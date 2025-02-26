@@ -690,10 +690,12 @@ def Jac2Hel_row(row):
 
       #Converts one row of sample from Jacobi to Heliocentric
       
-      rowCartJac = sample2cart_row(row, 'Jacobi')
-      rowCartHel = Jac2Hel_rowCart(rowCartJac)
-      rowlPkhiO  = cart2sample_row(rowCartHel, 'Heliocentric')
-      
+      C                = convert2absolute
+      convert2absolute = 1
+      rowCartJac       = sample2cart_row(row, 'Jacobi')
+      rowCartHel       = Jac2Hel_rowCart(rowCartJac)
+      rowlPkhiO        = cart2sample_row(rowCartHel, 'Heliocentric')
+      convert2absolute = C
       return rowlPkhiO
       
 
@@ -701,10 +703,12 @@ def Hel2Jac_row(row):
 
       #Converts one row of sample from Jacobi to Heliocentric
       
-      rowCartHel = sample2cart_row(row, 'Heliocentric')
-      rowCartJac = Hel2Jac_rowCart(rowCartHel)
-      rowlPkhiO  = cart2sample_row(rowCartJac, 'Jacobi')
-      
+      C                = convert2absolute
+      convert2absolute = 1
+      rowCartHel       = sample2cart_row(row, 'Heliocentric')
+      rowCartJac       = Hel2Jac_rowCart(rowCartHel)
+      rowlPkhiO        = cart2sample_row(rowCartJac, 'Jacobi')
+      convert2absolute = C
       return rowlPkhiO
 
 
