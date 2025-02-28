@@ -690,6 +690,7 @@ def Jac2Hel_row(row):
 
       #Converts one row of sample from Jacobi to Heliocentric
       
+      global convert2absolute
       C                = convert2absolute
       convert2absolute = 1
       rowCartJac       = sample2cart_row(row, 'Jacobi')
@@ -703,6 +704,7 @@ def Hel2Jac_row(row):
 
       #Converts one row of sample from Jacobi to Heliocentric
       
+      global convert2absolute
       C                = convert2absolute
       convert2absolute = 1
       rowCartHel       = sample2cart_row(row, 'Heliocentric')
@@ -820,7 +822,7 @@ def Hel2Jac(sample):
       
 ## Examples of use ##
 
-path = './Agol/Agol_TRAPPIST1_0_samples.csv' # This sample is given in Jacobi coordinates
+path = './path_towards_sample.csv' #A sample in Jacobi coordinates
 sample = np.loadtxt(path, dtype = np.float64, delimiter=',', unpack=True)
 
 S1 = Sample2cart(sample, 'Jacobi')                  # Converts the sample into Jacobi cartesian coordinates
@@ -838,8 +840,9 @@ S6 = Sample2alkhqp(Jac2Hel(sample), 'Heliocentric') # Converts the sample into H
 
 ## Sanity checks :
 
-# If convert2absolute is 1, then : 
 # - Jac2Hel(Hel2Jac(sample)) and Hel2Jac(Jac2Hel(sample)) should leave the sample mostly untouched (within numerical errors)
+
+# If convert2absolute is 1, then : 
 # - Sample2cart(Cart2sample(sample, 'Jacobi'), 'Jacobi') and Sample2cart(Cart2sample(sample, 'Heliocentric'), 'Heliocentric') should leave the sample mostly untouched as well.
 
 
