@@ -7,7 +7,7 @@ class URLS(Enum):
     """
     OBSERVATIONS_METADATA_TABLE         = "https://dace.unige.ch/downloads/resonant_state/observations/tables/metadata_table.parquet"
     SIMULATIONS_METADATA_TABLE          = "https://dace.unige.ch/downloads/resonant_state/simulations/tables/metadata_table.parquet"
-    SIMULATIONS_SUMMARY_METADATA_TABLE  = "https://dace.unige.ch/downloads/resonant_state/simulations/tables/metadata_table_summary.parquet"
+    #SIMULATIONS_SUMMARY_METADATA_TABLE  = "https://dace.unige.ch/downloads/resonant_state/simulations/tables/metadata_table_summary.parquet"
     
 
 class ObservationsSamplesDictionnary(Enum):
