@@ -8,8 +8,9 @@
 # Functions : 
 # - ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2) -> Returns the coordinates (X, Y, X2, Y2, delta) of the SFM. (X, Y) corresponds to the unique degree of freedom
 #                                                               of the SFM and (X2, Y2) to the first integral. delta is the unique parameter of the SFM
-# - SFM2useful(X, Y, X2, Y2, delta) -> Returns [sig, Sig, sig2, Sig2, nu, x1, x2] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
+# - SFM2useful(X, Y, X2, Y2, delta) -> Returns [sig, Sig, sig2, Sig2, nu, x1, x2, IsResonant] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
 #                                      nu is the frequency of the orbit starting at (X, Y). x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
+#                                      IsResonant is 1 if the system is in the resonance, and 0 else.
 
 import math as m
 import cmath as cm
@@ -23,8 +24,18 @@ plot_DACE_data = 1 # Determines if the data from a table of the GRSW are plotted
 path2sample = './Kepler-54_2_samples.csv'
 pairs       = [[0,1]] # Pairs of planets to be considered in the sample
 ps          = [2]     # Resonance of the corresponding pair (p such that resonance is p:p+1)
-colors      = ['green']
 sample      = np.loadtxt(path2sample, dtype = np.float64, delimiter=',', unpack=True)
+colors      = [sample[7,:] + sample[15,:]] # Either a list of numpy arrays or a list of strings like ['green','red']. Here the color is the total mass of the pair over the stellar mass
+if (isinstance(colors[0], np.ndarray)):
+      if (len(colors) >= 2):
+            full_color_array = np.concatenate((colors[0], colors[1]))
+            for cll in range (2, len(colors)):
+                  full_color_array = np.concatenate((full_color_array, colors[cll]))
+            color_min = min(full_color_array)
+            color_max = max(full_color_array)
+      else:
+            color_min = min(colors[0])
+            color_max = max(colors[0])
 
 delta_min  = -3. #To be chosen by trial and error. Irrelevant if plot_DACE_data is 0
 delta_max  = 5.
@@ -192,11 +203,12 @@ def SFM2useful(X, Y, X2, Y2, delta):
       
       nu_est = 3.*delta - 2.*Sig + 2.*np.cos(sig)/np.sqrt(2.*Sig)
       T_est  = 2.*np.pi/nu_est
-      dt     = T_est/192.
+      dt     = T_est/512.
       
       nu = []
       x1 = []
       x2 = []
+      IR = []
       
       n = len(delta)
       for i in range(n):
@@ -204,14 +216,24 @@ def SFM2useful(X, Y, X2, Y2, delta):
             nu.append(frequency)
             x1.append(xx1)
             x2.append(xx2)
+            [xmin, xmax, xint, xext, xhyp] = topologie(delta[i])
+            if (delta[i] > 1. and max(xx1,xx2) <= xmax and min(xx1,xx2) >= xmin):
+                  IR.append(1)
+            else:
+                  IR.append(0)
       nu = np.array(nu)
       x1 = np.array(x1)
       x2 = np.array(x2)
-      return [sig, Sig, sig2, Sig2, nu, x1, x2]
+      IR = np.array(IR)
+      return [sig, Sig, sig2, Sig2, nu, x1, x2, IR]
 
 def topologie(delta):
       #Returns [Xmin, Xmax, Xint, Xext, Xhyp] as a function of delta
       #Instead of a direct calculation, extrapolates from file './continuedSeparatrix.txt'
+      
+      if (delta > 50.):
+            print("Warning : delta > 50. Boolean IsResonant might be incorrect")
+            return [0., 0., 0., 0., 0.]
             
       N       = len(delt[delt < delta])
       xminmin = Xmin[N - 1]
@@ -247,10 +269,6 @@ if (plot_DACE_data):
       fig, ((ax1)) = py.subplots(1, 1, sharex=True, sharey=True, gridspec_kw={'width_ratios': [1]}, constrained_layout=False)
       py.subplots_adjust(left=0.26, right=0.71, bottom=0.1, top=0.95)
 
-      row     = sample[:,0]
-      n       = len(row)
-      k       = n%8
-      N       = (n - k)//8 #Number of planets
       N_pairs = len(ps)
       for pair in range(N_pairs):
             I    = pairs[pair][0]
@@ -276,11 +294,24 @@ if (plot_DACE_data):
             n20  = p*n10/(p + 1)
             n    = len(m1)
             [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
-            [sig, Sig, sig2, Sig2, nus, x1s, x2s] = SFM2useful(X, Y, X2, Y2, Ds)
-            ax1.scatter(Ds, x1s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.4, label = 'pair ' + str(I) + str(J))
-            ax1.scatter(Ds, x2s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.4)
+            [sig, Sig, sig2, Sig2, nus, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
+            if (isinstance(colors[pair], np.ndarray)):
+                  #Making sure that all plots use the same colorbar
+                  Ds    = np.concatenate((Ds, np.array([1.e300, 1.e300])))
+                  x1s   = np.concatenate((x1s, np.array([1.e300, 1.e300])))
+                  x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
+                  color = np.concatenate((colors[pair], np.array([color_min, color_max])))
+                  #Plotting
+                  ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7, label = 'pair ' + str(I) + str(J))
+                  ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7)
+            else:
+                  ax1.scatter(Ds, x1s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7, label = 'pair ' + str(I) + str(J))
+                  ax1.scatter(Ds, x2s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7)
 
 
+      if (isinstance(colors[0], np.ndarray)):
+            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_min, color_max)), ax=ax1, aspect=40, pad=0.01)
+            cbar.ax.tick_params(labelsize=25)
       ax1.set_xlim(xmin = delta_min, xmax = delta_max)
       ax1.set_ylim(ymin = X_min,     ymax = X_max)
       ax1.tick_params(axis='both', which='major', labelsize=25)
