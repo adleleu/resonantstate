@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from astropy import constants as c
+import warnings
+warnings.filterwarnings('ignore')
 
 def convert_units(planet_values, param, mstar, rstar, units):
     """
@@ -85,7 +87,9 @@ def get_labels(param, units):
         'density': r'$g/cm^3$' if units=='SI' else fr'$\rho_{{\mathrm{{planet}}}} \; (\rho_{{\mathrm{{{units}}}}})$',
         'omega': r'$\Omega \; (deg)$',
         'lambda': r'$\lambda \; (deg)$',
-        'incl': 'i (deg)'
+        'incl': 'i (deg)',
+        'k': r'$k = ecos(\varpi)$',
+        'h': r'$h = esin(\varpi)$'
     }
     return par_labels[param]
 
@@ -120,7 +124,14 @@ def get_samples(df, param,  p, units):
         if param=='varpi':
             samples = np.arctan2(par1,par2) * (180 / np.pi)  
         if param=='density':
-            samples = par1/(par2**3)
+            # Avoid division by zero or near-zero values
+            valid = par2 > 1e-6  
+            if not np.any(valid):   # if all values are invalid
+                return np.array([])  
+            samples = par1[valid] / (par2[valid]**3)
+            mstar = df['mass_star_m_sun'].values[valid]
+            rstar = df['radius_star_r_sun'].values[valid]
+            return convert_units(samples, param, mstar, rstar, units)
     else:
         samples = df[param_key].values
 
@@ -203,13 +214,17 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
 
         for p in range(nb_planets):
             if p < len(df_dict['planets_list']):
-                x = get_samples(df, x_param,  p, units)
-                y = get_samples(df, y_param,  p, units)
-                axs[p].scatter(x, y, alpha=0.1, label=key)
                 axs[p].set_xlabel(get_labels(x_param, units))
                 axs[p].set_ylabel(get_labels(y_param, units))
                 axs[p].legend()
                 axs[p].set_title(f'planet {p}')
+
+                x = get_samples(df, x_param,  p, units)
+                y = get_samples(df, y_param,  p, units)
+                if (x.size == 0) or (y.size == 0):
+                    continue
+                axs[p].scatter(x, y, alpha=0.1, label=key)
+
     plt.tight_layout()
     plt.show()
 
@@ -269,12 +284,16 @@ def plot_consecutive_planets(dict_list, param, units='star'):
 
         for p in range(nb_planets - 1):
             if p + 1 < len(df_dict['planets_list']):
-                x = get_samples(df, param,  p, units)
-                y = get_samples(df, param,  p+1, units)
-                axs[p].scatter(x, y, alpha=0.1, label=key)
                 axs[p].set_xlabel(f'{get_labels(param, units)} (planet {p})')
                 axs[p].set_ylabel(f'{get_labels(param, units)} (planet {p+1})')
                 axs[p].set_title(f'{param}_{p+1} vs {param}_{p}')
                 axs[p].legend()
+
+                x = get_samples(df, param,  p, units)
+                y = get_samples(df, param,  p+1, units)
+                if (x.size == 0) or (y.size == 0):
+                    continue
+                axs[p].scatter(x, y, alpha=0.1, label=key)
+
     plt.tight_layout()
     plt.show()
