@@ -216,7 +216,7 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
             if p < len(df_dict['planets_list']):
                 axs[p].set_xlabel(get_labels(x_param, units))
                 axs[p].set_ylabel(get_labels(y_param, units))
-                axs[p].legend()
+                
                 axs[p].set_title(f'planet {p}')
 
                 x = get_samples(df, x_param,  p, units)
@@ -224,7 +224,7 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
                 if (x.size == 0) or (y.size == 0):
                     continue
                 axs[p].scatter(x, y, alpha=0.1, label=key)
-
+                axs[p].legend()
     plt.tight_layout()
     plt.show()
 
@@ -287,13 +287,12 @@ def plot_consecutive_planets(dict_list, param, units='star'):
                 axs[p].set_xlabel(f'{get_labels(param, units)} (planet {p})')
                 axs[p].set_ylabel(f'{get_labels(param, units)} (planet {p+1})')
                 axs[p].set_title(f'{param}_{p+1} vs {param}_{p}')
-                axs[p].legend()
-
+                
                 x = get_samples(df, param,  p, units)
                 y = get_samples(df, param,  p+1, units)
                 if (x.size == 0) or (y.size == 0):
                     continue
                 axs[p].scatter(x, y, alpha=0.1, label=key)
-
+                axs[p].legend()
     plt.tight_layout()
     plt.show()

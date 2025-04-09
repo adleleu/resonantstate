@@ -18,24 +18,31 @@ import matplotlib.pyplot as py
 import matplotlib as mpl
 import numpy as np
 
-plot_DACE_data = 1 # Determines if the data from a table of the GRSW are plotted in the SFM
+import pandas as pd
+import os
+from pathlib import Path
+
+parent_of_current_working_directory = Path(os.getcwd()).resolve().parent
+
+
+#plot_DACE_data = 1 # Determines if the data from a table of the GRSW are plotted in the SFM
 
 # Defining sample to be used (only if plot_DACE_data is 1)
-path2sample = './Kepler-54_2_samples.csv'
-pairs       = [[0,1]] # Pairs of planets to be considered in the sample
-ps          = [2]     # Resonance of the corresponding pair (p such that resonance is p:p+1)
-sample      = np.loadtxt(path2sample, dtype = np.float64, delimiter=',', unpack=True)
-colors      = [sample[7,:] + sample[15,:]] # Either a list of numpy arrays or a list of strings like ['green','red']. Here the color is the total mass of the pair over the stellar mass
-if (isinstance(colors[0], np.ndarray)):
-      if (len(colors) >= 2):
-            full_color_array = np.concatenate((colors[0], colors[1]))
-            for cll in range (2, len(colors)):
-                  full_color_array = np.concatenate((full_color_array, colors[cll]))
-            color_min = min(full_color_array)
-            color_max = max(full_color_array)
-      else:
-            color_min = min(colors[0])
-            color_max = max(colors[0])
+#path2sample = './Kepler-54_2_samples.csv'
+#pairs       = [[0,1]] # Pairs of planets to be considered in the sample
+#ps          = [2]     # Resonance of the corresponding pair (p such that resonance is p:p+1)
+#sample      = np.loadtxt(path2sample, dtype = np.float64, delimiter=',', unpack=True)
+#colors      = [sample[7,:] + sample[15,:]] # Either a list of numpy arrays or a list of strings like ['green','red']. Here the color is the total mass of the pair over the stellar mass
+#if (isinstance(colors[0], np.ndarray)):
+#      if (len(colors) >= 2):
+#            full_color_array = np.concatenate((colors[0], colors[1]))
+#            for cll in range (2, len(colors)):
+#                  full_color_array = np.concatenate((full_color_array, colors[cll]))
+#            color_min = min(full_color_array)
+#            color_max = max(full_color_array)
+#      else:
+#            color_min = min(colors[0])
+#            color_max = max(colors[0])
 
 delta_min  = -3. #To be chosen by trial and error. Irrelevant if plot_DACE_data is 0
 delta_max  = 5.
@@ -46,7 +53,11 @@ X_max      = 5.
 f1s = [ 1.1904936978,  2.0252226899,  2.8404318567,  3.6496182441,  4.4561427851]
 f2s = [-0.4283898341, -2.4840051833, -3.2832567218, -4.0837053718, -4.8847062975]
 
-delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt('./continuedSeparatrix.txt', dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
+txt_file = os.path.join(parent_of_current_working_directory, 'src/ResonantState/continuedSeparatrix.txt')
+delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
+
+#delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt('./continuedSeparatrix.txt', dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
+
 delt = np.flip(delt)
 Xmin = np.flip(Xmin)
 Xmax = np.flip(Xmax)
@@ -264,10 +275,23 @@ def topologie(delta):
 
 
 #Plotting
-if (plot_DACE_data):
+#if (plot_DACE_data):
 
-      fig, ((ax1)) = py.subplots(1, 1, sharex=True, sharey=True, gridspec_kw={'width_ratios': [1]}, constrained_layout=False)
-      py.subplots_adjust(left=0.26, right=0.71, bottom=0.1, top=0.95)
+def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name=None):
+
+      if (isinstance(colors[0], np.ndarray)):
+            if (len(colors) >= 2):
+                  full_color_array = np.concatenate((colors[0], colors[1]))
+                  for cll in range (2, len(colors)):
+                        full_color_array = np.concatenate((full_color_array, colors[cll]))
+                  color_min = min(full_color_array)
+                  color_max = max(full_color_array)
+            else:
+                  color_min = min(colors[0])
+                  color_max = max(colors[0])
+
+      #fig, ((ax1)) = py.subplots(1, 1, sharex=True, sharey=True, gridspec_kw={'width_ratios': [1]}, constrained_layout=False)
+      #py.subplots_adjust(left=0.26, right=0.71, bottom=0.1, top=0.95)
 
       N_pairs = len(ps)
       for pair in range(N_pairs):
@@ -302,26 +326,81 @@ if (plot_DACE_data):
                   x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
                   color = np.concatenate((colors[pair], np.array([color_min, color_max])))
                   #Plotting
-                  ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7, label = 'pair ' + str(I) + str(J))
+                  ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7, label = label_name + ' ' + 'pair ' + str(I) + str(J))
                   ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7)
             else:
-                  ax1.scatter(Ds, x1s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7, label = 'pair ' + str(I) + str(J))
+                  ax1.scatter(Ds, x1s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7, label = label_name + ' ' + 'pair ' + str(I) + str(J))
                   ax1.scatter(Ds, x2s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7)
-
 
       if (isinstance(colors[0], np.ndarray)):
             cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_min, color_max)), ax=ax1, aspect=40, pad=0.01)
-            cbar.ax.tick_params(labelsize=25)
+            cbar.ax.tick_params()
+
+
+def plot_auxiliary(ax1, delta_lim, X_lim):
+      delta_min, delta_max = delta_lim
+      X_min, X_max = X_lim
+
       ax1.set_xlim(xmin = delta_min, xmax = delta_max)
       ax1.set_ylim(ymin = X_min,     ymax = X_max)
-      ax1.tick_params(axis='both', which='major', labelsize=25)
-      ax1.set_xlabel(xlabel="$\delta$", fontsize=25, labelpad=3)
-      ax1.set_ylabel(ylabel="$X$",      fontsize=25, labelpad=4, rotation=0)
+      ax1.tick_params(axis='both', which='major')
+      ax1.set_xlabel(xlabel="$\delta$", labelpad=3)
+      ax1.set_ylabel(ylabel="$X$",      labelpad=4, rotation=0)
       ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black',     linewidth = 4, linestyle = '-',  alpha = 1)
       ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '--', alpha = 1, label = 'Hyperbolic')
       ax1.plot(delt,             Xint,             color = 'black',     linewidth = 4, linestyle = '-',  alpha = 1, label = 'Elliptic')
       ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '-',  alpha = 1, label = 'Separatrix')
       ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '-',  alpha = 1)
       ax1.grid(linewidth=0.3, alpha = 0.5)
-      py.legend(fontsize = 20)
-      py.show()
+
+
+def plot_ell2SFM(data, colors, planet_pairs=[[0,1]], resonance=[2], delta_lim=(-3,5), X_lim=(-5,5)):
+      """
+      Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
+
+      Parameters
+      ----------
+      data : pandas.DataFrame or dict or list of dict
+            Input data containing the posterior samples.
+            - If DataFrame: used directly as sample input.
+            - If dict: must contain keys 'sample' (DataFrame) and 'sample_name' (str).
+            - If list: a list of the above dictionaries.
+      planet_pairs : list
+            Pairs of planets to be considered in the sample
+      resonance : list 
+            Resonance of the corresponding pair (p such that resonance is p:p+1).
+      delta_lim : tuple 
+            Lower and upper limits of the x-axis (delta).
+      X_lim : tuple
+            Lower and upper limits of the y-axis (X).
+      colors : list 
+            List of color values to use for plotting each pair.
+      """
+
+      plot_params = planet_pairs, resonance, colors
+
+      if isinstance(data, list):
+            fig, ax = py.subplots(1, 1, figsize=(6,7))
+            for df_dict in data:
+                  sample = np.vstack([df_dict['sample'][col] for col in df_dict['sample'].columns])
+                  plot_samples(fig, ax, sample, *plot_params, label_name=df_dict['sample_name'])
+            plot_auxiliary(ax, delta_lim, X_lim)
+
+      elif isinstance(data, dict):
+            sample = np.vstack([data['sample'][col] for col in data['sample'].columns])
+            fig, ax = py.subplots(1, 1, figsize=(6,7))
+            plot_samples(fig, ax, sample, *plot_params, label_name=data['sample_name'])
+            plot_auxiliary(ax, delta_lim, X_lim)
+
+      elif isinstance(data, pd.DataFrame):
+            fig, ax = py.subplots(1, 1, figsize=(6,7))
+            sample = np.vstack([data[col] for col in data.columns])
+            plot_samples(fig, ax, sample, *plot_params)
+            plot_auxiliary(ax, delta_lim, X_lim)
+
+      else:
+            raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
+      
+      py.legend()
+      py.tight_layout()
+      py.show()     
