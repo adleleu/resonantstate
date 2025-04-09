@@ -38,7 +38,7 @@
 # These functions convert into a system of units where : (see https://iau-a3.gitlab.io/NSFA/IAU2009_consts.html)
 # - The unit of length is the astronomical unit (1.49597870700e11 m, as recommended by the IAU)
 # - The unit of mass   is the mass of the Sun (1.98841583e30 kg, taking G and G*Msun as recommended by the IAU)
-# - The unit of time   is the year (365.25635 days = 31558149 s, using G*(Msun + Mearth) = (2*pi/(1 yr))^2 * (1 AU)**3, and taking values recommended by the IAU)
+# - The unit of time   is the day (86400 s, as recommended by the IAU)
 
 
 # Author : Jérémy COUTURIER
@@ -59,7 +59,7 @@ import random
 
 
 #Defining the gravitational constant
-G = 39.4782990317 #4*pi^2/(1 + G*Mearth/G*Msun)
+G = 0.0002959122 # AU^3 Msun^-1 day^-2 (Using the value G=6.67428e-11 m^3 kg^-1 s^-2 recommended by the IAU)
 
 
 def ell2cart_true(aeinuoO, mass):
@@ -353,7 +353,7 @@ def sample2cart_row(row, typeOfCoordinates, adcol):
       
       output = np.array([row[0]])
       
-      daysInUOT = 365.25635
+      daysInUOT = 1.
 
       for i in range(N):
             lPkhiO = row[1 + 8*i : 7 + 8*i]
@@ -393,7 +393,7 @@ def sample2aeiMoO_row(row, typeOfCoordinates, adcol):
       
       output = np.array([row[0]])
       
-      daysInUOT = 365.25635
+      daysInUOT = 1.
 
       for i in range(N):
             lPkhiO = row[1 + 8*i : 7 + 8*i]
@@ -434,7 +434,7 @@ def sample2alkhqp_row(row, typeOfCoordinates, adcol):
       
       output = np.array([row[0]])
       
-      daysInUOT = 365.25635
+      daysInUOT = 1.
 
       for i in range(N):
             lPkhiO = row[1 + 8*i : 7 + 8*i]
@@ -469,7 +469,7 @@ def cart2sample_row(row, typeOfCoordinates, adcol):
       
       output = np.array([row[0]])
       
-      daysInUOT = 365.25635
+      daysInUOT = 1.
 
       for i in range(N):
             XYZvXvYvZ = row[1 + 8*i : 7 + 8*i]
@@ -801,7 +801,8 @@ def Hel2Jac(sample, adcol):
       
 ## Examples of use ##
 
-path = './Kepler-60_2_samples.csv' #A sample in Heliocentric coordinates with no additional column
+'''
+path = 'path_towards_sample.csv'
 sample = np.loadtxt(path, dtype = np.float64, delimiter=',', unpack=True)
 
 
@@ -816,7 +817,7 @@ S4 = Sample2alkhqp(sample, 'Heliocentric', 0)       # Converts the sample into H
 S5 = Sample2aeiMoO(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, e, i, M, omega, Omega)
 
 S6 = Sample2alkhqp(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, l, k, h, q, p)
-
+'''
 
 
 ## Sanity checks :
@@ -824,12 +825,5 @@ S6 = Sample2alkhqp(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into J
 # - Jac2Hel(Hel2Jac(sample, adcol), adcol) or Hel2Jac(Jac2Hel(sample, adcol), adcol) should leave the sample mostly untouched (within errors due to Kepler equation solving)
 # - Sample2cart(Cart2sample(sample, 'Heliocentric', adcol), 'Heliocentric', adcol) and variations should leave the sample mostly untouched as well.
 
-
-## Running sanity checks
-S7 = Jac2Hel(Hel2Jac(sample, 0), 0)
-S8 = Cart2sample(Sample2cart(sample, 'Heliocentric', 0), 'Heliocentric', 0)
-
-print(np.max(np.absolute(sample - S7)))
-print(np.max(np.absolute(sample - S8)))
 
 
