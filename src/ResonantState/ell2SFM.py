@@ -44,10 +44,10 @@ parent_of_current_working_directory = Path(os.getcwd()).resolve().parent
 #            color_min = min(colors[0])
 #            color_max = max(colors[0])
 
-delta_min  = -3. #To be chosen by trial and error. Irrelevant if plot_DACE_data is 0
-delta_max  = 5.
-X_min      = -5.
-X_max      = 5.
+#delta_min  = -3. #To be chosen by trial and error. Irrelevant if plot_DACE_data is 0
+#delta_max  = 5.
+#X_min      = -5.
+#X_max      = 5.
 
 #Hamiltonian coefficients
 f1s = [ 1.1904936978,  2.0252226899,  2.8404318567,  3.6496182441,  4.4561427851]
