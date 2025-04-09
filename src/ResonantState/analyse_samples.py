@@ -165,7 +165,9 @@ def plot_histograms(dict_list, param, units='star'):
         Target unit system ('star', 'sun', 'earth', 'jup', or 'SI').
         Applies only to parameters 'mass', 'radius', or 'density'.
     """
-
+    if type(dict_list) is not list:
+        dict_list = [dict_list]
+    
     nb_planets = get_nb_planets(dict_list)
     fig, axes = plt.subplots(nb_planets, 1, figsize=(6, 5 * nb_planets))
     axs = np.atleast_1d(axes)
@@ -202,7 +204,9 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
         Target unit system ('star', 'sun', 'earth', 'jup', or 'SI'). 
         Applies only to parameters 'mass', 'radius', or 'density'.
     """
-
+    if type(dict_list) is not list:
+        dict_list = [dict_list]
+    
     nb_planets = get_nb_planets(dict_list)
     fig, axes = plt.subplots(nb_planets, 1, figsize=(6, 5 * nb_planets))
     axs = np.atleast_1d(axes)
@@ -238,7 +242,9 @@ def compare_period_ratios(dict_list):
     dict_list : list of dict
         Each dictionary should contain 'sample_name', 'sample', and 'planets_list'.
     """
-
+    if type(dict_list) is not list:
+        dict_list = [dict_list]
+    
     nb_planets = get_nb_planets(dict_list)
     fig, axes = plt.subplots(nb_planets-1, 1, figsize=(6, 5 * (nb_planets-1)))
     axs = np.atleast_1d(axes)
@@ -273,6 +279,9 @@ def plot_consecutive_planets(dict_list, param, units='star'):
         Target unit system ('star', 'sun', 'earth', 'jup', or 'SI'). 
         Applies only to parameters 'mass', 'radius', or 'density'.
     """
+    if type(dict_list) is not list:
+        dict_list = [dict_list]
+
     nb_planets = get_nb_planets(dict_list)
     fig, axes = plt.subplots(nb_planets-1, 1, figsize=(6, 5 * (nb_planets-1)))
     axs = np.atleast_1d(axes)

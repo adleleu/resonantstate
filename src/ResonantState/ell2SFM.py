@@ -354,7 +354,7 @@ def plot_auxiliary(ax1, delta_lim, X_lim):
       ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_ell2SFM(data, planet_pairs=[[0,1]], resonance=[2], colors=['green'], delta_lim=(-3,5), X_lim=(-5,5)):
+def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], delta_lim=(-3,5), X_lim=(-5,5)):
       """
       Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
 
@@ -374,27 +374,29 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonance=[2], colors=['green'], de
       X_lim : tuple
             Lower and upper limits of the y-axis (X).
       colors : list 
-            List of color values to use for plotting each pair.
+            List of color values to use for plotting each pair/analysis.
+            - Each entry in main list corresponds to one analysis.
+            - Each entry in nested list corresponds to one pair.
       """
 
-      plot_params = planet_pairs, resonance, colors
+      plot_params = planet_pairs, resonances
       ax_limits = delta_lim, X_lim
 
       fig, ax = py.subplots(1, 1, figsize=(6,7))
       plot_auxiliary(ax, *ax_limits)
 
       if isinstance(data, list):
-            for df_dict in data:
+            for df_dict, color in zip(data, colors):
                   sample = np.vstack([df_dict['sample'][col] for col in df_dict['sample'].columns])
-                  plot_samples(fig, ax, sample, *plot_params, label_name=df_dict['sample_name'])
+                  plot_samples(fig, ax, sample, *plot_params, colors=color, label_name=df_dict['sample_name'])
 
       elif isinstance(data, dict):
             sample = np.vstack([data['sample'][col] for col in data['sample'].columns])
-            plot_samples(fig, ax, sample, *plot_params, label_name=data['sample_name'])
+            plot_samples(fig, ax, sample, *plot_params, colors=colors[0], label_name=data['sample_name'])
 
       elif isinstance(data, pd.DataFrame):
             sample = np.vstack([data[col] for col in data.columns])
-            plot_samples(fig, ax, sample, *plot_params)
+            plot_samples(fig, ax, sample, *plot_params, colors=colors[0])
 
       else:
             raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
