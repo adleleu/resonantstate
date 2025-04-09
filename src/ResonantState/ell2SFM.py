@@ -277,7 +277,7 @@ def topologie(delta):
 #Plotting
 #if (plot_DACE_data):
 
-def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name=None):
+def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name=''):
 
       if (isinstance(colors[0], np.ndarray)):
             if (len(colors) >= 2):
@@ -378,25 +378,26 @@ def plot_ell2SFM(data, colors, planet_pairs=[[0,1]], resonance=[2], delta_lim=(-
       """
 
       plot_params = planet_pairs, resonance, colors
+      ax_limits = delta_lim, X_lim
 
       if isinstance(data, list):
             fig, ax = py.subplots(1, 1, figsize=(6,7))
             for df_dict in data:
                   sample = np.vstack([df_dict['sample'][col] for col in df_dict['sample'].columns])
                   plot_samples(fig, ax, sample, *plot_params, label_name=df_dict['sample_name'])
-            plot_auxiliary(ax, delta_lim, X_lim)
+            plot_auxiliary(ax, *ax_limits)
 
       elif isinstance(data, dict):
             sample = np.vstack([data['sample'][col] for col in data['sample'].columns])
             fig, ax = py.subplots(1, 1, figsize=(6,7))
             plot_samples(fig, ax, sample, *plot_params, label_name=data['sample_name'])
-            plot_auxiliary(ax, delta_lim, X_lim)
+            plot_auxiliary(ax, *ax_limits)
 
       elif isinstance(data, pd.DataFrame):
             fig, ax = py.subplots(1, 1, figsize=(6,7))
             sample = np.vstack([data[col] for col in data.columns])
             plot_samples(fig, ax, sample, *plot_params)
-            plot_auxiliary(ax, delta_lim, X_lim)
+            plot_auxiliary(ax, *ax_limits)
 
       else:
             raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
