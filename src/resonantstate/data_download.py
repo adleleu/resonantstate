@@ -3,9 +3,9 @@ import pandas as pd
 import requests
 import io
 from pathlib import Path
-from src.ResonantState.table_entries_catalogs import MetaDataTableEntries as mte
-from src.ResonantState.table_entries_catalogs import ObservationsSamplesDictionnary as osd
-from src.ResonantState.table_entries_catalogs import URLS as urls
+from resonantstate.table_entries_catalogs import MetaDataTableEntries as mte
+from resonantstate.table_entries_catalogs import ObservationsSamplesDictionnary as osd
+from resonantstate.table_entries_catalogs import URLS as urls
 import json
 
 

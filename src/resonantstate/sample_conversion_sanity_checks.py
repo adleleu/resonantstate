@@ -5,12 +5,7 @@
 # Author : Jérémy COUTURIER
 
 
-import math as m
-import cmath as cm
-import matplotlib.pyplot as py
-import matplotlib
 import numpy as np
-import random
 import sample_conversion as sc
 
 ## Sanity checks :

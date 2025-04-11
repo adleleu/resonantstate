@@ -13,16 +13,18 @@
 #                                      IsResonant is 1 if the system is in the resonance, and 0 else.
 
 import math as m
-import cmath as cm
 import matplotlib.pyplot as py
 import matplotlib as mpl
 import numpy as np
 
 import pandas as pd
-import os
-from pathlib import Path
 
-parent_of_current_working_directory = Path(os.getcwd()).resolve().parent
+
+import os 
+
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 
 
 #plot_DACE_data = 1 # Determines if the data from a table of the GRSW are plotted in the SFM
@@ -53,7 +55,7 @@ parent_of_current_working_directory = Path(os.getcwd()).resolve().parent
 f1s = [ 1.1904936978,  2.0252226899,  2.8404318567,  3.6496182441,  4.4561427851]
 f2s = [-0.4283898341, -2.4840051833, -3.2832567218, -4.0837053718, -4.8847062975]
 
-txt_file = os.path.join(parent_of_current_working_directory, 'src/ResonantState/continuedSeparatrix.txt')
+txt_file = os.path.join(dir_path,'continuedSeparatrix.txt')
 delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
 
 #delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt('./continuedSeparatrix.txt', dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
