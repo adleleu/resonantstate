@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resonantstate"
+version = "0.0.9"
+authors = [
+  { name = "Adrien Leleu", email = "adrien.leleu@unige.ch" },
+]
+description = "Resonant "
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://gitlab.unige.ch/delisle/kepmodel"
+Issues = "https://gitlab.unige.ch/delisle/kepmodel/-/issues"
+
+
+
