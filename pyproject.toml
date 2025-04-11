@@ -18,7 +18,15 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Operating System :: OS Independent",
 ]
-dependencies = []
+dependencies = [
+  "requests",
+  "pandas",
+  "matplotlib",
+  "numpy",
+  "ipykernel",
+  "pyarrow",
+  "astropy"
+]
 
 [project.urls]
 Homepage = "https://github.com/adleleu/resonantstate"
