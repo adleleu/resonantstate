@@ -174,16 +174,18 @@ def plot_histograms(dict_list, param, units='star'):
 
     # Loop through each analysis and plot the histograms
     for df_dict in dict_list:
-        key = df_dict['sample_name']
+        analysis_id = df_dict['sample_name'].split('_')[-1]
+        planets = df_dict['planets_list']
         df = df_dict['sample']
 
         for p in range(nb_planets):
             if p < len(df_dict['planets_list']):
+                planet = planets[p]
                 x = get_samples(df, param,  p, units)
-                axs[p].hist(x, bins=50, alpha=0.5, label=key)
+                axs[p].hist(x, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
                 axs[p].set_xlabel(get_labels(param, units))
                 axs[p].legend()
-                axs[p].set_title(f'planet {p}')
+                axs[p].set_title(planet)
     plt.tight_layout()
     plt.show()
 
@@ -213,21 +215,23 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
 
     # Loop through each analysis and plot the samples
     for df_dict in dict_list:
-        key = df_dict['sample_name']
+        analysis_id = df_dict['sample_name'].split('_')[-1]
         df = df_dict['sample']
+        planets = df_dict['planets_list']
 
         for p in range(nb_planets):
             if p < len(df_dict['planets_list']):
+                planet = planets[p]
                 axs[p].set_xlabel(get_labels(x_param, units))
                 axs[p].set_ylabel(get_labels(y_param, units))
                 
-                axs[p].set_title(f'planet {p}')
+                axs[p].set_title(planet)
 
                 x = get_samples(df, x_param,  p, units)
                 y = get_samples(df, y_param,  p, units)
                 if (x.size == 0) or (y.size == 0):
                     continue
-                axs[p].scatter(x, y, alpha=0.1, label=key)
+                axs[p].scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
                 axs[p].legend()
     plt.tight_layout()
     plt.show()
@@ -288,8 +292,9 @@ def plot_consecutive_planets(dict_list, param, units='star'):
 
     # Loop through each analysis and plot the samples of consecutive planets
     for df_dict in dict_list:
-        key = df_dict['sample_name']
+        analysis_id = df_dict['sample_name'].split('_')[-1]
         df = df_dict['sample']
+        planets = df_dict['planets_list']
 
         for p in range(nb_planets - 1):
             if p + 1 < len(df_dict['planets_list']):
@@ -301,7 +306,7 @@ def plot_consecutive_planets(dict_list, param, units='star'):
                 y = get_samples(df, param,  p+1, units)
                 if (x.size == 0) or (y.size == 0):
                     continue
-                axs[p].scatter(x, y, alpha=0.1, label=key)
+                axs[p].scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
                 axs[p].legend()
     plt.tight_layout()
     plt.show()
