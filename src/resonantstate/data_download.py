@@ -1,26 +1,29 @@
-import logging
 import pandas as pd
 import requests
 import io
 from pathlib import Path
-from resonantstate.table_entries_catalogs import MetaDataTableEntries as mte
-from resonantstate.table_entries_catalogs import ObservationsSamplesDictionnary as osd
+from resonantstate.table_entries_catalogs import MetaDataTableEntriesObservations as mteObs
+from resonantstate.table_entries_catalogs import MetaDataTableEntriesSimulations as mteSim
+from resonantstate.table_entries_catalogs import MetaDataTableEntriesSimulationsSummary as mteSimSum
+from resonantstate.table_entries_catalogs import AuthorsMetaDataTableEntries as mteAuthors
+from resonantstate.table_entries_catalogs import ObservationsSamplesDictionnary as obsDict
+from resonantstate.table_entries_catalogs import SimulationsDictionnary as simDict
 from resonantstate.table_entries_catalogs import URLS as urls
 import json
 
 
-log_fmt = '%(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(level=logging.INFO, format=log_fmt)
-logger = logging.getLogger(__name__)        
-    
+          
 # Disable warnings due to the use of the requests library with unverified HTTPS requests
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) 
 
 
-            
+# #######################################################################################################
+# OBSERVATIONS FUNCTION #################################################################################
+# #######################################################################################################
+
 def get_metadata_observations():
-    """This method retrieves the metadata table for the observations and return it in a pandas dataframe
+    """This method retrieves the metadata table for the observations and returns it in a pandas dataframe
 
     Returns
     -------
@@ -28,18 +31,134 @@ def get_metadata_observations():
         The observations metadata table in a pandas dataframe
     
     """
+    
     url = urls.OBSERVATIONS_METADATA_TABLE.value
 
+    # we query the table from DACE and make sure the status code is sucessful (http 200 OK = sucessful http request)
     file = requests.get(url, verify=False)
-    if not file.status_code == 200: # check if the request was successful
+    if not file.ok: # check if the request was successful
         raise Exception(f"URL {url} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content))
+    dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
     
     return dataframe
 
 
+def download_observations_samples(dataframe, download_destination=None):
+    """This method retrieves the samples for the systems in the given dataframe, and returns a dictionnary that contains informations about the samples and the samples themselves. 
+    
+    If a download destination is given, it saves the samples and the coresponding metadata in the given directory.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe containing the metadata of the planets samples that we want to download
+    download_destination : str or None
+        If given, save each sample and metadata in the given directory 
+    
+    Returns
+    -------
+    List[Dict]
+        A list of dictionnaries with the samples informations and the samples themselves
+        keys of the dictionnary are:
+        
+        - sample_name:      the name of the sample (str)
+        - planets_list:     the list of planets in the sample (list of str)
+        - code:             the code used to generate the sample (str)
+        - bibtex:           the bibtex reference of the sample (str)
+        - contact_email:    the email of the contact person for the sample (str)
+        - sample:           the sample itself (pandas.DataFrame) 
+        - readme:           the readme of the sample (str)
+    """
+    # common mistake when manipulating pandas dataframe and does not work with the package so it has its own check
+    if isinstance(dataframe, pd.Series):
+        raise ValueError("The dataframe should be a pandas DataFrame, not a pandas Series")
+        
+    if not isinstance(dataframe, pd.DataFrame):
+        raise ValueError("The dataframe should be a pandas DataFrame")
+    
+    # if the download destination is given, we create the directory if it does not exist
+    if download_destination is not None:
+        if not isinstance(download_destination, Path):
+            download_destination = Path(download_destination)
+        download_destination.mkdir(parents=True, exist_ok=True)
+    
+    # we create a list of unique urls for the samples and the metadata
+    unique_samples_urls = []
+    metadata_urls = []
+    readme_urls = []
+    for row in dataframe.iterrows():
+        index_row, planet_metadata = row
+        
+        url_of_sample   = planet_metadata[mteObs.URL_OF_SAMPLES.value]
+        url_of_metadata = planet_metadata[mteObs.METADATA_FILE.value]
+        url_of_readme   = planet_metadata.get(mteObs.README_FILE.value, None) # may be None
+        if url_of_sample not in unique_samples_urls:
+            
+            unique_samples_urls.append(url_of_sample)
+            metadata_urls.append(url_of_metadata)
+            readme_urls.append(url_of_readme)
+           
+    
+    # iterate over the unique urls and download the samples and metadata and add the information dictionnary to the list
+    return_samples = []
+    for url_index in range(len(unique_samples_urls)):
+        sample_url = unique_samples_urls[url_index]
+        metadata_url = metadata_urls[url_index]
+        readme_url = readme_urls[url_index]
+        file_sample = requests.get(sample_url, verify=False)
+        if not file_sample.ok: 
+            raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
+        dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
+        
+        file_metadata = requests.get(metadata_url, verify=False)
+        if not file_metadata.ok: 
+            raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
+        metadata = json.loads(file_metadata.text)
+
+        if readme_url is not None:
+            file_readme = requests.get(readme_url, verify=False)
+            if not file_readme.ok: 
+                raise Exception(f"URL {readme_url} responded with status code: {file_readme.status_code}")
+            readme = file_readme.text
+        else:
+            readme = None
+        name = f"{metadata[mteObs.STAR_NAME.value]}_{metadata[mteObs.ANALYSIS_ID.value]}"
+        
+        # name definitions from the table_entries_catalogs.py file
+        samples_dict = {
+            obsDict.SAMPLE_NAME.value:      name,
+            obsDict.PLANETS_LIST.value:     metadata[mteAuthors.PLANET_LIST.value],
+            obsDict.CODE.value:             metadata[mteObs.CODE_USED.value],
+            obsDict.BIBTEX.value:           metadata[mteObs.BIBTEX.value],
+            obsDict.CONTACT_EMAIL.value:    metadata[mteObs.CONTACT_EMAIL.value],
+            obsDict.SAMPLE.value:           dataframe_sample,
+            obsDict.README.value:           readme,
+        }
+        return_samples.append(samples_dict)
+    
+        # save the files if the download destination is given
+        if download_destination is not None:
+            sample_file_name = download_destination / f"{name}.parquet"
+            metadata_file_name = download_destination / f"{name}_metadata.json"
+            readme_file_name = download_destination / f"{name}_readme.txt"
+            dataframe.to_parquet(sample_file_name)
+            with open(metadata_file_name, 'w') as f:
+                json.dump(metadata, f, indent=4)
+            if readme is not None:
+                with open(readme_file_name, 'w') as f:
+                    f.write(readme)
+        
+    return return_samples
+
+
+
+
+# #######################################################################################################
+# SIMULATIONS FUNCTION ##################################################################################
+# #######################################################################################################
+
 def get_metadata_simulations():
-    """This method retrieves the metadata table for the simulations and return it in a pandas dataframe
+    """This method retrieves the summary metadata table for the simulations and return it in a pandas dataframe
     
     Returns
     -------
@@ -50,55 +169,79 @@ def get_metadata_simulations():
     url = urls.SIMULATIONS_METADATA_TABLE.value
   
     
+    # we query the table from DACE and make sure the status code is sucessful (http 200 OK = sucessful http request)
     file = requests.get(url, verify=False)
-    if not file.status_code == 200: # check if the request was successful
+    if not file.ok: # check if the request was successful
         raise Exception(f"URL {url} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content))
+    dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
         
     return dataframe  
 
 
 
-
-def _get_metadata_complet_simulations(local_metadata_path=None):
-    """This method retrieves the metadata table for the simulations and return it in a pandas dataframe
+def download_simulations_run_table(dataframe):
+    """
+    This method retrieves the runs tables from the selected line of the summary metadata datafame, and returns another dataframe with more details about the chosen run. For now, only allows to retrieve a single run table at a time.
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe containing the metadata of the simulation run that we want to download
     
     Returns
     -------
     pd.DataFrame
-        The simulations metadata table in a pandas dataframe
-    
-    """
-    url = urls.SIMULATIONS_METADATA_TABLE.value
-    if local_metadata_path:
-        dataframe = pd.read_csv(local_metadata_path)
-            
-    else:
-        file = requests.get(url, verify=False)
-        if not file.status_code == 200: # check if the request was successful
-            raise Exception(f"URL {url} responded with status code: {file.status_code}")
-        dataframe = pd.read_parquet(io.BytesIO(file.content))
+        A dataframe with the detailed metadata of the run
         
-    return dataframe        
+    """
+    
+    if isinstance(dataframe, pd.Series):
+        raise ValueError("The dataframe should be a pandas DataFrame, not a pandas Series")
+        
+    if not isinstance(dataframe, pd.DataFrame):
+        raise ValueError("The dataframe should be a pandas DataFrame")
+    
+    
+    if dataframe.shape[0] > 1:
+        raise ValueError(f"The dataframe should only contain one line (header non included). Given shape: {dataframe.shape}")
+    
+    url_of_table = dataframe[mteSimSum.URL_OF_TABLE.value].values[0]
+    
+    file = requests.get(url_of_table, verify=False)
+    if not file.ok: 
+        raise Exception(f"URL {url_of_table} responded with status code: {file.status_code}")
+    dataframe = pd.read_parquet(io.BytesIO(file.content))
+
+    return dataframe
 
 
 
-def download_observation_samples(dataframe, download_destination=None):
-    """This method retrieves the samples tables form the systems in the given dataframe, and returns a dictionnary of pandas dataframes with the samples. If a download destination is given, it saves the samples in the given directory.
+
+def download_simulations(dataframe, download_destination=None):
+    """This method retrieves the simulations present in the given dataframe, and returns a list of dictionnary that contains information about the evolutions and the evolutions themselves. If a download destination is given, it saves the evolutions in the given directory.
 
     Parameters
     ----------
     dataframe : pd.DataFrame
-        The dataframe containing the metadata of the planets samples that we want to download
+        The dataframe containing the metadata of the simulations that we want to download
     download_destination : str or None
-        If given, save the samples in the given directory
+        If given, save the simulations in the given directory with their corresponding metadata
     
     Returns
     -------
-    dict
-        A dictionnary of pandas dataframes with the samples names as keys and the samples dataframes as values
+    List[Dict]
+        A list of dictionnaries with the simulations informations and the simulations themselves
+        keys in of dictionnary are:
+        
+        - simulation_name:  the name of the simulation (str)
+        - planets_list:     the list of planets in the simulation (list of str)
+        - code:             the code used for the simulation (str)
+        - bibtex:           the bibtex reference of the simulation (str)
+        - contact_email:    the email of the contact person for the simulation (str)
+        - simulation:       the simulation itself (pandas.DataFrame) 
+        - additional_infos: the additional infos of the simulation (str)
     """
     
+    # common mistake when manipulating pandas dataframe and does not work with the package so it has its own check
     if isinstance(dataframe, pd.Series):
         raise ValueError("The dataframe should be a pandas DataFrame, not a pandas Series")
         
@@ -114,205 +257,70 @@ def download_observation_samples(dataframe, download_destination=None):
     
     unique_samples_urls = []
     metadata_urls = []
-    for row in dataframe.iterrows():
-        index_row, planet_metadata = row
-        
-        url_of_sample   = planet_metadata[mte.URL_OF_SAMPLES_PARQUET.value]
-        url_of_metadata = planet_metadata[mte.METADATA_FILE.value]
-        
-        if url_of_sample not in unique_samples_urls:
-            
-            unique_samples_urls.append(url_of_sample)
-            metadata_urls.append(url_of_metadata)
-           
-    
-    
-    return_samples = []
-    for url_index in range(len(unique_samples_urls)):
-        sample_url = unique_samples_urls[url_index]
-        metadata_url = metadata_urls[url_index]
-        
-        file_sample = requests.get(sample_url, verify=False)
-        dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
-        file_metadata = requests.get(metadata_url, verify=False)
-        metadata = json.loads(file_metadata.text)
-    
-    
-        name = f"{metadata[mte.STAR_NAME.value]}_{metadata[mte.ANALYSIS_ID.value]}"
-        
-        
-        samples_dict = {
-            osd.SAMPLE_NAME.value:      name,
-            osd.PLANETS_LIST.value:     metadata[mte.PLANET_LIST.value],
-            osd.CODE.value:            metadata[mte.CODE_USED.value],
-            osd.BIBTEX.value:          metadata[mte.BIBTEX.value],
-            osd.CONTACT_EMAIL.value:   metadata[mte.CONTACT_EMAIL.value],
-            osd.SAMPLE.value:          dataframe_sample
-        }
-        return_samples.append(samples_dict)
-    
-        if download_destination is not None:
-            file_name = download_destination / f"{name}.parquet"
-            dataframe.to_parquet(file_name)
-        
-    return return_samples
-
-
-
-
-def download_simulation_run_tables(dataframe, download_destination=None):
-    """
-
-    Parameters
-    ----------
-    dataframe : pd.DataFrame
-        The dataframe containing the metadata of the planets samples that we want to download
-    download_destination : str or None
-        If given, save the samples in the given directory
-    
-    Returns
-    -------
-    dict
-        
-    """
-    
-    if isinstance(dataframe, pd.Series):
-        raise ValueError("The dataframe should be a pandas DataFrame, not a pandas Series")
-        
-    if not isinstance(dataframe, pd.DataFrame):
-        raise ValueError("The dataframe should be a pandas DataFrame")
-    
-    
-    if download_destination is not None:
-        if not isinstance(download_destination, Path):
-            download_destination = Path(download_destination)
-        download_destination.mkdir(parents=True, exist_ok=True)
-    
-    if dataframe.shape[1] > 1:
-        logger.warning("The dataframe has more than one column. The simulations tables are quite big, it may take some time to download.")
-    unique_samples_urls = []
-    metadata_urls = []
+    additional_infos_urls = []
     for row in dataframe.iterrows():
         index_row, metadata_line = row
         
-        url_of_table   = metadata_line.get(mte.URL_OF_SAMPLES_PARQUET.value, None)
-
+        url_of_sample           = metadata_line.get(mteSim.URL_OF_SIMULATION.value, None)
+        url_of_metadata         = metadata_line.get(mteSim.METADATA_FILE.value, None)
+        url_of_additional_info  = metadata_line.get(mteSim.CONFIG_FILE.value, None) 
+        if url_of_additional_info is None:
+            pass # no condition on the aditional infos as it may not be present
+        if url_of_sample is None:
+            raise ValueError(f"Missing URL_OF_SIMULATION in the metadata line: {metadata_line}")
+        if url_of_metadata is None:
+            raise ValueError(f"Missing METADATA_FILE in the metadata line: {metadata_line}")
         if url_of_sample not in unique_samples_urls:
             unique_samples_urls.append(url_of_sample)
             metadata_urls.append(url_of_metadata)
-        
+            additional_infos_urls.append(url_of_additional_info)
 
     
     return_samples = []
     for url_index in range(len(unique_samples_urls)):
         sample_url = unique_samples_urls[url_index]
         metadata_url = metadata_urls[url_index]
-        
+        aditional_info_url = additional_infos_urls[url_index]
         file_sample = requests.get(sample_url, verify=False)
+        if not file_sample.ok:
+            raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
         dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
+        
         file_metadata = requests.get(metadata_url, verify=False)
+        if not file_metadata.ok:
+            raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
         metadata = json.loads(file_metadata.text)
         
-        name = f"{metadata[mte.SYSTEM_ID.value]}_{metadata[mte.RUN_ID.value]}"
+        if aditional_info_url is not None:
+            file_additional_info = requests.get(aditional_info_url, verify=False)
+            if not file_additional_info.ok:
+                raise Exception(f"URL {aditional_info_url} responded with status code: {file_additional_info.status_code}")
+            additional_infos = json.loads(file_additional_info.text)
+        else:
+            additional_infos = None
         
-        
+        name = f"{metadata[mteSim.SIMULATION_TYPE.value]}_{metadata[mteSim.RUN_ID.value]}_{metadata[mteSim.SIMULATION_ID.value]}"
         
         samples_dict = {
-            "name":  name,
-            "planets": f"{metadata[mte.PLANET_LIST.value]}",
-            "code": metadata[mte.CODE_USED.value],
-            "bibtex": metadata[mte.BIBTEX.value],
-            "samples": dataframe_sample
+            simDict.SIMULATION_NAME.value:  name,
+            simDict.PLANETS_LIST.value:     metadata[mteAuthors.PLANET_LIST.value],
+            simDict.CODE.value:             metadata[mteSim.CODE_USED.value],
+            simDict.BIBTEX.value:           metadata[mteSim.BIBTEX.value],
+            simDict.CONTACT_EMAIL.value:    metadata[mteSim.CONTACT_EMAIL.value],
+            simDict.ADDITIONAL_INFO.value:  additional_infos,
+            simDict.SIMULATION.value:       dataframe_sample
         }
         return_samples.append(samples_dict)
     
         if download_destination is not None:
-            file_name = download_destination / name
-            dataframe.to_parquet(file_name)
-        
-    return return_samples
-
-
-
-
-def download_simulation_samples(dataframe, download_destination=None, local=False):
-    """This method retrieves the samples tables form the systems in the given dataframe, and returns a dictionnary of pandas dataframes with the samples. If a download destination is given, it saves the samples in the given directory.
-
-    Parameters
-    ----------
-    dataframe : pd.DataFrame
-        The dataframe containing the metadata of the planets samples that we want to download
-    download_destination : str or None
-        If given, save the samples in the given directory
-    
-    Returns
-    -------
-    dict
-        A dictionnary of pandas dataframes with the samples names as keys and the samples dataframes as values
-    """
-    
-    if isinstance(dataframe, pd.Series):
-        raise ValueError("The dataframe should be a pandas DataFrame, not a pandas Series")
-        
-    if not isinstance(dataframe, pd.DataFrame):
-        raise ValueError("The dataframe should be a pandas DataFrame")
-    
-    
-    if download_destination is not None:
-        if not isinstance(download_destination, Path):
-            download_destination = Path(download_destination)
-        download_destination.mkdir(parents=True, exist_ok=True)
-    
-    
-    unique_samples_urls = []
-    metadata_urls = []
-    for row in dataframe.iterrows():
-        index_row, metadata_line = row
-        
-        url_of_sample   = metadata_line.get(mte.URL_OF_SAMPLES_PARQUET.value, None)
-        url_of_metadata = metadata_line.get(mte.METADATA_FILE.value, None)
-
-        if url_of_sample not in unique_samples_urls:
-            unique_samples_urls.append(url_of_sample)
-            metadata_urls.append(url_of_metadata)
-        
-
-    
-    return_samples = []
-    for url_index in range(len(unique_samples_urls)):
-        sample_url = unique_samples_urls[url_index]
-        metadata_url = metadata_urls[url_index]
-        
-        if not local:
-            file_sample = requests.get(sample_url, verify=False)
-            dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
-            file_metadata = requests.get(metadata_url, verify=False)
-            metadata = json.loads(file_metadata.text)
-        else:
-            file_sample = Path(sample_url)
-            relative_path_sample =file_sample.relative_to(file_sample.parent.parent.parent.parent)
-            logger.info(f"Relative path sample: {relative_path_sample}")
-            return 0    
-        
-        if metadata.get(mte.STAR_NAME.value, False) and metadata.get(mte.ANALYSIS_ID.value, False):
-            name = f"{metadata[mte.STAR_NAME.value]}_{metadata[mte.ANALYSIS_ID.value]}"
-        elif metadata.get(mte.SYSTEM_ID.value, False) and metadata.get(mte.RUN_ID.value, False):
-            name = f"{metadata[mte.SYSTEM_ID.value]}_{metadata[mte.RUN_ID.value]}"
-        else:
-            logger.error(f"Metadata does not contain the required keys for activity A or B")
-            name = Path(sample_url).stem
-        
-        samples_dict = {
-            "name":  name,
-            "planets": f"{metadata[mte.PLANET_LIST.value]}",
-            "code": metadata[mte.CODE_USED.value],
-            "bibtex": metadata[mte.BIBTEX.value],
-            "samples": dataframe_sample
-        }
-        return_samples.append(samples_dict)
-    
-        if download_destination is not None:
-            file_name = download_destination / name
-            dataframe.to_parquet(file_name)
+            simulation_file_name = download_destination / f"{name}.parquet"
+            metadata_file_name = download_destination / f"{name}_metadata.json"
+            dataframe.to_parquet(simulation_file_name)
+            with open(metadata_file_name, 'w') as f:
+                json.dump(metadata, f, indent=4) 
+            if additional_infos is not None:
+                additional_infos_file_name = download_destination / f"{name}_additional_infos.json"
+                with open(additional_infos_file_name, 'w') as f:
+                    json.dump(additional_infos, f, indent=4)
         
     return return_samples
