@@ -6,45 +6,42 @@
 # Only columns lbd(°), Period(days), k, h, Inclination(°), Omega(°) are modified for each planet.
 
 
-# - Sample2cart(sample, typeOfCoordinates)   -->  Converts the sample to cartesian coordinates.
-#                                                 The columns are now Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-#                                                 typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+# - Sample2cart(sample, typeOfCoordinates, adcol)   -->  Converts the sample to cartesian coordinates.
+#                                                        The columns are now Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
+#                                                        typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+#                                                        adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
-# - Sample2aeiMoO(sample, typeOfCoordinates) -->  Converts the sample to elliptic coordinates (a, e, i, M, omega, Omega) = (semi-major axis, eccentricity, inclination, 
-#                                                 mean anomaly, argument of periapsis, longitude of ascending node).
-#                                                 The columns are now Id or timestamp, a, e, i(rad), M(rad), omega(rad), Omega(rad), m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-#                                                 typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+# - Sample2aeiMoO(sample, typeOfCoordinates, adcol) -->  Converts the sample to elliptic coordinates (a, e, i, M, omega, Omega) = (semi-major axis, eccentricity, inclination, 
+#                                                        mean anomaly, argument of periapsis, longitude of ascending node).
+#                                                        The columns are now Id or timestamp, a, e, i(rad), M(rad), omega(rad), Omega(rad), m/M*, R/R*, ... , M* (Msun), R* (Rsun)
+#                                                        typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+#                                                        adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
-# - Sample2alkhqp(sample, typeOfCoordinates) -->  Converts the sample to elliptic coordinates (a, lbd, k, h, q, p) = (semi-major axis, mean longitude,
-#                                                 e*cos(varpi), e*sin(varpi), sin(i/2)*cos(Omega), sin(i/2)*sin(Omega)).
-#                                                 The columns are now Id or timestamp, a, lbd(rad), k, h, q, p, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-#                                                 typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+# - Sample2alkhqp(sample, typeOfCoordinates, adcol) -->  Converts the sample to elliptic coordinates (a, lbd, k, h, q, p) = (semi-major axis, mean longitude,
+#                                                        e*cos(varpi), e*sin(varpi), sin(i/2)*cos(Omega), sin(i/2)*sin(Omega)).
+#                                                        The columns are now Id or timestamp, a, lbd(rad), k, h, q, p, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
+#                                                        typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+#                                                        adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
-# - Cart2sample(sample, typeOfCoordinates)   -->  Inverse of Sample2cart.
+# - Cart2sample(sample, typeOfCoordinates, adcol)   -->  Inverse of Sample2cart.
 
 # CAUTION : typeOfCoordinates indicates the type of coordinates the sample is given in. It cannot be used to change from Jacobi to Heliocentric or vice-versa.
 #           For example, if your sample is in Jacobi coordinates, Sample2cart(sample, 'Jacobi') will convert it into Jacobi cartesian coordinates, whereas
 #           Sample2cart(sample, 'Heliocentric') will have undefined behavior. Use functions Jac2Hel and Hel2Jac for conversion Jacobi <--> Heliocentric
 
-# - Jac2Hel(sample) --> Converts the sample from Jacobi coordinates to Heliocentric coordinates
+# - Jac2Hel(sample, adcol) --> Converts the sample from Jacobi coordinates to Heliocentric coordinates
+#                              adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
-# - Hel2Jac(sample) --> Converts the sample from Heliocentric coordinates to Jacobi coordinates
+# - Hel2Jac(sample, adcol) --> Converts the sample from Heliocentric coordinates to Jacobi coordinates
+#                              adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
+
+# These functions convert into a system of units where : (see https://iau-a3.gitlab.io/NSFA/IAU2009_consts.html)
+# - The unit of length is the astronomical unit (1.49597870700e11 m, as recommended by the IAU)
+# - The unit of mass   is the mass of the Sun (1.98841583e30 kg, taking G and G*Msun as recommended by the IAU)
+# - The unit of time   is the day (86400 s, as recommended by the IAU)
 
 
-# By default, these functions convert into an absolute system of units where :
-# - The unit of length is the Sun radius
-# - The unit of mass   is the Sun mass
-# - The unit of time   is the day
-
-# If it is more convenient for you, you can convert into a relative system of units where
-# - The unit of length is the semi-major axis of the first planet of the current row
-# - The unit of mass   is the stellar mass of the current row
-# - The unit of time   is the orbital period of a massless particle with same semi-major axis that the first planet of the current row
-
-# To do so, set this parameter to 0
-convert2absolute = 1
-
-# Conversion functions written by Jérémy COUTURIER
+# Author : Jérémy COUTURIER
 
                                          ###### See the very bottom of this page for examples of use ######
 
@@ -62,9 +59,7 @@ import random
 
 
 #Defining the gravitational constant
-G = 4.*np.pi**2
-if (convert2absolute):
-      G = 0.034053
+G = 0.0002959122 # AU^3 Msun^-1 day^-2 (Using the value G=6.67428e-11 m^3 kg^-1 s^-2 recommended by the IAU)
 
 
 def ell2cart_true(aeinuoO, mass):
@@ -305,8 +300,8 @@ def lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT):
       
 def aeiMoO_to_alkhqp(aeiMoO, mass, daysInUOT):
 
-      #Converts from the workshop format to elliptic elements [semi-major axis, eccentricity, inclination, mean longitude, argument of periapsis, longitude of ascending node]
-      #lPkhiO = [mean longitude (deg), Period (days), k, h, inclination(deg), longitude of the ascending node(deg)]
+      #Converts from elliptic elements [semi-major axis, eccentricity, inclination, mean longitude, argument of periapsis, longitude of ascending node]
+      #to elliptic elements [semi-major axis, mean longitude (deg), k, h, q, p]
       #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
 
       
@@ -341,26 +336,24 @@ def lPkhiO_to_cart(lPkhiO, mass, daysInUOT):
       return cart;
 
 
-def sample2cart_row(row, typeOfCoordinates):
+def sample2cart_row(row, typeOfCoordinates, adcol):
 
       #Converts one row of the workshop into the same row in cartesian coordinates
       #typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'
       #typeOfCoordinates must be the type of coordinates into which the sample is given !
       #This function cannot be used to change the type of coordinates ! Its purpose is only to convert to cartesian
       #Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row
+      #adcol is the number of additional columns in the sample (often 0). (e.g. adcol = 1 for Hadden's posteriors)
 
       n = len(row)
-      if (n%8 != 3):
-            raise Exception("The sample line does not have 8*k + 3 columns.")
+      if (n%8 != 3 + adcol):
+            raise Exception("The sample line does not have 8*k + 3 + adcol columns.")
 
-      N = (len(row) - 3)//8 #Number of planets
+      N = (len(row) - 3 - adcol)//8 #Number of planets
       
       output = np.array([row[0]])
       
-      if (convert2absolute):
-            daysInUOT = 1.
-      else:
-            daysInUOT = row[2]*np.sqrt(1. + row[7]) #Orbital period of inner planet is (1 + m1/m0)**(-1/2) since it is not massless
+      daysInUOT = 1.
 
       for i in range(N):
             lPkhiO = row[1 + 8*i : 7 + 8*i]
@@ -372,16 +365,17 @@ def sample2cart_row(row, typeOfCoordinates):
                   mass = 1. + row[7 + 8*i]
             else:
                   raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
-            if (convert2absolute):
-                  mass = mass*row[-2]
+            mass = mass*row[-2-adcol]
             cart   = np.array(lPkhiO_to_cart(lPkhiO, mass, daysInUOT))
             output = np.concatenate((output, cart, np.array([row[7 + 8*i], row[8 + 8*i]])))
 
-      output = np.concatenate((output, np.array([row[-2], row[-1]])))
+      output = np.concatenate((output, np.array([row[-2-adcol], row[-1-adcol]])))
+      for i in range(adcol):
+            output = np.concatenate((output, np.array([row[-adcol+i]])))
       return output
 
 
-def sample2aeiMoO_row(row, typeOfCoordinates):
+def sample2aeiMoO_row(row, typeOfCoordinates, adcol):
 
       #Converts one row of the workshop into the same row in coordinates a, e, i, M, o, O
       #[a, e, i, M, o, O] = [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]
@@ -389,19 +383,17 @@ def sample2aeiMoO_row(row, typeOfCoordinates):
       #typeOfCoordinates must be the type of coordinates into which the sample is given !
       #This function cannot be used to change the type of coordinates ! Its purpose is only to convert to a, e, i, M, o, O
       #Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row
+      #adcol is the number of additional columns in the sample (often 0). (e.g. adcol = 1 for Hadden's posteriors)
 
       n = len(row)
-      if (n%8 != 3):
-            raise Exception("The sample line does not have 8*k + 3 columns.")
+      if (n%8 != 3 + adcol):
+            raise Exception("The sample line does not have 8*k + 3 + adcol columns.")
 
-      N = (len(row) - 3)//8 #Number of planets
+      N = (len(row) - 3 - adcol)//8 #Number of planets
       
       output = np.array([row[0]])
       
-      if (convert2absolute):
-            daysInUOT = 1.
-      else:
-            daysInUOT = row[2]*np.sqrt(1. + row[7]) #Orbital period of inner planet is (1 + m1/m0)**(-1/2) since it is not massless
+      daysInUOT = 1.
 
       for i in range(N):
             lPkhiO = row[1 + 8*i : 7 + 8*i]
@@ -413,17 +405,18 @@ def sample2aeiMoO_row(row, typeOfCoordinates):
                   mass = 1. + row[7 + 8*i]
             else:
                   raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
-            if (convert2absolute):
-                  mass = mass*row[-2]
+            mass = mass*row[-2-adcol]
             aeiMoO = np.array(lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT))
             output = np.concatenate((output, aeiMoO, np.array([row[7 + 8*i], row[8 + 8*i]])))
 
-      output = np.concatenate((output, np.array([row[-2], row[-1]])))
+      output = np.concatenate((output, np.array([row[-2-adcol], row[-1-adcol]])))
+      for i in range(adcol):
+            output = np.concatenate((output, np.array([row[-adcol+i]])))
       return output
       
       
       
-def sample2alkhqp_row(row, typeOfCoordinates):
+def sample2alkhqp_row(row, typeOfCoordinates, adcol):
 
       #Converts one row of the workshop into the same row in coordinates a, lbd, k, h, q, p
       #[a, lbd, k, h, q, p] = [semi-major axis, mean longitude, e*cos(varpi), e*sin(varpi), sin(i/2)*cos(Omega), sin(i/2)*sin(Omega)]
@@ -431,20 +424,17 @@ def sample2alkhqp_row(row, typeOfCoordinates):
       #typeOfCoordinates must be the type of coordinates into which the sample is given !
       #This function cannot be used to change the type of coordinates ! Its purpose is only to convert to a, lbd, k, h, q, p
       #Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row
+      #adcol is the number of additional columns in the sample (often 0). (e.g. adcol = 1 for Hadden's posteriors)
 
       n = len(row)
-      if (n%8 != 3):
-            raise Exception("The sample line does not have 8*k + 3 columns.")
+      if (n%8 != 3 + adcol):
+            raise Exception("The sample line does not have 8*k + 3 + adcol columns.")
 
-      N = (len(row) - 3)//8 #Number of planets
+      N = (len(row) - 3 - adcol)//8 #Number of planets
       
       output = np.array([row[0]])
       
-      
-      if (convert2absolute):
-            daysInUOT = 1.
-      else:
-            daysInUOT = row[2]*np.sqrt(1. + row[7]) #Orbital period of inner planet is (1 + m1/m0)**(-1/2) since it is not massless
+      daysInUOT = 1.
 
       for i in range(N):
             lPkhiO = row[1 + 8*i : 7 + 8*i]
@@ -456,40 +446,30 @@ def sample2alkhqp_row(row, typeOfCoordinates):
                   mass = 1. + row[7 + 8*i]
             else:
                   raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
-            if (convert2absolute):
-                  mass = mass*row[-2]
+            mass = mass*row[-2-adcol]
             aeiMoO = lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT)
             alkhqp = aeiMoO_to_alkhqp(aeiMoO, mass, daysInUOT)
             output = np.concatenate((output, alkhqp, np.array([row[7 + 8*i], row[8 + 8*i]])))
 
-      output = np.concatenate((output, np.array([row[-2], row[-1]])))
+      output = np.concatenate((output, np.array([row[-2-adcol], row[-1-adcol]])))
+      for i in range(adcol):
+            output = np.concatenate((output, np.array([row[-adcol+i]])))
       return output
       
 
-def cart2sample_row(row, typeOfCoordinates):
+def cart2sample_row(row, typeOfCoordinates, adcol):
 
       #Inverse of function sample2cart_row
 
       n = len(row)
-      if (n%8 != 3):
-            raise Exception("The sample line does not have 8*k + 3 columns.")
+      if (n%8 != 3 + adcol):
+            raise Exception("The sample line does not have 8*k + 3 + adcol columns.")
 
-      N = (len(row) - 3)//8 #Number of planets
+      N = (len(row) - 3 - adcol)//8 #Number of planets
       
       output = np.array([row[0]])
       
-      #Getting the period of the inner planet
-      XYZvXvYvZ = row[1 : 7]
-      mass = 1. + row[7]
-      if (convert2absolute):
-            mass = mass*row[-2]
-      alkhqp = cart2ell(XYZvXvYvZ, mass)
-      n      = np.sqrt(G*mass/alkhqp[0]**3)
-      Pin    = 2.*np.pi/n
-      if (convert2absolute):
-            daysInUOT = 1.
-      else:
-            daysInUOT = Pin*np.sqrt(1. + row[7]) #Orbital period of inner planet is (1 + m1/m0)**(-1/2) since it is not massless
+      daysInUOT = 1.
 
       for i in range(N):
             XYZvXvYvZ = row[1 + 8*i : 7 + 8*i]
@@ -501,8 +481,7 @@ def cart2sample_row(row, typeOfCoordinates):
                   mass = 1. + row[7 + 8*i]
             else:
                   raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
-            if (convert2absolute):
-                  mass = mass*row[-2]
+            mass = mass*row[-2-adcol]
             alkhqp = cart2ell(XYZvXvYvZ, mass)
             a      = alkhqp[0]
             lbd    = alkhqp[1]
@@ -522,20 +501,22 @@ def cart2sample_row(row, typeOfCoordinates):
             lPkhiO = np.array([lbd, P, k, h, I, Omega])
             output = np.concatenate((output, lPkhiO, np.array([row[7 + 8*i], row[8 + 8*i]])))
 
-      output = np.concatenate((output, np.array([row[-2], row[-1]])))
+      output = np.concatenate((output, np.array([row[-2-adcol], row[-1-adcol]])))
+      for i in range(adcol):
+            output = np.concatenate((output, np.array([row[-adcol+i]])))
       return output
 
 
-def Jac2Hel_rowCart(row):
+def Jac2Hel_rowCart(row, adcol):
 
       #To be called on the return value of sample2cart_row
       #Converts from Jacobi to Heliocentric
       
       n = len(row)
-      if (n%8 != 3):
-            raise Exception("The sample line does not have 8*k + 3 columns.")
+      if (n%8 != 3 + adcol):
+            raise Exception("The sample line does not have 8*k + 3 + adcol columns.")
 
-      N = (len(row) - 3)//8 #Number of planets
+      N = (len(row) - 3 - adcol)//8 #Number of planets
       
       output = np.zeros((len(row)))
       for i in range(len(row)):
@@ -606,16 +587,16 @@ def Jac2Hel_rowCart(row):
       return output
             
 
-def Hel2Jac_rowCart(row):
+def Hel2Jac_rowCart(row, adcol):
 
       #To be called on the return value of sample2cart_row
       #Converts from Heliocentric to Jacobi
       
       n = len(row)
-      if (n%8 != 3):
-            raise Exception("The sample line does not have 8*k + 3 columns.")
+      if (n%8 != 3 + adcol):
+            raise Exception("The sample line does not have 8*k + 3 + adcol columns.")
 
-      N = (len(row) - 3)//8 #Number of planets
+      N = (len(row) - 3 - adcol)//8 #Number of planets
       
       output = np.zeros((len(row)))
       for i in range(len(row)):
@@ -686,31 +667,23 @@ def Hel2Jac_rowCart(row):
       return output
             
 
-def Jac2Hel_row(row):
+def Jac2Hel_row(row, adcol):
 
       #Converts one row of sample from Jacobi to Heliocentric
       
-      global convert2absolute
-      C                = convert2absolute
-      convert2absolute = 1
-      rowCartJac       = sample2cart_row(row, 'Jacobi')
-      rowCartHel       = Jac2Hel_rowCart(rowCartJac)
-      rowlPkhiO        = cart2sample_row(rowCartHel, 'Heliocentric')
-      convert2absolute = C
+      rowCartJac       = sample2cart_row(row, 'Jacobi', adcol)
+      rowCartHel       = Jac2Hel_rowCart(rowCartJac, adcol)
+      rowlPkhiO        = cart2sample_row(rowCartHel, 'Heliocentric', adcol)
       return rowlPkhiO
       
 
-def Hel2Jac_row(row):
+def Hel2Jac_row(row, adcol):
 
       #Converts one row of sample from Jacobi to Heliocentric
       
-      global convert2absolute
-      C                = convert2absolute
-      convert2absolute = 1
-      rowCartHel       = sample2cart_row(row, 'Heliocentric')
-      rowCartJac       = Hel2Jac_rowCart(rowCartHel)
-      rowlPkhiO        = cart2sample_row(rowCartJac, 'Jacobi')
-      convert2absolute = C
+      rowCartHel       = sample2cart_row(row, 'Heliocentric', adcol)
+      rowCartJac       = Hel2Jac_rowCart(rowCartHel, adcol)
+      rowlPkhiO        = cart2sample_row(rowCartJac, 'Jacobi', adcol)
       return rowlPkhiO
 
 
@@ -719,100 +692,106 @@ def Hel2Jac_row(row):
 ##########################################################################################################################
 
 
-def Sample2cart(sample, typeOfCoordinates):
+def Sample2cart(sample, typeOfCoordinates, adcol):
 
       n = sample.shape[1]
+      output = np.copy(sample)
       print("Converting sample into Cartesian coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[:,i]
-            Newrow = sample2cart_row(row, typeOfCoordinates)
-            sample[:,i] = Newrow
+            Newrow = sample2cart_row(row, typeOfCoordinates, adcol)
+            output[:,i] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
-      return sample
+      return output
 
 
-def Cart2sample(sample, typeOfCoordinates):
+def Cart2sample(sample, typeOfCoordinates, adcol):
 
       n = sample.shape[1]
+      output = np.copy(sample)
       print("Converting sample from Cartesian to workshop format")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[:,i]
-            Newrow = cart2sample_row(row, typeOfCoordinates)
-            sample[:,i] = Newrow
+            Newrow = cart2sample_row(row, typeOfCoordinates, adcol)
+            output[:,i] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
-      return sample
+      return output
 
 
-def Sample2aeiMoO(sample, typeOfCoordinates):
+def Sample2aeiMoO(sample, typeOfCoordinates, adcol):
 
       n = sample.shape[1]
+      output = np.copy(sample)
       print("Converting sample into (a, e, i, M, o, O) elliptic elements")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[:,i]
-            Newrow = sample2aeiMoO_row(row, typeOfCoordinates)
-            sample[:,i] = Newrow
+            Newrow = sample2aeiMoO_row(row, typeOfCoordinates, adcol)
+            output[:,i] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
-      return sample
+      return output
 
 
-def Sample2alkhqp(sample, typeOfCoordinates):
+def Sample2alkhqp(sample, typeOfCoordinates, adcol):
 
       n = sample.shape[1]
+      output = np.copy(sample)
       print("Converting sample into (a, lbd, k, h, q, p) elliptic elements")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[:,i]
-            Newrow = sample2alkhqp_row(row, typeOfCoordinates)
-            sample[:,i] = Newrow
+            Newrow = sample2alkhqp_row(row, typeOfCoordinates, adcol)
+            output[:,i] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
-      return sample
+      return output
       
       
-def Jac2Hel(sample):
+def Jac2Hel(sample, adcol):
 
       n = sample.shape[1]
+      output = np.copy(sample)
       print("Converting sample from Jacobi to Heliocentric coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[:,i]
-            Newrow = Jac2Hel_row(row)
-            sample[:,i] = Newrow
+            Newrow = Jac2Hel_row(row, adcol)
+            output[:,i] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
-      return sample
+      return output
       
       
-def Hel2Jac(sample):
+def Hel2Jac(sample, adcol):
 
       n = sample.shape[1]
+      output = np.copy(sample)
       print("Converting sample from Heliocentric to Jacobi coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[:,i]
-            Newrow = Hel2Jac_row(row)
-            sample[:,i] = Newrow
+            Newrow = Hel2Jac_row(row, adcol)
+            output[:,i] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
-      return sample
+      return output
       
       
 ##########################################################################################################################
@@ -822,27 +801,29 @@ def Hel2Jac(sample):
       
 ## Examples of use ##
 
-path = './path_towards_sample.csv' #A sample in Jacobi coordinates
+'''
+path = 'path_towards_sample.csv'
 sample = np.loadtxt(path, dtype = np.float64, delimiter=',', unpack=True)
 
-S1 = Sample2cart(sample, 'Jacobi')                  # Converts the sample into Jacobi cartesian coordinates
 
-S2 = Sample2cart(Jac2Hel(sample), 'Heliocentric')   # Converts the sample into Heliocentric cartesian coordinates
+S1 = Sample2cart(sample, 'Heliocentric', 0)         # Converts the sample into Heliocentric cartesian coordinates
 
-S3 = Sample2aeiMoO(sample, 'Jacobi')                # Converts the sample into Jacobi elliptic elements (a, e, i, M, omega, Omega)
+S2 = Sample2cart(Hel2Jac(sample, 0), 'Jacobi', 0)   # Converts the sample into Jacobi cartesian coordinates
 
-S4 = Sample2alkhqp(sample, 'Jacobi')                # Converts the sample into Jacobi elliptic elements (a, l, k, h, q, p)
+S3 = Sample2aeiMoO(sample, 'Heliocentric', 0)       # Converts the sample into Heliocentric elliptic elements (a, e, i, M, omega, Omega)
 
-S5 = Sample2aeiMoO(Jac2Hel(sample), 'Heliocentric') # Converts the sample into Heliocentric elliptic elements (a, e, i, M, omega, Omega)
+S4 = Sample2alkhqp(sample, 'Heliocentric', 0)       # Converts the sample into Heliocentric elliptic elements (a, l, k, h, q, p)
 
-S6 = Sample2alkhqp(Jac2Hel(sample), 'Heliocentric') # Converts the sample into Heliocentric elliptic elements (a, l, k, h, q, p)
+S5 = Sample2aeiMoO(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, e, i, M, omega, Omega)
+
+S6 = Sample2alkhqp(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, l, k, h, q, p)
+'''
 
 
 ## Sanity checks :
 
-# - Jac2Hel(Hel2Jac(sample)) and Hel2Jac(Jac2Hel(sample)) should leave the sample mostly untouched (within numerical errors)
+# - Jac2Hel(Hel2Jac(sample, adcol), adcol) or Hel2Jac(Jac2Hel(sample, adcol), adcol) should leave the sample mostly untouched (within errors due to Kepler equation solving)
+# - Sample2cart(Cart2sample(sample, 'Heliocentric', adcol), 'Heliocentric', adcol) and variations should leave the sample mostly untouched as well.
 
-# If convert2absolute is 1, then : 
-# - Sample2cart(Cart2sample(sample, 'Jacobi'), 'Jacobi') and Sample2cart(Cart2sample(sample, 'Heliocentric'), 'Heliocentric') should leave the sample mostly untouched as well.
 
 
