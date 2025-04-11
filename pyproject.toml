@@ -6,10 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "resonantstate"
 version = "0.0.9"
 authors = [
-  { name = "Adrien Leleu", email = "adrien.leleu@unige.ch",
-    name = "Yannick Eyholzer", email = "yannick.eyholzer@unige.ch",
-    name = "Jérémy Couturier", email = "jeremy.couturier@unige.ch",
-    name = "Marylyn Rosenqvist", email = "marylyn.rosenqvist@unige.ch"},
+  {name = "Adrien Leleu", email = "adrien.leleu@unige.ch"},
+  {name = "Yannick Eyholzer", email = "yannick.eyholzer@unige.ch"},
+  {name = "Jérémy Couturier", email = "jeremy.couturier@unige.ch"},
+  {name = "Marylyn Rosenqvist", email = "marylyn.rosenqvist@unige.ch"},
 ]
 description = "functions to access and manipulate the data from the https://dace.unige.ch/resonantStateObservationsCatalog/ and https://dace.unige.ch/resonantStateSimulationsCatalog/ "
 readme = "README.md"
