@@ -19,7 +19,7 @@ dependencies = []
 
 [project.urls]
 Homepage = "https://gitlab.unige.ch/delisle/kepmodel"
-Issues = "https://gitlab.unige.ch/delisle/kepmodel/-/issues"
+Issues = "https://github.com/adleleu/resonantstate"
 
 
 
