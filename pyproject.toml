@@ -18,8 +18,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://gitlab.unige.ch/delisle/kepmodel"
-Issues = "https://github.com/adleleu/resonantstate"
+Homepage = "https://github.com/adleleu/resonantstate"
+
 
 
 
