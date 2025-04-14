@@ -279,7 +279,7 @@ def topologie(delta):
 #Plotting
 #if (plot_DACE_data):
 
-def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name=''):
+def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_resonance=False):
 
       if (isinstance(colors[0], np.ndarray)):
             if (len(colors) >= 2):
@@ -321,6 +321,12 @@ def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name=''):
             n    = len(m1)
             [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
             [sig, Sig, sig2, Sig2, nus, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
+
+            if check_resonance:
+                  resonant = np.where(IsResonant == 1)
+                  percent = (resonant[0].size / IsResonant.size)*100
+                  print('pair', pairs[pair], ':', percent, '% within resonance.')
+
             if (isinstance(colors[pair], np.ndarray)):
                   #Making sure that all plots use the same colorbar
                   Ds    = np.concatenate((Ds, np.array([1.e300, 1.e300])))
@@ -346,17 +352,17 @@ def plot_auxiliary(ax1, delta_lim, X_lim):
       ax1.set_xlim(xmin = delta_min, xmax = delta_max)
       ax1.set_ylim(ymin = X_min,     ymax = X_max)
       ax1.tick_params(axis='both', which='major')
-      ax1.set_xlabel(xlabel="$\delta$", labelpad=3)
-      ax1.set_ylabel(ylabel="$X$",      labelpad=4, rotation=0)
+      ax1.set_xlabel(xlabel=r"$\delta$", labelpad=3)
+      ax1.set_ylabel(ylabel=r"$X$",      labelpad=4, rotation=0)
       ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black',     linewidth = 4, linestyle = '-',  alpha = 1)
-      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '--', alpha = 1, label = 'Hyperbolic')
+      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = ':', alpha = 1, label = 'Hyperbolic')
       ax1.plot(delt,             Xint,             color = 'black',     linewidth = 4, linestyle = '-',  alpha = 1, label = 'Elliptic')
       ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '-',  alpha = 1, label = 'Separatrix')
       ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '-',  alpha = 1)
       ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], delta_lim=(-3,5), X_lim=(-5,5)):
+def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], delta_lim=(-3,5), X_lim=(-5,5), check_resonance=False):
       """
       Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
 
@@ -371,38 +377,42 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             Pairs of planets to be considered in the sample
       resonance : list 
             Resonance of the corresponding pair (p such that resonance is p:p+1).
-      delta_lim : tuple 
-            Lower and upper limits of the x-axis (delta).
-      X_lim : tuple
-            Lower and upper limits of the y-axis (X).
       colors : list 
             List of color values to use for plotting each pair/analysis.
             - Each entry in main list corresponds to one analysis.
             - Each entry in nested list corresponds to one pair.
+      delta_lim : tuple 
+            Lower and upper limits of the x-axis (delta).
+      X_lim : tuple
+            Lower and upper limits of the y-axis (X).
       """
 
       plot_params = planet_pairs, resonances
       ax_limits = delta_lim, X_lim
 
-      fig, ax = py.subplots(1, 1, figsize=(6,7))
+      fig, ax = py.subplots(1, 1, figsize=(7,7))
       plot_auxiliary(ax, *ax_limits)
 
       if isinstance(data, list):
             for df_dict, color in zip(data, colors):
+                  if check_resonance:
+                        print('Analysis', df_dict['sample_name'], ':')
                   sample = np.vstack([df_dict['sample'][col] for col in df_dict['sample'].columns])
-                  plot_samples(fig, ax, sample, *plot_params, colors=color, label_name=df_dict['sample_name'])
+                  plot_samples(fig, ax, sample, *plot_params, colors=color, 
+                               label_name=df_dict['sample_name'], check_resonance=check_resonance)
 
       elif isinstance(data, dict):
             sample = np.vstack([data['sample'][col] for col in data['sample'].columns])
-            plot_samples(fig, ax, sample, *plot_params, colors=colors[0], label_name=data['sample_name'])
+            plot_samples(fig, ax, sample, *plot_params, colors=colors[0], label_name=data['sample_name'],
+                          check_resonance=check_resonance)
 
       elif isinstance(data, pd.DataFrame):
             sample = np.vstack([data[col] for col in data.columns])
-            plot_samples(fig, ax, sample, *plot_params, colors=colors[0])
+            plot_samples(fig, ax, sample, *plot_params, colors=colors[0], check_resonance=check_resonance)
 
       else:
             raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
 
       py.legend()
       py.tight_layout()
-      py.show()     
+      py.show()                

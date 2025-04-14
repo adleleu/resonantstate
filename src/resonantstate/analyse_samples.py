@@ -141,13 +141,15 @@ def get_samples(df, param,  p, units):
     return samples_in_units
 
 
-def get_nb_planets(data):
-    nb_planets = 0
+
+def get_all_planets(data):
+    planets_masterlist = []
     for df_dict in data:
-        n_planets = len(df_dict["planets_list"])
-        if n_planets > nb_planets:
-            nb_planets = n_planets
-    return nb_planets
+        planets = df_dict["planets_list"]
+        for planet in planets:
+            if planet not in planets_masterlist:
+                planets_masterlist.append(planet)
+    return planets_masterlist
         
 
 def plot_histograms(dict_list, param, units='star'):
@@ -166,10 +168,13 @@ def plot_histograms(dict_list, param, units='star'):
     """
     if type(dict_list) is not list:
         dict_list = [dict_list]
+
+    all_planets = get_all_planets(dict_list)
+    nb_planets = len(all_planets)
     
-    nb_planets = get_nb_planets(dict_list)
     fig, axes = plt.subplots(nb_planets, 1, figsize=(6, 5 * nb_planets))
     axs = np.atleast_1d(axes)
+    axis_dict = {all_planets[i]: axs[i] for i in range(nb_planets)}
 
     # Loop through each analysis and plot the histograms
     for df_dict in dict_list:
@@ -177,14 +182,15 @@ def plot_histograms(dict_list, param, units='star'):
         planets = df_dict['planets_list']
         df = df_dict['sample']
 
-        for p in range(nb_planets):
-            if p < len(df_dict['planets_list']):
-                planet = planets[p]
-                x = get_samples(df, param,  p, units)
-                axs[p].hist(x, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
-                axs[p].set_xlabel(get_labels(param, units))
-                axs[p].legend()
-                axs[p].set_title(planet)
+        for planet in planets:
+            p_id = planets.index(planet)
+            ax = axis_dict[planet]
+            x = get_samples(df, param,  p_id, units)
+            ax.hist(x, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
+            ax.set_xlabel(get_labels(param, units))
+            ax.legend()
+            ax.set_title(planet)
+
     plt.tight_layout()
     plt.show()
 
@@ -208,9 +214,14 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
     if type(dict_list) is not list:
         dict_list = [dict_list]
     
-    nb_planets = get_nb_planets(dict_list)
+    all_planets = get_all_planets(dict_list)
+    nb_planets = len(all_planets)
+    
     fig, axes = plt.subplots(nb_planets, 1, figsize=(6, 5 * nb_planets))
     axs = np.atleast_1d(axes)
+    axis_dict = {all_planets[i]: axs[i] for i in range(nb_planets)}
+
+    used_axes = []
 
     # Loop through each analysis and plot the samples
     for df_dict in dict_list:
@@ -218,25 +229,34 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
         df = df_dict['sample']
         planets = df_dict['planets_list']
 
-        for p in range(nb_planets):
-            if p < len(df_dict['planets_list']):
-                planet = planets[p]
-                axs[p].set_xlabel(get_labels(x_param, units))
-                axs[p].set_ylabel(get_labels(y_param, units))
-                
-                axs[p].set_title(planet)
+        for planet in planets:
+            p_id = planets.index(planet)
+            ax = axis_dict[planet]
+            if planet not in axis_dict:
+                continue
+            
+            x = get_samples(df, x_param,  p_id, units)
+            y = get_samples(df, y_param,  p_id, units)
 
-                x = get_samples(df, x_param,  p, units)
-                y = get_samples(df, y_param,  p, units)
-                if (x.size == 0) or (y.size == 0):
+            if (x.size == 0) or (y.size == 0):
                     continue
-                axs[p].scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
-                axs[p].legend()
+            ax.scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
+            ax.set_xlabel(get_labels(x_param, units))
+            ax.set_ylabel(get_labels(y_param, units))
+            ax.legend()
+            ax.set_title(planet)  
+            used_axes.append(planet)   
+
+        # Remove unused axes
+    for planet, ax in axis_dict.items():
+        if planet not in used_axes:
+            fig.delaxes(ax)       
+
     plt.tight_layout()
     plt.show()
 
 
-def compare_period_ratios(dict_list):
+def compare_period_ratios(dict_list, planet_pair):
     """
     Plots histograms of period ratios (P_{i+1} / P_i) between adjacent planets.
 
@@ -244,31 +264,30 @@ def compare_period_ratios(dict_list):
     -----------
     dict_list : list of dict
         Each dictionary should contain 'sample_name', 'sample', and 'planets_list'.
+    planet_pair : list 
+        List of planet pairs to be considered.
     """
-    if type(dict_list) is not list:
-        dict_list = [dict_list]
-    
-    nb_planets = get_nb_planets(dict_list)
-    fig, axes = plt.subplots(nb_planets-1, 1, figsize=(6, 5 * (nb_planets-1)))
-    axs = np.atleast_1d(axes)
-
-    # Loop through each analysis and plot the period ratios
+    fig, ax = plt.subplots(1, 1, figsize=(6, 5))
     for df_dict in dict_list:
-        key = df_dict['sample_name']
+        analysis_id = df_dict['sample_name'].split('_')[-1]
         df = df_dict['sample']
+        planets = df_dict['planets_list']
 
-        for p in range(nb_planets - 1):
-            if p + 1 < len(df_dict['planets_list']):
-                val_p = get_samples(df, 'period',  p, units='star')
-                val_p1 = get_samples(df, 'period',  p+1, units='star')
-                axs[p].hist(val_p1 / val_p, bins=50, alpha=0.5, label=key)
-                axs[p].set_xlabel(f'P_{p+1} / P_{p}')
-                axs[p].legend()
+        if planet_pair[0] in planets and planet_pair[1] in planets:
+            p_id0 = planets.index(planet_pair[0])
+            p_id1 = planets.index(planet_pair[1])
+
+            val_p0 = get_samples(df, 'period',  p_id0, units='star')
+            val_p1 = get_samples(df, 'period',  p_id1, units='star')
+            
+            ax.hist(val_p1 / val_p0, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
+            ax.set_xlabel(f'Period ratio')
+            ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')
+            ax.legend()
     plt.tight_layout()
     plt.show()
 
-
-def plot_consecutive_planets(dict_list, param, units='star'):
+def plot_adjacent_planets(dict_list, param, planet_pair, units='star'):
     """
     Plots scatter plots comparing a parameter between consecutive planets.
 
@@ -278,34 +297,30 @@ def plot_consecutive_planets(dict_list, param, units='star'):
         Each dictionary should contain 'sample_name', 'sample', and 'planets_list'.
     param : str
         Parameter to compare.
+    planet_pair : list 
+        List of planet pairs to be considered.
     units : str, optional (default is 'star')
         Target unit system ('star', 'sun', 'earth', 'jup', or 'SI'). 
         Applies only to parameters 'mass', 'radius', or 'density'.
     """
-    if type(dict_list) is not list:
-        dict_list = [dict_list]
-
-    nb_planets = get_nb_planets(dict_list)
-    fig, axes = plt.subplots(nb_planets-1, 1, figsize=(6, 5 * (nb_planets-1)))
-    axs = np.atleast_1d(axes)
-
-    # Loop through each analysis and plot the samples of consecutive planets
+    fig, ax = plt.subplots(1, 1, figsize=(6, 5))
     for df_dict in dict_list:
         analysis_id = df_dict['sample_name'].split('_')[-1]
         df = df_dict['sample']
         planets = df_dict['planets_list']
 
-        for p in range(nb_planets - 1):
-            if p + 1 < len(df_dict['planets_list']):
-                axs[p].set_xlabel(f'{get_labels(param, units)} (planet {p})')
-                axs[p].set_ylabel(f'{get_labels(param, units)} (planet {p+1})')
-                axs[p].set_title(f'{param}_{p+1} vs {param}_{p}')
-                
-                x = get_samples(df, param,  p, units)
-                y = get_samples(df, param,  p+1, units)
-                if (x.size == 0) or (y.size == 0):
-                    continue
-                axs[p].scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
-                axs[p].legend()
+        if planet_pair[0] in planets and planet_pair[1] in planets:
+            p_id0 = planets.index(planet_pair[0])
+            p_id1 = planets.index(planet_pair[1])
+
+            x = get_samples(df, param,  p_id0, units)
+            y = get_samples(df, param,  p_id1, units)  
+
+            ax.scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
+
+            ax.set_xlabel(f'{get_labels(param, units)}')
+            ax.set_ylabel(f'{get_labels(param, units)}')  
+            ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')    
+            ax.legend()   
     plt.tight_layout()
     plt.show()
