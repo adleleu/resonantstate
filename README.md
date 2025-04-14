@@ -1,10 +1,8 @@
 # ResonantState database [draft]
 
-This package contains basic functions that helps navigate the resonant state databases, please check the notebooks https://github.com/adleleu/resonantstate_nb to see how the package can be used.
+This package contains basic functions that helps navigate the resonant state database, please check the notebooks https://github.com/adleleu/resonantstate_nb to see how the package can be used.
 
 The resonant state database is split into two : 
-
-
 
 - **Resonant State Observations Catalog** : https://dace.unige.ch/resonantStateObservationsCatalog/ this database stores samples of MCMC posterior of the Transit Timing Variations (TTVs) or photo-dynamical analysis of observed (near-)resonant planetary systems.
 
