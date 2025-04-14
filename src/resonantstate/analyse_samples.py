@@ -147,8 +147,8 @@ def get_all_planets(data):
     for df_dict in data:
         planets = df_dict["planets_list"]
         for planet in planets:
-            if planet not in planets_masterlist:
-                planets_masterlist.append(planet)
+            if planet.lower() not in planets_masterlist:
+                planets_masterlist.append(planet.lower())
     return planets_masterlist
         
 
@@ -184,7 +184,7 @@ def plot_histograms(dict_list, param, units='star'):
 
         for planet in planets:
             p_id = planets.index(planet)
-            ax = axis_dict[planet]
+            ax = axis_dict[planet.lower()]
             x = get_samples(df, param,  p_id, units)
             ax.hist(x, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
             ax.set_xlabel(get_labels(param, units))
@@ -231,7 +231,7 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
 
         for planet in planets:
             p_id = planets.index(planet)
-            ax = axis_dict[planet]
+            ax = axis_dict[planet.lower()]
             if planet not in axis_dict:
                 continue
             
@@ -267,23 +267,27 @@ def compare_period_ratios(dict_list, planet_pair):
     planet_pair : list 
         List of planet pairs to be considered.
     """
+    planet_pair_norm = [p.lower() for p in planet_pair]
     fig, ax = plt.subplots(1, 1, figsize=(6, 5))
     for df_dict in dict_list:
         analysis_id = df_dict['sample_name'].split('_')[-1]
         df = df_dict['sample']
         planets = df_dict['planets_list']
+        planets_norm = [p.lower() for p in planets]
 
-        if planet_pair[0] in planets and planet_pair[1] in planets:
-            p_id0 = planets.index(planet_pair[0])
-            p_id1 = planets.index(planet_pair[1])
+        try:
+            p_id0 = planets_norm.index(planet_pair_norm[0])
+            p_id1 = planets_norm.index(planet_pair_norm[1])
+        except ValueError:
+            continue
 
-            val_p0 = get_samples(df, 'period',  p_id0, units='star')
-            val_p1 = get_samples(df, 'period',  p_id1, units='star')
-            
-            ax.hist(val_p1 / val_p0, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
-            ax.set_xlabel(f'Period ratio')
-            ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')
-            ax.legend()
+        val_p0 = get_samples(df, 'period',  p_id0, units='star')
+        val_p1 = get_samples(df, 'period',  p_id1, units='star')
+        
+        ax.hist(val_p1 / val_p0, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
+        ax.set_xlabel(f'Period ratio')
+        ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')
+        ax.legend()
     plt.tight_layout()
     plt.show()
 
@@ -303,24 +307,28 @@ def plot_adjacent_planets(dict_list, param, planet_pair, units='star'):
         Target unit system ('star', 'sun', 'earth', 'jup', or 'SI'). 
         Applies only to parameters 'mass', 'radius', or 'density'.
     """
+    planet_pair_norm = [p.lower() for p in planet_pair]
     fig, ax = plt.subplots(1, 1, figsize=(6, 5))
     for df_dict in dict_list:
         analysis_id = df_dict['sample_name'].split('_')[-1]
         df = df_dict['sample']
         planets = df_dict['planets_list']
+        planets_norm = [p.lower() for p in planets]
 
-        if planet_pair[0] in planets and planet_pair[1] in planets:
-            p_id0 = planets.index(planet_pair[0])
-            p_id1 = planets.index(planet_pair[1])
+        try:
+            p_id0 = planets_norm.index(planet_pair_norm[0])
+            p_id1 = planets_norm.index(planet_pair_norm[1])
+        except ValueError:
+            continue
 
-            x = get_samples(df, param,  p_id0, units)
-            y = get_samples(df, param,  p_id1, units)  
+        x = get_samples(df, param,  p_id0, units)
+        y = get_samples(df, param,  p_id1, units)  
 
-            ax.scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
+        ax.scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
 
-            ax.set_xlabel(f'{get_labels(param, units)}')
-            ax.set_ylabel(f'{get_labels(param, units)}')  
-            ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')    
-            ax.legend()   
+        ax.set_xlabel(f'{get_labels(param, units)}')
+        ax.set_ylabel(f'{get_labels(param, units)}')  
+        ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')    
+        ax.legend()   
     plt.tight_layout()
     plt.show()
