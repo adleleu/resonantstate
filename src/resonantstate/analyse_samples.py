@@ -221,8 +221,6 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
     axs = np.atleast_1d(axes)
     axis_dict = {all_planets[i]: axs[i] for i in range(nb_planets)}
 
-    used_axes = []
-
     # Loop through each analysis and plot the samples
     for df_dict in dict_list:
         analysis_id = df_dict['sample_name'].split('_')[-1]
@@ -232,8 +230,11 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
         for planet in planets:
             p_id = planets.index(planet)
             ax = axis_dict[planet.lower()]
-            if planet not in axis_dict:
-                continue
+            ax.set_title(planet) 
+            ax.set_xlabel(get_labels(x_param, units))
+            ax.set_ylabel(get_labels(y_param, units))
+            #if planet not in axis_dict:
+            #    continue
             
             x = get_samples(df, x_param,  p_id, units)
             y = get_samples(df, y_param,  p_id, units)
@@ -241,16 +242,7 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
             if (x.size == 0) or (y.size == 0):
                     continue
             ax.scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
-            ax.set_xlabel(get_labels(x_param, units))
-            ax.set_ylabel(get_labels(y_param, units))
-            ax.legend()
-            ax.set_title(planet)  
-            used_axes.append(planet)   
-
-        # Remove unused axes
-    for planet, ax in axis_dict.items():
-        if planet not in used_axes:
-            fig.delaxes(ax)       
+            ax.legend()   
 
     plt.tight_layout()
     plt.show()
@@ -285,7 +277,7 @@ def compare_period_ratios(dict_list, planet_pair):
         val_p1 = get_samples(df, 'period',  p_id1, units='star')
         
         ax.hist(val_p1 / val_p0, bins=50, alpha=0.5, label=f'analysis {analysis_id}')
-        ax.set_xlabel(f'Period ratio')
+        ax.set_xlabel(f'Period ratio (P_{planet_pair[1]}/P_{planet_pair[0]})')
         ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')
         ax.legend()
     plt.tight_layout()
@@ -326,8 +318,8 @@ def plot_adjacent_planets(dict_list, param, planet_pair, units='star'):
 
         ax.scatter(x, y, alpha=0.1, label=f'analysis {analysis_id}')
 
-        ax.set_xlabel(f'{get_labels(param, units)}')
-        ax.set_ylabel(f'{get_labels(param, units)}')  
+        ax.set_xlabel(f'{get_labels(param, units)} ({planet_pair[0]})')
+        ax.set_ylabel(f'{get_labels(param, units)} ({planet_pair[1]})')  
         ax.set_title(f'{planet_pair[1]} against {planet_pair[0]}')    
         ax.legend()   
     plt.tight_layout()
