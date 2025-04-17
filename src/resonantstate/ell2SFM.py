@@ -52,8 +52,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 #X_max      = 5.
 
 #Hamiltonian coefficients
-f1s = [ 1.1904936978,  2.0252226899,  2.8404318567,  3.6496182441,  4.4561427851]
-f2s = [-0.4283898341, -2.4840051833, -3.2832567218, -4.0837053718, -4.8847062975]
+f1s = [ 1.1904936978,  2.0252226899,  2.8404318567,  3.6496182441,  4.4561427851,  5.261254,  6.065524,  6.869252,  7.672611,  8.475707,  9.278609]
+f2s = [-0.4283898341, -2.4840051833, -3.2832567218, -4.0837053718, -4.8847062975, -5.686007, -6.487490, -7.289090, -8.090771, -8.892509, -9.694291]
 
 txt_file = os.path.join(dir_path,'continuedSeparatrix.txt')
 delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
@@ -79,6 +79,8 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       # T1 and T2 are the periods. They can be given in any unit because they will be renormalized by the inner period.
       # p is an integer such that the pair is close to the resonance p : p + 1
 
+      if (p > 11):
+            raise Exception('The index p of the resonance cannot be equal or larger than 12')
 
       # Period of inner planet is normalized to 1
       T2    = T2/T1
@@ -244,8 +246,17 @@ def topologie(delta):
       #Returns [Xmin, Xmax, Xint, Xext, Xhyp] as a function of delta
       #Instead of a direct calculation, extrapolates from file './continuedSeparatrix.txt'
       
-      if (delta > 50.):
-            print("Warning : delta > 50. Boolean IsResonant might be incorrect")
+      if (delta < -1000.):
+            print("Warning : delta < -1000. Maybe p is ill-chosen.")
+      
+      if (delta < -20.):
+            xint = -2./(3.*delta)
+            xmin = xint - np.sqrt(6.)
+            xmax = xint + np.sqrt(6.)
+            return [xmin, xmax, xint, 0., 0.]
+      	
+      if (delta > 1000.):
+            print("Warning : delta > 1000. Boolean IsResonant might be incorrect. Maybe p is ill-chosen.")
             return [0., 0., 0., 0., 0.]
             
       N       = len(delt[delt < delta])
