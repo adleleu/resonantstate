@@ -189,7 +189,7 @@ def rk4(X, Y, delta, dt):
             X0    = X0 + dt/6.*(k1_x + 2.*k2_x + 2.*k3_x + k4_x)
             Y0    = Y0 + dt/6.*(k1_y + 2.*k2_y + 2.*k3_y + k4_y)
             count = count + 1
-            if (count >= 10000):
+            if (count >= 40000):
                   return [0., 0., 1000.]
             if (Y0 == 0. or oldY*Y0 < 0.):
                   t    = abs(Y0/(Y0 - oldY))
@@ -218,7 +218,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
       
       nu_est = 3.*delta - 2.*Sig + 2.*np.cos(sig)/np.sqrt(2.*Sig)
       T_est  = 2.*np.pi/nu_est
-      dt     = T_est/512.
+      dt     = np.absolute(T_est/92.)
       
       nu = []
       x1 = []
@@ -227,7 +227,17 @@ def SFM2useful(X, Y, X2, Y2, delta):
       
       n = len(delta)
       for i in range(n):
-            [xx1, xx2, frequency] = rk4(X[i], Y[i], delta[i], dt[i])
+            xx1 = 0.
+            xx2 = 0.
+            count = 0
+            while(xx1 == 0. and xx2 == 0. and count < 5):
+                  [xx1, xx2, frequency] = rk4(X[i], Y[i], delta[i], dt[i])
+                  if (count):
+                        dt[i] = dt[i]/16.
+                  count = count + 1
+            if (count):
+                  dt[i]= dt[i]/4.
+                  [xx1, xx2, frequency] = rk4(X[i], Y[i], delta[i], dt[i])
             nu.append(frequency)
             x1.append(xx1)
             x2.append(xx2)
