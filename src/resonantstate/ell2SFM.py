@@ -8,11 +8,12 @@
 # Functions : 
 # - ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2) -> Returns the coordinates (X, Y, X2, Y2, delta) of the SFM. (X, Y) corresponds to the unique degree of freedom
 #                                                               of the SFM and (X2, Y2) to the first integral. delta is the unique parameter of the SFM
-# - SFM2useful(X, Y, X2, Y2, delta) -> Returns [sig, Sig, sig2, Sig2, nu, x1, x2, IsResonant] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
-#                                      nu is the frequency of the orbit starting at (X, Y). x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
+# - SFM2useful(X, Y, X2, Y2, delta) -> Returns [sig, Sig, sig2, Sig2, x1, x2, IsResonant] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
+#                                      x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
 #                                      IsResonant is 1 if the system is in the resonance, and 0 else.
 
 import math as m
+import cmath as cm
 import matplotlib.pyplot as py
 import matplotlib as mpl
 import numpy as np
@@ -52,8 +53,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 #X_max      = 5.
 
 #Hamiltonian coefficients
-f1s = [ 1.1904936978,  2.0252226899,  2.8404318567,  3.6496182441,  4.4561427851,  5.261254,  6.065524,  6.869252,  7.672611,  8.475707,  9.278609]
-f2s = [-0.4283898341, -2.4840051833, -3.2832567218, -4.0837053718, -4.8847062975, -5.686007, -6.487490, -7.289090, -8.090771, -8.892509, -9.694291]
+f1s = [ 1.190493697849547, 2.025222689938346, 2.840431856715441, 3.649618244089652, 4.456142785027623, 5.261253831849899, 6.065523627097718, 6.869251916417852, 7.672611034475267, 8.475707148201764, 9.278609253466129, 10.08136413618922, 10.88400465063751, 11.68655455857515, 12.48903144896030, 13.29144865274429, 14.09381638467312, 14.89614276587963, 15.69843412935734, 16.50069558620453]
+f2s = [-0.428389834143869,-2.484005183303907,-3.283256721821090,-4.083705371769611,-4.884706297511002,-5.686007411626633,-6.487489727907814,-7.289089771453291,-8.090770598035306,-8.892509248107672,-9.694290707819164,-10.49610474146903,-11.29794413782656,-12.09980367496610,-12.90167944505811,-13.70356853306293,-14.50546862185001,-15.30737796425819,-16.10929512977600,-16.91121894121170]
 
 txt_file = os.path.join(dir_path,'continuedSeparatrix.txt')
 delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
@@ -79,8 +80,8 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       # T1 and T2 are the periods. They can be given in any unit because they will be renormalized by the inner period.
       # p is an integer such that the pair is close to the resonance p : p + 1
 
-      if (p > 11):
-            raise Exception('The index p of the resonance cannot be equal or larger than 12')
+      if (p > 20 or p < 1):
+            raise Exception('The index p of the resonance must be between 1 and 20 included')
 
       # Period of inner planet is normalized to 1
       T2    = T2/T1
@@ -156,56 +157,64 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       X2    = np.sqrt(2.*Sigma2)*cosig2
       Y2    = np.sqrt(2.*Sigma2)*sisig2
       return [X, Y, X2, Y2, delta]
-            
-def rk4(X, Y, delta, dt):
-      #Starting from (X,Y), integrates with a Runge-Kutta 4 until Y has changed sign twice
-      #Returns the two values of X corresponding to Y=0 and the frequency of the orbit
 
-      X0    = X
-      Y0    = 0.
-      count = 0
-      go_on = 1
-      first_time = 1
-      
-      while(go_on):
-            Zx    = X0
-            Zy    = Y0
-            k1_x  = -3.*delta*Zy + Zy*(Zx**2 + Zy**2)
-            k1_y  =  3.*delta*Zx - Zx*(Zx**2 + Zy**2) + 2.
-            Zx    = X0 + 0.5*dt*k1_x
-            Zy    = Y0 + 0.5*dt*k1_y
-            k2_x  = -3.*delta*Zy + Zy*(Zx**2 + Zy**2)
-            k2_y  =  3.*delta*Zx - Zx*(Zx**2 + Zy**2) + 2.
-            Zx    = X0 + 0.5*dt*k2_x
-            Zy    = Y0 + 0.5*dt*k2_y
-            k3_x  = -3.*delta*Zy + Zy*(Zx**2 + Zy**2)
-            k3_y  =  3.*delta*Zx - Zx*(Zx**2 + Zy**2) + 2.
-            Zx    = X0 + dt*k3_x
-            Zy    = Y0 + dt*k3_y
-            k4_x  = -3.*delta*Zy + Zy*(Zx**2 + Zy**2)
-            k4_y  =  3.*delta*Zx - Zx*(Zx**2 + Zy**2) + 2.
-            oldY  = Y0
-            oldX  = X0
-            X0    = X0 + dt/6.*(k1_x + 2.*k2_x + 2.*k3_x + k4_x)
-            Y0    = Y0 + dt/6.*(k1_y + 2.*k2_y + 2.*k3_y + k4_y)
-            count = count + 1
-            if (count >= 40000):
-                  return [0., 0., 1000.]
-            if (Y0 == 0. or oldY*Y0 < 0.):
-                  t    = abs(Y0/(Y0 - oldY))
-                  tOld = (count - 1)*dt
-                  tNew = count*dt
-                  if (first_time):
-                        first_time = 0
-                        X1 = t*oldX + (1. - t)*X0
-                        t1 = t*tOld + (1. - t)*tNew
-                  else:
-                        go_on = 0
-                        X2 = t*oldX + (1. - t)*X0
-                        t2 = t*tOld + (1. - t)*tNew
-      Period    = 2.*(t2 - t1)
-      frequency = 2.*np.pi/Period
-      return [X1, X2, frequency]
+def quartic(a_4, a_3, a_2, a_1, a_0):
+      # Returns the real solutions of a_4*X^4 + a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 from analytical expressions of Ferrari's solution
+      Sol = []
+      if (a_4 == 0.):
+            print("Warning: The term of 4th degree must be non-zero in function quartic.")
+            return []
+      if (a_4 != 1.):
+            return quartic(1., a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4)
+      ### Equation is Y^4 + p*Y^2 + q*Y + r = 0 with Y = X + s ###
+      p = a_2 - 3./8.*a_3**2
+      q = a_1 + a_3**3/8. - 0.5*a_2*a_3
+      r = a_0 + a_2*a_3**2/16. - a_1*a_3/4. - 3.*a_3**4/256.
+      s = a_3/4.
+      ### Getting M solution of the resolving cubic ###
+      P  = -(r + p**2/12.)
+      Q  = p*r/3. - q**2/8. - p**3/108.
+      D  = Q**2+4./27.*P**3
+      if (D < 0.):
+            u3 = 0.5*(-Q + cm.sqrt(D))
+            v3 = 0.5*(-Q - cm.sqrt(D))
+            [mod_u3, arg_u3] = cm.polar(u3)
+            [mod_v3, arg_v3] = cm.polar(v3)
+            u  = mod_u3**(1./3.)*cm.exp(1j*arg_u3/3.)
+            v  = mod_v3**(1./3.)*cm.exp(1j*arg_v3/3.)
+            M  = (u + v).real - p/3.
+      else:
+            u3 = 0.5*(-Q + m.sqrt(D))
+            v3 = 0.5*(-Q - m.sqrt(D))
+            if (u3 < 0.):
+                  u = -(-u3)**(1./3.)
+            else:
+                  u  = u3**(1./3.)
+            if (v3 < 0.):
+                  v = -(-v3)**(1./3.)
+            else:
+                  v  = v3**(1./3.)
+            M  = u + v - p/3.
+      if (abs(M) < 1.e-15):
+            print("Warning: Problem with quartic. It may be bi-quartic.")
+            return []
+      if (M < 0.): #There are no real solutions
+            return []
+      ### Getting first pair of solutions ###
+      D = q/(2.*m.sqrt(2.*M))-(p + M)/2.
+      if (D >= 0.):
+            S1 = -m.sqrt(2.*M)/2. + m.sqrt(D)
+            S2 = -m.sqrt(2.*M)/2. - m.sqrt(D)
+            Sol.append(S1 - s)
+            Sol.append(S2 - s)
+      ### Getting second pair of solutions ###
+      D = -q/(2.*m.sqrt(2.*M))-(p + M)/2.
+      if (D >= 0.):
+            S3 = m.sqrt(2.*M)/2. + m.sqrt(D)
+            S4 = m.sqrt(2.*M)/2. - m.sqrt(D)
+            Sol.append(S3 - s)
+            Sol.append(S4 - s)
+      return Sol
 
 def SFM2useful(X, Y, X2, Y2, delta):
       # Returns [sig, Sig, sig2, Sig2, nu, x1, x2] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
@@ -216,29 +225,42 @@ def SFM2useful(X, Y, X2, Y2, delta):
       sig  = np.arctan2(Y,  X)
       sig2 = np.arctan2(Y2, X2)
       
-      nu_est = 3.*delta - 2.*Sig + 2.*np.cos(sig)/np.sqrt(2.*Sig)
-      T_est  = 2.*np.pi/nu_est
-      dt     = np.absolute(T_est/92.)
-      
-      nu = []
       x1 = []
       x2 = []
       IR = []
       
       n = len(delta)
       for i in range(n):
-            xx1 = 0.
-            xx2 = 0.
-            count = 0
-            while(xx1 == 0. and xx2 == 0. and count < 5):
-                  [xx1, xx2, frequency] = rk4(X[i], Y[i], delta[i], dt[i])
-                  if (count):
-                        dt[i] = dt[i]/16.
-                  count = count + 1
-            if (count):
-                  dt[i]= dt[i]/4.
-                  [xx1, xx2, frequency] = rk4(X[i], Y[i], delta[i], dt[i])
-            nu.append(frequency)
+            H   = 1.5*delta[i]*(X[i]**2 + Y[i]**2) - 0.25*(X[i]**2 + Y[i]**2)**2 + 2.*X[i]
+            Sol = quartic(-0.25, 0., 1.5*delta[i], 2., -H)
+            if   (len(Sol) == 0):
+                  print("Warning: Problem with quartic.")
+                  [xx1, xx2] = [1.e300, 1.e300]
+            elif (len(Sol) == 2):
+                  [xx1, xx2] = Sol
+            else: #Four solutions. Retaining the two whose distance to the origin is closest to that of (X,Y)
+                  if (delta[i] < 1.): #Four solutions should be impossible when delta < 1
+                        print("Warning: Four solutions were found even though delta < 1")
+                  [S1, S2, S3, S4] = Sol
+                  D                = m.sqrt(X[i]**2 + Y[i]**2)
+                  [D1, D2, D3, D4] = [abs(S1), abs(S2), abs(S3), abs(S4)]
+                  DD               = np.sort(np.array([abs(D - D1), abs(D - D2), abs(D - D3), abs(D - D4)]))
+                  if   (DD[0] == abs(D - D1)):
+                        xx1 = S1
+                  elif (DD[0] == abs(D - D2)):
+                        xx1 = S2
+                  elif (DD[0] == abs(D - D3)):
+                        xx1 = S3
+                  else:
+                        xx1 = S4
+                  if   (DD[1] == abs(D - D1)):
+                        xx2 = S1
+                  elif (DD[1] == abs(D - D2)):
+                        xx2 = S2
+                  elif (DD[1] == abs(D - D3)):
+                        xx2 = S3
+                  else:
+                        xx2 = S4
             x1.append(xx1)
             x2.append(xx2)
             [xmin, xmax, xint, xext, xhyp] = topologie(delta[i])
@@ -246,11 +268,10 @@ def SFM2useful(X, Y, X2, Y2, delta):
                   IR.append(1)
             else:
                   IR.append(0)
-      nu = np.array(nu)
       x1 = np.array(x1)
       x2 = np.array(x2)
       IR = np.array(IR)
-      return [sig, Sig, sig2, Sig2, nu, x1, x2, IR]
+      return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
 def topologie(delta):
       #Returns [Xmin, Xmax, Xint, Xext, Xhyp] as a function of delta
@@ -341,7 +362,7 @@ def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_reson
             n20  = p*n10/(p + 1)
             n    = len(m1)
             [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
-            [sig, Sig, sig2, Sig2, nus, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
+            [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
 
             if check_resonance:
                   resonant = np.where(IsResonant == 1)
@@ -350,7 +371,7 @@ def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_reson
 
             if (isinstance(colors[pair], np.ndarray)):
                   #Making sure that all plots use the same colorbar
-                  Ds    = np.concatenate((Ds, np.array([1.e300, 1.e300])))
+                  Ds    = np.concatenate((Ds,  np.array([1.e300, 1.e300])))
                   x1s   = np.concatenate((x1s, np.array([1.e300, 1.e300])))
                   x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
                   color = np.concatenate((colors[pair], np.array([color_min, color_max])))
@@ -373,13 +394,14 @@ def plot_auxiliary(ax1, delta_lim, X_lim):
       ax1.set_xlim(xmin = delta_min, xmax = delta_max)
       ax1.set_ylim(ymin = X_min,     ymax = X_max)
       ax1.tick_params(axis='both', which='major')
-      ax1.set_xlabel(xlabel=r"$\delta$", labelpad=3)
-      ax1.set_ylabel(ylabel=r"$X$",      labelpad=4, rotation=0)
-      ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black',     linewidth = 4, linestyle = '-',  alpha = 1)
-      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = ':', alpha = 1, label = 'Hyperbolic')
-      ax1.plot(delt,             Xint,             color = 'black',     linewidth = 4, linestyle = '-',  alpha = 1, label = 'Elliptic')
-      ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '-',  alpha = 1, label = 'Separatrix')
-      ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'lightpink', linewidth = 4, linestyle = '-',  alpha = 1)
+      ax1.set_xlabel(xlabel=r"$\delta$", labelpad = 3)
+      ax1.set_ylabel(ylabel=r"$X$",      labelpad = 4, rotation = 0)
+      ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black', linewidth = 4, linestyle = '-', alpha = 1)
+      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = 4, linestyle = ':', alpha = 1, label = 'Hyperbolic')
+      ax1.plot(delt,             Xint,             color = 'black', linewidth = 4, linestyle = '-', alpha = 1, label = 'Elliptic')
+      ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = 4, linestyle = '-', alpha = 1, label = 'Separatrix')
+      ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = 4, linestyle = '-', alpha = 1)
+      ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'red', alpha = 0.1)
       ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
