@@ -15,15 +15,15 @@ def get_nearest_resonance(period_ratio, second_order = False, kmax=12, differenc
     
     # Get closest first order resonance
     ks = np.arange(2, kmax)
-    possible_deltas = period_ratio * (ks - 1) / ks - 1
-    k = ks[np.argmin(np.abs(possible_deltas))]
-    min_delta = np.min(np.abs(possible_deltas))
+    possible_delta = period_ratio * (ks - 1) / ks - 1
+    k = ks[np.argmin(np.abs(possible_delta))]
+    min_delta = np.min(np.abs(possible_delta))
     
     # Get closest second order resonance
     if second_order:
-        possible_deltas = period_ratio * (ks - 2) / ks - 1
-        k2 = ks[np.argmin(np.abs(possible_deltas))]
-        min_delta2 = np.min(np.abs(possible_deltas))
+        possible_delta = period_ratio * (ks - 2) / ks - 1
+        k2 = ks[np.argmin(np.abs(possible_delta))]
+        min_delta2 = np.min(np.abs(possible_delta))
         
         # If second order matches better first order, return it
         if min_delta2 < difference_order * min_delta:
