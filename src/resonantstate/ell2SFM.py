@@ -23,8 +23,9 @@ import pandas as pd
 
 import os 
 
+pi = 3.14159265358979323846
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+#dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 
@@ -56,17 +57,17 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 f1s = [ 1.190493697849547, 2.025222689938346, 2.840431856715441, 3.649618244089652, 4.456142785027623, 5.261253831849899, 6.065523627097718, 6.869251916417852, 7.672611034475267, 8.475707148201764, 9.278609253466129, 10.08136413618922, 10.88400465063751, 11.68655455857515, 12.48903144896030, 13.29144865274429, 14.09381638467312, 14.89614276587963, 15.69843412935734, 16.50069558620453]
 f2s = [-0.428389834143869,-2.484005183303907,-3.283256721821090,-4.083705371769611,-4.884706297511002,-5.686007411626633,-6.487489727907814,-7.289089771453291,-8.090770598035306,-8.892509248107672,-9.694290707819164,-10.49610474146903,-11.29794413782656,-12.09980367496610,-12.90167944505811,-13.70356853306293,-14.50546862185001,-15.30737796425819,-16.10929512977600,-16.91121894121170]
 
-txt_file = os.path.join(dir_path,'continuedSeparatrix.txt')
-delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
+#txt_file = os.path.join(dir_path,'continuedSeparatrix.txt')
+#delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
 
 #delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt('./continuedSeparatrix.txt', dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
 
-delt = np.flip(delt)
-Xmin = np.flip(Xmin)
-Xmax = np.flip(Xmax)
-Xint = np.flip(Xint)
-Xext = np.flip(Xext)
-Xhyp = np.flip(Xhyp)
+#delt = np.flip(delt)
+#Xmin = np.flip(Xmin)
+#Xmax = np.flip(Xmax)
+#Xint = np.flip(Xint)
+#Xext = np.flip(Xext)
+#Xhyp = np.flip(Xhyp)
 
 
 def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
@@ -158,34 +159,40 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       Y2    = np.sqrt(2.*Sigma2)*sisig2
       return [X, Y, X2, Y2, delta]
 
-def quartic(a_4, a_3, a_2, a_1, a_0):
-      # Returns the real solutions of a_4*X^4 + a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 from analytical expressions of Ferrari's solution
-      Sol = []
-      if (a_4 == 0.):
-            print("Warning: The term of 4th degree must be non-zero in function quartic.")
+def cubic(a_3, a_2, a_1, a_0):
+      # Returns the real roots of a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 using analytical expressions of Cardan's method
+      if (a_3 == 0.):
+            if (a_2 == 0.):
+                  if (a_1 == 0.):
+                        return []
+                  return [-a_0/a_1]
+            Delta = a_1**2 - 4.*a_2*a_0
+            if (Delta >= 0.):
+                  return [(-a_1 + m.sqrt(Delta))/(2.*a_2), (-a_1 - m.sqrt(Delta))/(2.*a_2)]
             return []
-      if (a_4 != 1.):
-            return quartic(1., a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4)
-      ### Equation is Y^4 + p*Y^2 + q*Y + r = 0 with Y = X + s ###
-      p = a_2 - 3./8.*a_3**2
-      q = a_1 + a_3**3/8. - 0.5*a_2*a_3
-      r = a_0 + a_2*a_3**2/16. - a_1*a_3/4. - 3.*a_3**4/256.
-      s = a_3/4.
-      ### Getting M solution of the resolving cubic ###
-      P  = -(r + p**2/12.)
-      Q  = p*r/3. - q**2/8. - p**3/108.
-      D  = Q**2+4./27.*P**3
-      if (D < 0.):
-            u3 = 0.5*(-Q + cm.sqrt(D))
-            v3 = 0.5*(-Q - cm.sqrt(D))
+      if (a_3 != 1.):
+            return cubic(1., a_2/a_3, a_1/a_3, a_0/a_3)
+      ### Equation is Y^3 + p*Y + q = 0 with Y = X + s ###
+      p = a_1 - a_2**2/3.
+      q = a_0 - a_1*a_2/3. + 2.*a_2**3/27.
+      s = a_2/3.
+      D = q**2/4. + p**3/27.
+      if (D < 0.): # 3 real solutions
+            u3 = -q/2. + cm.sqrt(D)
+            v3 = -q/2. - cm.sqrt(D)
             [mod_u3, arg_u3] = cm.polar(u3)
             [mod_v3, arg_v3] = cm.polar(v3)
             u  = mod_u3**(1./3.)*cm.exp(1j*arg_u3/3.)
             v  = mod_v3**(1./3.)*cm.exp(1j*arg_v3/3.)
-            M  = (u + v).real - p/3.
-      else:
-            u3 = 0.5*(-Q + m.sqrt(D))
-            v3 = 0.5*(-Q - m.sqrt(D))
+            j  = cm.exp( 2.*1j*pi/3.)
+            jb = cm.exp(-2.*1j*pi/3.)
+            S1 = (u + v).real
+            S2 = (j*u + jb*v).real
+            S3 = (jb*u + j*v).real
+            return [S1 - s, S2 - s, S3 - s]
+      else: # 1 real solution
+            u3 = -q/2. + m.sqrt(D)
+            v3 = -q/2. - m.sqrt(D)
             if (u3 < 0.):
                   u = -(-u3)**(1./3.)
             else:
@@ -194,31 +201,98 @@ def quartic(a_4, a_3, a_2, a_1, a_0):
                   v = -(-v3)**(1./3.)
             else:
                   v  = v3**(1./3.)
-            M  = u + v - p/3.
-      if (abs(M) < 1.e-15):
-            print("Warning: Problem with quartic. It may be bi-quartic.")
-            return []
-      if (M < 0.): #There are no real solutions
-            return []
+            return [u + v - s]
+
+def quartic(a_4, a_3, a_2, a_1, a_0):
+      # Returns the real roots of a_4*X^4 + a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 using analytical expressions of Ferrari's method
+      if (a_4 == 0.):
+            return cubic(a_3, a_2, a_1, a_0)
+      if (a_4 != 1.):
+            return quartic(1., a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4)
+      ### Equation is Y^4 + p*Y^2 + q*Y + r = 0 with Y = X + s ###
+      p = a_2 - 3./8.*a_3**2
+      q = a_1 + a_3**3/8. - 0.5*a_2*a_3
+      r = a_0 + a_2*a_3**2/16. - a_1*a_3/4. - 3.*a_3**4/256.
+      s = a_3/4.
+      ### Taking care of bi-quartic case ###
+      if (abs(q) < 1.e-14):
+            Sol = cubic(0., 1., p, r)
+            if (len(Sol) == 0):
+                  return []
+            [S1, S2] = Sol
+            Sol = []
+            # First pair
+            if (S1 >= -1.e-14):
+                  Sol.append( m.sqrt(abs(S1)) - s)
+                  Sol.append(-m.sqrt(abs(S1)) - s)
+            if (S2 >= -1.e-14):
+                  Sol.append( m.sqrt(abs(S2)) - s)
+                  Sol.append(-m.sqrt(abs(S2)) - s)
+            return Sol
+      ### Getting a solution of the resolving cubic ###
+      if (abs(q) < 1.e-6): #Too close from bi-quartic. Must be done differently
+            if (abs(2.*p**2 - 8.*r) > 1.e-10):
+                  if (2.*p**2 - 8.*r < 0.):
+                        return []
+                  sqM = abs(q)/m.sqrt(2.*p**2 - 8.*r)
+            else:
+                  if (abs(8.*p) > 1.e-10):
+                        if (p < 0.):
+                              sqM = m.sqrt(-p)
+                        else:
+                              sqM = abs(q)/m.sqrt(8.*p)
+                  else:
+                        sqM = (q**2/8.)**(1./6.)
+      else:
+            Sol = cubic(1., p, p**2/4. - r, -q**2/8.)
+            Sol.sort()
+            if (Sol[-1] < 0.): #There are no real solutions
+                  return []
+            sqM = m.sqrt(Sol[-1])
       ### Getting first pair of solutions ###
-      D = q/(2.*m.sqrt(2.*M))-(p + M)/2.
-      if (D >= 0.):
-            S1 = -m.sqrt(2.*M)/2. + m.sqrt(D)
-            S2 = -m.sqrt(2.*M)/2. - m.sqrt(D)
+      Sol = []
+      D = q/(2.*m.sqrt(2.)*sqM)-(p + sqM**2)/2.
+      if (D >= -1.e-14):
+            S1 = -sqM/m.sqrt(2.) + m.sqrt(abs(D))
+            S2 = -sqM/m.sqrt(2.) - m.sqrt(abs(D))
             Sol.append(S1 - s)
             Sol.append(S2 - s)
       ### Getting second pair of solutions ###
-      D = -q/(2.*m.sqrt(2.*M))-(p + M)/2.
-      if (D >= 0.):
-            S3 = m.sqrt(2.*M)/2. + m.sqrt(D)
-            S4 = m.sqrt(2.*M)/2. - m.sqrt(D)
+      D = -q/(2.*m.sqrt(2.)*sqM)-(p + sqM**2)/2.
+      if (D >= -1.e-14):
+            S3 = sqM/m.sqrt(2.) + m.sqrt(abs(D))
+            S4 = sqM/m.sqrt(2.) - m.sqrt(abs(D))
             Sol.append(S3 - s)
             Sol.append(S4 - s)
       return Sol
 
+def X1X2(X, Y, delta):
+      # Returns X1 and X2 such that (X1, 0) and (X2, 0) are on the same level line as (X, Y)
+      H   = 1.5*delta*(X**2 + Y**2) - 0.25*(X**2 + Y**2)**2 + 2.*X
+      Sol = quartic(-0.25, 0., 1.5*delta, 2., -H)
+      Sol.sort()
+      if (len(Sol) == 0):
+            print("Warning: Problem with quartic.")
+            return [0., 0.]
+      if (len(Sol) == 2):
+            return Sol
+      #Four solutions. Either [Sol[0], Sol[3]] or [Sol[1], Sol[2]] should be returned
+      if (delta < 1.): #Four solutions should be impossible when delta < 1
+            print("Warning: Four solutions were found even though delta < 1 in function X1X2")
+      topo = topologie_light(delta)
+      if (len(topo) == 1):
+            print("Warning: Could not find xhyp and xext in function X1X2")
+            return [Sol[0], Sol[3]]
+      [xint, xext, xhyp] = topo
+      # A very simple criterion proposed by Max Goldberg to determine which pair of solution should be returned 
+      if ((X - xext)**2 + Y**2 > (xhyp - xext)**2):
+            return [Sol[0], Sol[3]]
+      else:
+            return [Sol[1], Sol[2]]
+
 def SFM2useful(X, Y, X2, Y2, delta):
-      # Returns [sig, Sig, sig2, Sig2, nu, x1, x2] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
-      # nu is the frequency of the orbit starting at (X, Y). x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
+      # Returns [sig, Sig, sig2, Sig2, x1, x2] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
+      # x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
       
       Sig  = (X**2  + Y**2) /2.
       Sig2 = (X2**2 + Y2**2)/2.
@@ -231,92 +305,66 @@ def SFM2useful(X, Y, X2, Y2, delta):
       
       n = len(delta)
       for i in range(n):
-            H   = 1.5*delta[i]*(X[i]**2 + Y[i]**2) - 0.25*(X[i]**2 + Y[i]**2)**2 + 2.*X[i]
-            Sol = quartic(-0.25, 0., 1.5*delta[i], 2., -H)
-            if   (len(Sol) == 0):
-                  print("Warning: Problem with quartic.")
-                  [xx1, xx2] = [1.e300, 1.e300]
-            elif (len(Sol) == 2):
-                  [xx1, xx2] = Sol
-            else: #Four solutions. Retaining the two whose distance to the origin is closest to that of (X,Y)
-                  if (delta[i] < 1.): #Four solutions should be impossible when delta < 1
-                        print("Warning: Four solutions were found even though delta < 1")
-                  [S1, S2, S3, S4] = Sol
-                  D                = m.sqrt(X[i]**2 + Y[i]**2)
-                  [D1, D2, D3, D4] = [abs(S1), abs(S2), abs(S3), abs(S4)]
-                  DD               = np.sort(np.array([abs(D - D1), abs(D - D2), abs(D - D3), abs(D - D4)]))
-                  if   (DD[0] == abs(D - D1)):
-                        xx1 = S1
-                  elif (DD[0] == abs(D - D2)):
-                        xx1 = S2
-                  elif (DD[0] == abs(D - D3)):
-                        xx1 = S3
-                  else:
-                        xx1 = S4
-                  if   (DD[1] == abs(D - D1)):
-                        xx2 = S1
-                  elif (DD[1] == abs(D - D2)):
-                        xx2 = S2
-                  elif (DD[1] == abs(D - D3)):
-                        xx2 = S3
-                  else:
-                        xx2 = S4
+            [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
             x1.append(xx1)
             x2.append(xx2)
             [xmin, xmax, xint, xext, xhyp] = topologie(delta[i])
-            if (delta[i] > 1. and max(xx1,xx2) <= xmax and min(xx1,xx2) >= xmin):
-                  IR.append(1)
-            else:
+            if (delta[i] < 1.):
                   IR.append(0)
+            else:
+                  Hseparatrix = 1.5*delta[i]*xhyp**2 - 0.25*xhyp**4 + 2.*xhyp
+                  H           = 1.5*delta[i]*(X[i]**2 + Y[i]**2) - 0.25*(X[i]**2 + Y[i]**2)**2 + 2.*X[i]
+                  if (H > Hseparatrix):
+                        IR.append(1)
+                  else:
+                        IR.append(0)
       x1 = np.array(x1)
       x2 = np.array(x2)
       IR = np.array(IR)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
 def topologie(delta):
-      #Returns [Xmin, Xmax, Xint, Xext, Xhyp] as a function of delta
-      #Instead of a direct calculation, extrapolates from file './continuedSeparatrix.txt'
-      
-      if (delta < -1000.):
-            print("Warning : delta < -1000. Maybe p is ill-chosen.")
-      
-      if (delta < -20.):
-            xint = -2./(3.*delta)
-            xmin = xint - np.sqrt(6.)
-            xmax = xint + np.sqrt(6.)
-            return [xmin, xmax, xint, 0., 0.]
-      	
-      if (delta > 1000.):
-            print("Warning : delta > 1000. Boolean IsResonant might be incorrect. Maybe p is ill-chosen.")
-            return [0., 0., 0., 0., 0.]
+      #Returns [Xmin, Xmax, Xint, Xext, Xhyp] from analytical expressions instead of reading from file
+      #If delta < 1, returns [0, 0, Xint, 0, 0]
+      if (delta == 1.):
+            return [-1., 3., 2., -1., -1.]
+      Sol = cubic(1., 0., -3.*delta, -2.)
+      if (len(Sol) == 1):
+            return [0., 0., Sol[0], 0., 0.]
+      else:
+            [S1, S2, S3] = Sol
+            if (S2**2 < 3.*delta and S2**2 > delta):
+                  xhyp = S2
+                  xext = S3
+            else:
+                  xhyp = S3
+                  xext = S2
+            H  = 1.5*delta*xhyp**2 - 0.25*xhyp**4 + 2.*xhyp
+            Sl = quartic(-0.25, 0., 1.5*delta, 2., -H) #Getting Xmin and Xmax
+            Sl.sort()
+            if (len(Sl) < 2):
+                  print("Warning in function topologie : The separatrix could not be obtained at delta =", delta)
+                  return [0., 0., S1, xext, xhyp]
+            if (len(Sl) == 2):
+                  return [Sl[0], Sl[1], S1, xext, xhyp]
+            return [Sl[2], Sl[3], S1, xext, xhyp]
             
-      N       = len(delt[delt < delta])
-      xminmin = Xmin[N - 1]
-      xminmax = Xmin[N]
-      xmaxmin = Xmax[N - 1]
-      xmaxmax = Xmax[N]
-      xintmin = Xint[N - 1]
-      xintmax = Xint[N]
-      xextmin = Xext[N - 1]
-      xextmax = Xext[N]
-      xhypmin = Xhyp[N - 1]
-      xhypmax = Xhyp[N]
-      Dmin    = delt[N - 1]
-      Dmax    = delt[N]
-      if (delta > Dmax or delta < Dmin):
-            print("N = ", N)
-            print("delta = ", delta)
-            print("Dmin = ", Dmin)
-            print("Dmax = ", Dmax)
-            raise Exception("Problem with Dmin or Dmax\n")
-      t    = (Dmax - delta)/(Dmax - Dmin)
-      xmin = t*xminmin + (1. - t)*xminmax
-      xmax = t*xmaxmin + (1. - t)*xmaxmax
-      xint = t*xintmin + (1. - t)*xintmax
-      xext = t*xextmin + (1. - t)*xextmax
-      xhyp = t*xhypmin + (1. - t)*xhypmax
-      return [xmin, xmax, xint, xext, xhyp]
-
+def topologie_light(delta):
+      #Same as topologie but only returns [Xint, Xext, Xhyp]
+      if (delta == 1.):
+            return [2., -1., -1.]
+      Sol = cubic(1., 0., -3.*delta, -2.)
+      if (len(Sol) == 1):
+            return [Sol[0], 0., 0.]
+      else:
+            [S1, S2, S3] = Sol
+            if (S2**2 < 3.*delta and S2**2 > delta):
+                  xhyp = S2
+                  xext = S3
+            else:
+                  xhyp = S3
+                  xext = S2
+            return [S1, xext, xhyp]
 
 #Plotting
 #if (plot_DACE_data):
@@ -396,6 +444,21 @@ def plot_auxiliary(ax1, delta_lim, X_lim):
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\delta$", labelpad = 3)
       ax1.set_ylabel(ylabel=r"$X$",      labelpad = 4, rotation = 0)
+      delt = np.linspace(delta_min, delta_max, 512)
+      Xmin = np.zeros(512)
+      Xmax = np.zeros(512)
+      Xint = np.zeros(512)
+      Xext = np.zeros(512)
+      Xhyp = np.zeros(512)
+      count = 0
+      for delta in delt:
+            [xmin, xmax, xint, xext, xhyp] = topologie(delta)
+            Xmin[count] = xmin
+            Xmax[count] = xmax
+            Xint[count] = xint
+            Xext[count] = xext
+            Xhyp[count] = xhyp
+            count = count + 1            
       ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black', linewidth = 4, linestyle = '-', alpha = 1)
       ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = 4, linestyle = ':', alpha = 1, label = 'Hyperbolic')
       ax1.plot(delt,             Xint,             color = 'black', linewidth = 4, linestyle = '-', alpha = 1, label = 'Elliptic')
@@ -433,7 +496,7 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
       plot_params = planet_pairs, resonances
       ax_limits = delta_lim, X_lim
 
-      fig, ax = py.subplots(1, 1, figsize=(7,7))
+      fig, ax = py.subplots(1, 1, figsize=(9,9))
       plot_auxiliary(ax, *ax_limits)
 
       if isinstance(data, list):
