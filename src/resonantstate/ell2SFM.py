@@ -23,7 +23,7 @@ import pandas as pd
 
 import os 
 
-pi = 3.14159265358979323846
+pi = m.pi
 
 #dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -369,70 +369,87 @@ def topologie_light(delta):
 #Plotting
 #if (plot_DACE_data):
 
-def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_resonance=False):
+
+def samples2ell_twoplanets(sample, pair):
+      I    = pair[0]
+      J    = pair[1]
+      lbd1 = sample[1 + 8*I,:]
+      lbd2 = sample[1 + 8*J,:]
+      P1   = sample[2 + 8*I,:]
+      P2   = sample[2 + 8*J,:]
+      k1   = sample[3 + 8*I,:]
+      k2   = sample[3 + 8*J,:]
+      h1   = sample[4 + 8*I,:]
+      h2   = sample[4 + 8*J,:]
+      m1   = sample[7 + 8*I,:]
+      m2   = sample[7 + 8*J,:]
+      lbd1 = lbd1*np.pi/180.
+      lbd2 = lbd2*np.pi/180.
+      e1   = np.sqrt(k1**2 + h1**2)
+      e2   = np.sqrt(k2**2 + h2**2)
+      vp1  = np.arctan2(h1, k1)
+      vp2  = np.arctan2(h2, k2)
+
+      return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
+
+
+
+
+def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7):
+      I    = pair[0]
+      J    = pair[1]
+      
+      n10  = 2.*m.pi
+      n20  = p*n10/(p + 1)
+
+
+
+      if check_resonance:
+            resonant = np.where(IsResonant == 1)
+            percent = (resonant[0].size / IsResonant.size)*100
+            print('pair',pair, ':', percent, '% within resonance.')
+
+      if (isinstance(colors, np.ndarray)):
+            #Making sure that all plots use the same colorbar
+            Ds    = np.concatenate((Ds,  np.array([1.e300, 1.e300])))
+            x1s   = np.concatenate((x1s, np.array([1.e300, 1.e300])))
+            x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
+            color = np.concatenate((colors, np.array([colors.min(), color.max()])))
+            #Plotting
+            ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
+            ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = alpha)
+      else:
+            ax1.scatter(Ds, x1s, c = colors, marker = 'o',  s = 80, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
+            ax1.scatter(Ds, x2s, c = colors, marker = 'o',  s = 80, alpha = alpha)
 
       if (isinstance(colors[0], np.ndarray)):
-            if (len(colors) >= 2):
-                  full_color_array = np.concatenate((colors[0], colors[1]))
-                  for cll in range (2, len(colors)):
-                        full_color_array = np.concatenate((full_color_array, colors[cll]))
-                  color_min = min(full_color_array)
-                  color_max = max(full_color_array)
-            else:
-                  color_min = min(colors[0])
-                  color_max = max(colors[0])
-
-      #fig, ((ax1)) = py.subplots(1, 1, sharex=True, sharey=True, gridspec_kw={'width_ratios': [1]}, constrained_layout=False)
-      #py.subplots_adjust(left=0.26, right=0.71, bottom=0.1, top=0.95)
-
-      N_pairs = len(ps)
-      for pair in range(N_pairs):
-            I    = pairs[pair][0]
-            J    = pairs[pair][1]
-            lbd1 = sample[1 + 8*I,:]
-            lbd2 = sample[1 + 8*J,:]
-            P1   = sample[2 + 8*I,:]
-            P2   = sample[2 + 8*J,:]
-            k1   = sample[3 + 8*I,:]
-            k2   = sample[3 + 8*J,:]
-            h1   = sample[4 + 8*I,:]
-            h2   = sample[4 + 8*J,:]
-            m1   = sample[7 + 8*I,:]
-            m2   = sample[7 + 8*J,:]
-            lbd1 = lbd1*np.pi/180.
-            lbd2 = lbd2*np.pi/180.
-            e1   = np.sqrt(k1**2 + h1**2)
-            e2   = np.sqrt(k2**2 + h2**2)
-            vp1  = np.arctan2(h1, k1)
-            vp2  = np.arctan2(h2, k2)
-            p    = ps[pair]
-            n10  = 2.*m.pi
-            n20  = p*n10/(p + 1)
-            n    = len(m1)
-            [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
-            [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
-
-            if check_resonance:
-                  resonant = np.where(IsResonant == 1)
-                  percent = (resonant[0].size / IsResonant.size)*100
-                  print('pair', pairs[pair], ':', percent, '% within resonance.')
-
-            if (isinstance(colors[pair], np.ndarray)):
-                  #Making sure that all plots use the same colorbar
-                  Ds    = np.concatenate((Ds,  np.array([1.e300, 1.e300])))
-                  x1s   = np.concatenate((x1s, np.array([1.e300, 1.e300])))
-                  x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
-                  color = np.concatenate((colors[pair], np.array([color_min, color_max])))
-                  #Plotting
-                  ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7, label = label_name + ' ' + 'pair ' + str(I) + str(J))
-                  ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = 0.7)
-            else:
-                  ax1.scatter(Ds, x1s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7, label = label_name + ' ' + 'pair ' + str(I) + str(J))
-                  ax1.scatter(Ds, x2s, c = colors[pair], marker = 'o',  s = 80, alpha = 0.7)
-
-      if (isinstance(colors[0], np.ndarray)):
-            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_min, color_max)), ax=ax1, aspect=40, pad=0.01)
+            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(colors.min(), color.max())), ax=ax1, aspect=40, pad=0.01)
             cbar.ax.tick_params()
+
+
+def samples2SFM( sample, pair, p):
+      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
+      [X, Y, X2, Y2, delta] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
+      return [X, Y, X2, Y2, delta]
+
+
+def samples2usefull( sample, pair, p):
+      [X, Y, X2, Y2, Ds] = samples2SFM( sample, pair, p)
+      [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
+      return [sig, Sig, sig2, Sig2, x1, x2, IR]
+
+def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7):
+
+      [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
+      [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
+
+      plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha)
+
+
+def plot_samples(fig, ax1, sample, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7):
+      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
+      plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha)
+
 
 
 def plot_auxiliary(ax1, delta_lim, X_lim):
