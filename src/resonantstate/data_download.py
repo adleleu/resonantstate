@@ -86,6 +86,7 @@ def download_observations_samples(dataframe, download_destination=None):
     unique_samples_urls = []
     metadata_urls = []
     readme_urls = []
+    planet_metadatas = []
     for row in dataframe.iterrows():
         index_row, planet_metadata = row
         
@@ -97,6 +98,7 @@ def download_observations_samples(dataframe, download_destination=None):
             unique_samples_urls.append(url_of_sample)
             metadata_urls.append(url_of_metadata)
             readme_urls.append(url_of_readme)
+            planet_metadatas.append(planet_metadata)
            
     
     # iterate over the unique urls and download the samples and metadata and add the information dictionnary to the list
@@ -105,6 +107,7 @@ def download_observations_samples(dataframe, download_destination=None):
         sample_url = unique_samples_urls[url_index]
         metadata_url = metadata_urls[url_index]
         readme_url = readme_urls[url_index]
+        planet_metadata = planet_metadatas[url_index]
         file_sample = requests.get(sample_url, verify=False)
         if not file_sample.ok: 
             raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
@@ -128,11 +131,26 @@ def download_observations_samples(dataframe, download_destination=None):
         samples_dict = {
             obsDict.SAMPLE_NAME.value:      name,
             obsDict.PLANETS_LIST.value:     metadata[mteAuthors.PLANET_LIST.value],
-            obsDict.CODE.value:             metadata[mteObs.CODE_USED.value],
-            obsDict.BIBTEX.value:           metadata[mteObs.BIBTEX.value],
-            obsDict.CONTACT_EMAIL.value:    metadata[mteObs.CONTACT_EMAIL.value],
+            #obsDict.CODE.value:             metadata[mteObs.CODE_USED.value],
+            #obsDict.BIBTEX.value:           metadata[mteObs.BIBTEX.value],
+            #obsDict.CONTACT_EMAIL.value:    metadata[mteObs.CONTACT_EMAIL.value],
             obsDict.SAMPLE.value:           dataframe_sample,
             obsDict.README.value:           readme,
+            mteObs.STAR_NAME.value:         planet_metadata[mteObs.STAR_NAME.value],                     
+            mteObs.ANALYSIS_ID.value:       planet_metadata[mteObs.ANALYSIS_ID.value],  
+            mteObs.CONTACT_EMAIL.value:     planet_metadata[mteObs.CONTACT_EMAIL.value],  
+            mteObs.DEFAULT.value:           planet_metadata[mteObs.DEFAULT.value],  
+            mteObs.ROBUSTNESS.value:        planet_metadata[mteObs.ROBUSTNESS.value],  
+            mteObs.INITIAL_CONDITION_DATE_BJD.value:  planet_metadata[mteObs.INITIAL_CONDITION_DATE_BJD.value],  
+            mteObs.NB_PLANETS.value:        len(metadata[mteAuthors.PLANET_LIST.value]),  
+            mteObs.GAIA_ID.value:           planet_metadata[mteObs.GAIA_ID.value],  
+            mteObs.MASS_PRIORS.value:       planet_metadata[mteObs.MASS_PRIORS.value],  
+            mteObs.ECCENTRICITY_PRIORS.value:   planet_metadata[mteObs.ECCENTRICITY_PRIORS.value],  
+            mteObs.METHODS.value:           planet_metadata[mteObs.METHODS.value],  
+            mteObs.INSTRUMENTS.value:       planet_metadata[mteObs.INSTRUMENTS.value],  
+            mteObs.BIBTEX.value:            planet_metadata[mteObs.BIBTEX.value],  
+            mteObs.CODE_USED.value:         planet_metadata[mteObs.CODE_USED.value],  
+            mteObs.OTHER_REMARKS.value:     planet_metadata[mteObs.OTHER_REMARKS.value],  
         }
         return_samples.append(samples_dict)
     
