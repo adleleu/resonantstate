@@ -9,13 +9,17 @@ class URLS(Enum):
     
 
 class ObservationsSamplesDictionnary(Enum):
-    SAMPLE_NAME     = "sample_name"  
-    PLANETS_LIST    = "planets_list" 
-    CODE            = "code"        
-    BIBTEX          = "bibtex"
-    CONTACT_EMAIL   = "contact_email"
-    SAMPLE          = "sample"
-    README          = "readme"
+    SAMPLE_NAME                     = "sample_name"  
+    SAMPLE                          = "sample"
+    README                          = "readme"
+    NB_PLANETS                      = "nb_planets"
+   
+    PLANETS_LIST                    = "planets_list" 
+    CODE                            = "code"        
+    STAR_NAME                       = "star_name"                       
+    ANALYSIS_ID                     = "analysis_id"
+    CONTACT_EMAIL                   = "contact_email"
+
 
 class SimulationsDictionnary(Enum):
     SIMULATION_NAME = "simulation_name"  
@@ -25,6 +29,7 @@ class SimulationsDictionnary(Enum):
     CONTACT_EMAIL   = "contact_email"
     SIMULATION      = "simulation"
     ADDITIONAL_INFO = "additional_info"
+    README          = "readme"
 
 
 # Name of the column for the metadata table created from the author metadata file
@@ -35,6 +40,7 @@ class MetaDataTableEntriesObservations(Enum):
     STAR_NAME                       = "star_name"                           # TOI-178
     ANALYSIS_ID                     = "analysis_id"                         # 0,1,2,..
     CONTACT_EMAIL                   = "contact_mail"                        # adrien.leleu@unige.ch
+    AUTHOR_NAME                     = "author_name"                         
     DEFAULT                         = "default"                             # 0 or 1 (int)
     ROBUSTNESS                      = "robustness"                          # between -1, 0 and 1
     PERIOD_DAYS                     = "period_days"                         # in days (float)
@@ -59,6 +65,7 @@ class MetaDataTableEntriesObservations(Enum):
     MASS_PRIORS                     = "mass_prior"                          # uniform, log-uniform (str)
     ECCENTRICITY_PRIORS             = "eccentricity_prior"                  # same
     
+    TRANSIT_DEFINITION              = "transit_definition"                   # "TESS", "NGTS", "CHEOPS" (str)
     METHODS                         = "methods"                             # ["rv", "transit"] (list of str)
     INSTRUMENTS                     = "instruments"                         # ["Tess", "NGTS, "CHEOPS", "ESPRESSO"] (list of str)
     BIBTEX                          = "bibtex"                              # bibtex 2024A&a...6888A.211L
@@ -79,7 +86,8 @@ class MetaDataTableEntriesSimulations(Enum):
     RUN_NAME                        = "run_name"                             # str
     SIMULATION_ID                   = "simulation_id"
     CONTACT_EMAIL                   = "contact_mail"                        # adrien.leleu@unige.ch
-    
+    AUTHOR_NAME                     = "author_name"                         
+
     PLANET_NAME                     = "planet_name"                         # TOI-178 c
     PERIOD_DAYS                     = "period_days"                         # in days (float)
     RADIUS_PLANET_R_EARTH           = "radius_planet_r_earth"               # in Earth radius (float)
@@ -140,6 +148,7 @@ class AuthorsMetaDataTableEntries(Enum):
     
     ############################### common for both activities ##############
     CONTACT_EMAIL                   = "contact_mail"
+    AUTHOR_NAME                     = "author_name"
     BIBTEX                          = "bibtex"
     CODE_USED                       = "code_used"
     STAR_NAME                       = "star_name"
@@ -147,7 +156,7 @@ class AuthorsMetaDataTableEntries(Enum):
     OTHER_REMARKS                   = "other_remarks"
     
     ############################### only in activity A ######################
-    GAIA_ID                         = "GAIA_ID"
+    GAIA_ID                         = "gaia_id"                             # str
     INSTRUMENTS                     = "instruments"
     METHODS                         = "methods"
     ANALYSIS_ID                     = "analysis_id"
@@ -159,9 +168,10 @@ class AuthorsMetaDataTableEntries(Enum):
     
     
     ############################### only in activity B ######################
-    RUN_ID                          = "run_ID"
-    SIMULATION_ID                   = "System_ID"
-    SIMULATION_TYPE                 = "Simulation_Type"
+    RUN_ID                          = "run_id"
+    SIMULATION_ID                   = "system_id"
+    SIMULATION_TYPE                 = "simulation_type"
+    PHYSICS_IMPLEMENTED             = "physics_implemented"
     
     
     

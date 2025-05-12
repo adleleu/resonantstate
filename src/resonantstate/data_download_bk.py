@@ -129,28 +129,28 @@ def download_observations_samples(dataframe, download_destination=None):
         
         # name definitions from the table_entries_catalogs.py file
         samples_dict = {
-            obsDict.SAMPLE_NAME.value:                  name,
-            obsDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
-            
-            obsDict.SAMPLE.value:                       dataframe_sample,
-            obsDict.README.value:                       readme,
-            mteObs.AUTHOR_NAME.value:                   metadata.get(mteObs.AUTHOR_NAME.value, None),
-            mteObs.STAR_NAME.value:                     metadata[mteObs.STAR_NAME.value],                     
-            mteObs.ANALYSIS_ID.value:                   metadata[mteObs.ANALYSIS_ID.value],  
-            mteObs.CONTACT_EMAIL.value:                 metadata[mteObs.CONTACT_EMAIL.value],  
-            mteObs.DEFAULT.value:                       metadata[mteObs.DEFAULT.value],  
-            mteObs.ROBUSTNESS.value:                    metadata[mteObs.ROBUSTNESS.value],  
-            mteObs.INITIAL_CONDITION_DATE_BJD.value:    metadata[mteObs.INITIAL_CONDITION_DATE_BJD.value],  
-            mteObs.NB_PLANETS.value:                    len(metadata[mteAuthors.PLANET_LIST.value]),  
-            mteObs.GAIA_ID.value:                       metadata.get(mteObs.GAIA_ID.value, None),  
-            mteObs.MASS_PRIORS.value:                   metadata[mteObs.MASS_PRIORS.value],  
-            mteObs.ECCENTRICITY_PRIORS.value:           metadata[mteObs.ECCENTRICITY_PRIORS.value],  
-            mteObs.TRANSIT_DEFINITION.value:            metadata.get(mteObs.TRANSIT_DEFINITION.value,None),
-            mteObs.METHODS.value:                       metadata[mteObs.METHODS.value],  
-            mteObs.INSTRUMENTS.value:                   metadata[mteObs.INSTRUMENTS.value],  
-            mteObs.BIBTEX.value:                        metadata[mteObs.BIBTEX.value],  
-            mteObs.CODE_USED.value:                     metadata[mteObs.CODE_USED.value],  
-            mteObs.OTHER_REMARKS.value:                 metadata[mteObs.OTHER_REMARKS.value],  
+            obsDict.SAMPLE_NAME.value:      name,
+            obsDict.PLANETS_LIST.value:     metadata[mteAuthors.PLANET_LIST.value],
+            #obsDict.CODE.value:             metadata[mteObs.CODE_USED.value],
+            #obsDict.BIBTEX.value:           metadata[mteObs.BIBTEX.value],
+            #obsDict.CONTACT_EMAIL.value:    metadata[mteObs.CONTACT_EMAIL.value],
+            obsDict.SAMPLE.value:           dataframe_sample,
+            obsDict.README.value:           readme,
+            mteObs.STAR_NAME.value:         planet_metadata[mteObs.STAR_NAME.value],                     
+            mteObs.ANALYSIS_ID.value:       planet_metadata[mteObs.ANALYSIS_ID.value],  
+            mteObs.CONTACT_EMAIL.value:     planet_metadata[mteObs.CONTACT_EMAIL.value],  
+            mteObs.DEFAULT.value:           planet_metadata[mteObs.DEFAULT.value],  
+            mteObs.ROBUSTNESS.value:        planet_metadata[mteObs.ROBUSTNESS.value],  
+            mteObs.INITIAL_CONDITION_DATE_BJD.value:  planet_metadata[mteObs.INITIAL_CONDITION_DATE_BJD.value],  
+            mteObs.NB_PLANETS.value:        len(metadata[mteAuthors.PLANET_LIST.value]),  
+            mteObs.GAIA_ID.value:           planet_metadata[mteObs.GAIA_ID.value],  
+            mteObs.MASS_PRIORS.value:       planet_metadata[mteObs.MASS_PRIORS.value],  
+            mteObs.ECCENTRICITY_PRIORS.value:   planet_metadata[mteObs.ECCENTRICITY_PRIORS.value],  
+            mteObs.METHODS.value:           planet_metadata[mteObs.METHODS.value],  
+            mteObs.INSTRUMENTS.value:       planet_metadata[mteObs.INSTRUMENTS.value],  
+            mteObs.BIBTEX.value:            planet_metadata[mteObs.BIBTEX.value],  
+            mteObs.CODE_USED.value:         planet_metadata[mteObs.CODE_USED.value],  
+            mteObs.OTHER_REMARKS.value:     planet_metadata[mteObs.OTHER_REMARKS.value],  
         }
         return_samples.append(samples_dict)
     
@@ -334,28 +334,15 @@ def download_simulations(dataframe, download_destination=None):
         name = f"{metadata[mteSim.SIMULATION_TYPE.value]}_{metadata[mteSim.RUN_ID.value]}_{metadata[mteSim.SIMULATION_ID.value]}"
         
         samples_dict = {
-            simDict.SIMULATION_NAME.value:              name,
-            simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
-            simDict.ADDITIONAL_INFO.value:              additional_infos,
-            simDict.SIMULATION.value:                   dataframe_sample,
-            simDict.README.value:                       readme,
-            
-            mteSim.AUTHOR_NAME.value:                   metadata.get(mteSim.AUTHOR_NAME.value,None),
-            mteSim.STAR_NAME.value:                     metadata.get(mteSim.STAR_NAME.value, None),                    
-
-            mteSim.CONTACT_EMAIL.value:                 metadata[mteSim.CONTACT_EMAIL.value],  
-            
-            mteSim.NB_PLANETS.value:                    len(metadata[mteAuthors.PLANET_LIST.value]),  
-            mteSim.SIMULATION_TYPE.value:               metadata[mteSim.SIMULATION_TYPE.value],
-            mteSim.PHYSICS_IMPLEMENTED.value:           metadata[mteSim.PHYSICS_IMPLEMENTED.value],
-            
-            mteSim.RUN_ID.value:                        metadata[mteSim.RUN_ID.value],
-            mteSim.SIMULATION_ID.value:                 metadata[mteSim.SIMULATION_ID.value],
-            mteSim.BIBTEX.value:                        metadata[mteSim.BIBTEX.value],  
-            mteSim.CODE_USED.value:                     metadata[mteSim.CODE_USED.value],  
-            mteSim.OTHER_REMARKS.value:                 metadata[mteSim.OTHER_REMARKS.value],  
+            simDict.SIMULATION_NAME.value:  name,
+            simDict.PLANETS_LIST.value:     metadata[mteAuthors.PLANET_LIST.value],
+            simDict.CODE.value:             metadata[mteSim.CODE_USED.value],
+            simDict.BIBTEX.value:           metadata[mteSim.BIBTEX.value],
+            simDict.CONTACT_EMAIL.value:    metadata[mteSim.CONTACT_EMAIL.value],
+            simDict.ADDITIONAL_INFO.value:  additional_infos,
+            simDict.SIMULATION.value:       dataframe_sample,
+            simDict.README.value:           metadata[mteSim.README_FILE.value],
         }
-            
         return_samples.append(samples_dict)
     
         if download_destination is not None:
