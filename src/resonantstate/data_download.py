@@ -95,7 +95,12 @@ def download_observations_samples(dataframe, download_destination=None):
         url_of_sample           = planet_metadata[mteObs.URL_OF_SAMPLES.value]
         url_of_metadata         = planet_metadata[mteObs.METADATA_FILE.value]
         url_of_readme           = planet_metadata.get(mteObs.README_FILE.value, None) # may be None
+        if url_of_readme == "":
+            url_of_readme = None
         url_of_additional_info  = planet_metadata.get(mteObs.CONFIG_FILE.value, None) # may be None
+        if url_of_additional_info == "":
+            url_of_additional_info = None
+
         if url_of_sample not in unique_samples_urls:
             
             unique_samples_urls.append(url_of_sample)
@@ -108,10 +113,11 @@ def download_observations_samples(dataframe, download_destination=None):
     # iterate over the unique urls and download the samples and metadata and add the information dictionnary to the list
     return_samples = []
     for url_index in range(len(unique_samples_urls)):
-        sample_url = unique_samples_urls[url_index]
-        metadata_url = metadata_urls[url_index]
-        readme_url = readme_urls[url_index]
-        url_of_additional_info = additional_infos_urls[url_index]
+        sample_url          = unique_samples_urls[url_index]
+        metadata_url        = metadata_urls[url_index]
+        readme_url          = readme_urls[url_index]
+        additional_info_url = additional_infos_urls[url_index]
+        
         planet_metadata = planet_metadatas[url_index]
         file_sample = requests.get(sample_url, verify=False)
         if not file_sample.ok: 
@@ -131,10 +137,10 @@ def download_observations_samples(dataframe, download_destination=None):
         else:
             readme = None
         
-        if url_of_additional_info is not None:   
-            file_additional_info = requests.get(url_of_additional_info, verify=False)
+        if additional_info_url is not None:   
+            file_additional_info = requests.get(additional_info_url, verify=False)
             if not file_additional_info.ok: 
-                raise Exception(f"URL {url_of_additional_info} responded with status code: {file_additional_info.status_code}")
+                raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
             additional_infos = json.loads(file_additional_info.text) 
         else:
             additional_infos = None
@@ -305,13 +311,14 @@ def download_simulations(dataframe, download_destination=None):
         url_of_metadata         = metadata_line.get(mteSim.METADATA_FILE.value, None)
         url_of_additional_info  = metadata_line.get(mteSim.CONFIG_FILE.value, None) 
         url_of_readme           = metadata_line.get(mteSim.README_FILE.value, None) # may be None
-        if url_of_additional_info is None:
-            pass # no condition on the aditional infos as it may not be present
-        if url_of_readme is None:
+        if url_of_additional_info == "":
+            url_of_additional_info = None
+        if url_of_readme == "":
+            url_of_readme = None
             pass # no condition on the readme as it may not be present
-        if url_of_sample is None:
+        if url_of_sample is None or url_of_sample == "":
             raise ValueError(f"Missing URL_OF_SIMULATION in the metadata line: {metadata_line}")
-        if url_of_metadata is None:
+        if url_of_metadata is None or url_of_metadata == "":
             raise ValueError(f"Missing METADATA_FILE in the metadata line: {metadata_line}")
         if url_of_sample not in unique_simulations_urls:
             unique_simulations_urls.append(url_of_sample)
