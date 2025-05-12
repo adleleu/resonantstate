@@ -372,22 +372,45 @@ def topologie_light(delta):
 def samples2ell_twoplanets(sample, pair):
       I    = pair[0]
       J    = pair[1]
-      lbd1 = sample[1 + 8*I,:]
-      lbd2 = sample[1 + 8*J,:]
-      P1   = sample[2 + 8*I,:]
-      P2   = sample[2 + 8*J,:]
-      k1   = sample[3 + 8*I,:]
-      k2   = sample[3 + 8*J,:]
-      h1   = sample[4 + 8*I,:]
-      h2   = sample[4 + 8*J,:]
-      m1   = sample[7 + 8*I,:]
-      m2   = sample[7 + 8*J,:]
-      lbd1 = lbd1*np.pi/180.
-      lbd2 = lbd2*np.pi/180.
+      if isinstance(sample, pd.DataFrame) and isinstance(I, str) and isinstance(J, str):
+            lbd1 = sample[f'mean_longitude_deg_{I}'].values
+            lbd2 = sample[f'mean_longitude_deg_{J}'].values
+            P1   = sample[f'period_days_{I}'].values
+            P2   = sample[f'period_days_{J}'].values
+            k1 = sample[f'k_{I}'].values
+            k2 = sample[f'k_{J}'].values
+            h1 = sample[f'h_{I}'].values
+            h2 = sample[f'h_{J}'].values
+            m1 = sample[f'planet_star_mass_ratio_{I}'].values
+            m2 = sample[f'planet_star_mass_ratio_{J}'].values
+      elif isinstance(sample, pd.DataFrame) and isinstance(I, (int, np.integer)) and isinstance(J, (int, np.integer)):
+            lbd1 = sample.iloc[:, 1 + 8*I].values
+            lbd2 = sample.iloc[:, 1 + 8*J].values
+            P1   = sample.iloc[:, 2 + 8*I].values
+            P2   = sample.iloc[:, 2 + 8*J].values
+            k1   = sample.iloc[:, 3 + 8*I].values
+            k2   = sample.iloc[:, 3 + 8*J].values
+            h1   = sample.iloc[:, 4 + 8*I].values
+            h2   = sample.iloc[:, 4 + 8*J].values
+            m1   = sample.iloc[:, 7 + 8*I].values
+            m2   = sample.iloc[:, 7 + 8*J].values
+      else:
+            lbd1 = sample[1 + 8*I,:]
+            lbd2 = sample[1 + 8*J,:]
+            P1   = sample[2 + 8*I,:]
+            P2   = sample[2 + 8*J,:]
+            k1   = sample[3 + 8*I,:]
+            k2   = sample[3 + 8*J,:]
+            h1   = sample[4 + 8*I,:]
+            h2   = sample[4 + 8*J,:]
+            m1   = sample[7 + 8*I,:]
+            m2   = sample[7 + 8*J,:]
       e1   = np.sqrt(k1**2 + h1**2)
       e2   = np.sqrt(k2**2 + h2**2)
       vp1  = np.arctan2(h1, k1)
       vp2  = np.arctan2(h2, k2)
+      lbd2 = lbd2*np.pi/180.
+      lbd1 = lbd1*np.pi/180.
 
       return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
 
@@ -408,10 +431,10 @@ def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='',
             x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
             color = np.concatenate((colors, np.array([colors.min(), colors.max()])))
             #Plotting
-            ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
+            ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha, label = label_name + f' pair {I} {J}')
             ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha)
       else:
-            ax1.scatter(Ds, x1s, c = colors, marker = 'o',  s = markersize, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
+            ax1.scatter(Ds, x1s, c = colors, marker = 'o',  s = markersize, alpha = alpha, label = label_name + f' pair {I} {J}')
             ax1.scatter(Ds, x2s, c = colors, marker = 'o',  s = markersize, alpha = alpha)
 
       if (isinstance(colors[0], np.ndarray)):
@@ -502,9 +525,9 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             - Each entry in nested list corresponds to one pair.
             - Nested list entries can be strings or numpy arrays to be colormapped. 
       delta_lim : tuple 
-            Lower and upper limits of the x-axis (delta).
+            Lower and upper limits of the x-axis (delta). Set to 'auto' for automatic scaling.
       X_lim : tuple
-            Lower and upper limits of the y-axis (X).
+            Lower and upper limits of the y-axis (X). Set to 'auto' for automatic scaling.
       check_resonance : bool
             If True, prints the percentage of samples within the resonance.
       grid : bool
@@ -515,35 +538,55 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             Transparency of the markers in the scatterplot of samples.
       linewidth : float
             Width of the lines representing the equilibrium points and separatrix. 
+      
+      Returns
+      -------
+      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes objects of the plot.
       """
 
       if len(planet_pairs) != len(resonances):
             raise ValueError('The number of planet pairs must match the number of resonances.')
 
       fig, ax = py.subplots(1, 1, figsize=(9,9))
-      plot_auxiliary(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
 
       if isinstance(data, list):
             for df_dict, color in zip(data, colors):
                   if check_resonance:
                         print('Analysis', df_dict['sample_name'], ':')
-                  sample = np.vstack([df_dict['sample'][col] for col in df_dict['sample'].columns])
-                  plot_samples(fig, ax, sample, planet_pairs, resonances, colors=color, 
+                  plot_samples(fig, ax, df_dict['sample'], planet_pairs, resonances, colors=color, 
                                label_name=df_dict['sample_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, dict):
-            sample = np.vstack([data['sample'][col] for col in data['sample'].columns])
-            plot_samples(fig, ax, sample, planet_pairs, resonances, colors=colors[0], label_name=data['sample_name'],
+            plot_samples(fig, ax, data['sample'], planet_pairs, resonances, colors=colors[0], label_name=data['sample_name'],
                           check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, pd.DataFrame):
-            sample = np.vstack([data[col] for col in data.columns])
-            plot_samples(fig, ax, sample, planet_pairs, resonances, colors=colors[0], 
+            plot_samples(fig, ax, data, planet_pairs, resonances, colors=colors[0], 
                          check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       else:
             raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
 
+      if delta_lim == 'auto':
+            ax.autoscale(axis='x')
+            delta_lim = ax.get_xlim()
+            if delta_lim[0] > -3:
+                  delta_lim = (-3, delta_lim[1])
+            if delta_lim[1] < 5:
+                  delta_lim = (delta_lim[0], 5)
+            ax.set_xlim(delta_lim)
+      if X_lim == 'auto':
+            ax.autoscale(axis='y')
+            X_lim = ax.get_ylim()
+            if X_lim[0] > -5:
+                  X_lim = (-5, X_lim[1])
+            if X_lim[1] < 5:
+                  X_lim = (X_lim[0], 5)
+            ax.set_ylim(X_lim)
+      plot_auxiliary(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
+
       py.legend()
       py.tight_layout()
-      py.show()                
+      py.show()
+      return fig, ax
