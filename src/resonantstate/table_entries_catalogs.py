@@ -9,28 +9,25 @@ class URLS(Enum):
     
 
 class ObservationsSamplesDictionnary(Enum):
-    SAMPLE_NAME                     = "analysis_name"  
-    SAMPLE                          = "samples"
-    README                          = "readme"
-    NB_PLANETS                      = "nb_planets"
+    SAMPLE_NAME         = "samples_name"  
+    SAMPLES             = "samples"
+    ADDITIONAL_INFO     = "additional_info"
+    README              = "readme"
+    PLANETS_LIST        = "planets_list"
+    CONTACT_EMAIL       = "contact_email"
    
-    PLANETS_LIST                    = "planets_list" 
-    CODE                            = "code"        
-    STAR_NAME                       = "star_name"                       
-    ANALYSIS_ID                     = "analysis_id"
-    CONTACT_EMAIL                   = "contact_email"
-
 
 class SimulationsDictionnary(Enum):
-    SIMULATION_NAME = "simulation_name"  
-    PLANETS_LIST    = "planets_list" 
-    CODE            = "code"        
-    BIBTEX          = "bibtex"
-    CONTACT_EMAIL   = "contact_email"
-    SIMULATION      = "simulation"
-    ADDITIONAL_INFO = "additional_info"
-    README          = "readme"
+    SIMULATION_NAME     = "simulation_name"  
+    SIMULATION          = "simulation"
+    ADDITIONAL_INFO     = "additional_info"
+    README              = "readme"
+    PLANETS_LIST        = "planets_list"
+    CONTACT_EMAIL       = "contact_email"
 
+    
+    
+ 
 
 # Name of the column for the metadata table created from the author metadata file
 class MetaDataTableEntriesObservations(Enum):
@@ -50,8 +47,8 @@ class MetaDataTableEntriesObservations(Enum):
     MASS_STAR_M_SUN                 = "mass_star_m_sun"                     # in solar mass (float)
     RADIUS_STAR_R_SUN               = "radius_star_r_sun"                   # in solar radius (float)
     
-    PLANET_STAR_MASS_RATIO           = "planet_star_mass_ratio"             # float
-    PLANET_STAR_RADIUS_RATIO         = "planet_star_radius_ratio"           # float
+    PLANET_STAR_MASS_RATIO          = "planet_star_mass_ratio"             # float
+    PLANET_STAR_RADIUS_RATIO        = "planet_star_radius_ratio"           # float
     SEMI_MAJOR_AXIS_AU              = "semi_major_axis_au"                  # in AU (float)
     MEAN_LONGITUDE_DEG              = "mean_longitude_deg"                  # in deg (float)
     ECCENTRICITY                    = "eccentricity"                        # (float)
