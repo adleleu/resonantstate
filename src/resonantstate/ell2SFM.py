@@ -12,18 +12,17 @@
 #                                      x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
 #                                      IsResonant is 1 if the system is in the resonance, and 0 else.
 
-import math as m
+# import math as m
 import cmath as cm
 import matplotlib.pyplot as py
 import matplotlib as mpl
 import numpy as np
+from itertools import cycle
 
 import pandas as pd
 
 
-import os 
-
-pi = m.pi
+# import os 
 
 #dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -89,14 +88,14 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       T1    = T1/T1
 
       # Getting semi-major axes and Lambda
-      G     = 4.*m.pi**2
+      G     = 4.*np.pi**2
       beta1 = m1/(1. + m1)
       beta2 = m2/(1. + m2)
       mu1   = G*(1. + m1)
       mu2   = G*(1. + m2) 
-      n1    = 2.*m.pi/T1
-      n2    = 2.*m.pi/T2
-      n10   = 2.*m.pi
+      n1    = 2.*np.pi/T1
+      n2    = 2.*np.pi/T2
+      n10   = 2.*np.pi
       n20   = p*n10/(p + 1)
       a1    = (mu1/n1**2)**(1./3.)
       a2    = (mu2/n2**2)**(1./3.)
@@ -168,7 +167,7 @@ def cubic(a_3, a_2, a_1, a_0):
                   return [-a_0/a_1]
             Delta = a_1**2 - 4.*a_2*a_0
             if (Delta >= 0.):
-                  return [(-a_1 + m.sqrt(Delta))/(2.*a_2), (-a_1 - m.sqrt(Delta))/(2.*a_2)]
+                  return [(-a_1 + np.sqrt(Delta))/(2.*a_2), (-a_1 - np.sqrt(Delta))/(2.*a_2)]
             return []
       if (a_3 != 1.):
             return cubic(1., a_2/a_3, a_1/a_3, a_0/a_3)
@@ -184,15 +183,15 @@ def cubic(a_3, a_2, a_1, a_0):
             [mod_v3, arg_v3] = cm.polar(v3)
             u  = mod_u3**(1./3.)*cm.exp(1j*arg_u3/3.)
             v  = mod_v3**(1./3.)*cm.exp(1j*arg_v3/3.)
-            j  = cm.exp( 2.*1j*pi/3.)
-            jb = cm.exp(-2.*1j*pi/3.)
+            j  = cm.exp( 2.*1j*np.pi/3.)
+            jb = cm.exp(-2.*1j*np.pi/3.)
             S1 = (u + v).real
             S2 = (j*u + jb*v).real
             S3 = (jb*u + j*v).real
             return [S1 - s, S2 - s, S3 - s]
       else: # 1 real solution
-            u3 = -q/2. + m.sqrt(D)
-            v3 = -q/2. - m.sqrt(D)
+            u3 = -q/2. + np.sqrt(D)
+            v3 = -q/2. - np.sqrt(D)
             if (u3 < 0.):
                   u = -(-u3)**(1./3.)
             else:
@@ -223,24 +222,24 @@ def quartic(a_4, a_3, a_2, a_1, a_0):
             Sol = []
             # First pair
             if (S1 >= -1.e-14):
-                  Sol.append( m.sqrt(abs(S1)) - s)
-                  Sol.append(-m.sqrt(abs(S1)) - s)
+                  Sol.append( np.sqrt(abs(S1)) - s)
+                  Sol.append(-np.sqrt(abs(S1)) - s)
             if (S2 >= -1.e-14):
-                  Sol.append( m.sqrt(abs(S2)) - s)
-                  Sol.append(-m.sqrt(abs(S2)) - s)
+                  Sol.append( np.sqrt(abs(S2)) - s)
+                  Sol.append(-np.sqrt(abs(S2)) - s)
             return Sol
       ### Getting a solution of the resolving cubic ###
       if (abs(q) < 1.e-6): #Too close from bi-quartic. Must be done differently
             if (abs(2.*p**2 - 8.*r) > 1.e-10):
                   if (2.*p**2 - 8.*r < 0.):
                         return []
-                  sqM = abs(q)/m.sqrt(2.*p**2 - 8.*r)
+                  sqM = abs(q)/np.sqrt(2.*p**2 - 8.*r)
             else:
                   if (abs(8.*p) > 1.e-10):
                         if (p < 0.):
-                              sqM = m.sqrt(-p)
+                              sqM = np.sqrt(-p)
                         else:
-                              sqM = abs(q)/m.sqrt(8.*p)
+                              sqM = abs(q)/np.sqrt(8.*p)
                   else:
                         sqM = (q**2/8.)**(1./6.)
       else:
@@ -248,20 +247,20 @@ def quartic(a_4, a_3, a_2, a_1, a_0):
             Sol.sort()
             if (Sol[-1] < 0.): #There are no real solutions
                   return []
-            sqM = m.sqrt(Sol[-1])
+            sqM = np.sqrt(Sol[-1])
       ### Getting first pair of solutions ###
       Sol = []
-      D = q/(2.*m.sqrt(2.)*sqM)-(p + sqM**2)/2.
+      D = q/(2.*np.sqrt(2.)*sqM)-(p + sqM**2)/2.
       if (D >= -1.e-14):
-            S1 = -sqM/m.sqrt(2.) + m.sqrt(abs(D))
-            S2 = -sqM/m.sqrt(2.) - m.sqrt(abs(D))
+            S1 = -sqM/np.sqrt(2.) + np.sqrt(abs(D))
+            S2 = -sqM/np.sqrt(2.) - np.sqrt(abs(D))
             Sol.append(S1 - s)
             Sol.append(S2 - s)
       ### Getting second pair of solutions ###
-      D = -q/(2.*m.sqrt(2.)*sqM)-(p + sqM**2)/2.
+      D = -q/(2.*np.sqrt(2.)*sqM)-(p + sqM**2)/2.
       if (D >= -1.e-14):
-            S3 = sqM/m.sqrt(2.) + m.sqrt(abs(D))
-            S4 = sqM/m.sqrt(2.) - m.sqrt(abs(D))
+            S3 = sqM/np.sqrt(2.) + np.sqrt(abs(D))
+            S4 = sqM/np.sqrt(2.) - np.sqrt(abs(D))
             Sol.append(S3 - s)
             Sol.append(S4 - s)
       return Sol
@@ -395,32 +394,25 @@ def samples2ell_twoplanets(sample, pair):
 
 
 
-def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7):
+def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
       I    = pair[0]
       J    = pair[1]
-      
-      n10  = 2.*m.pi
-      n20  = p*n10/(p + 1)
-
-
 
       if check_resonance:
-            resonant = np.where(IsResonant == 1)
-            percent = (resonant[0].size / IsResonant.size)*100
-            print('pair',pair, ':', percent, '% within resonance.')
+            print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
 
       if (isinstance(colors, np.ndarray)):
             #Making sure that all plots use the same colorbar
             Ds    = np.concatenate((Ds,  np.array([1.e300, 1.e300])))
             x1s   = np.concatenate((x1s, np.array([1.e300, 1.e300])))
             x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
-            color = np.concatenate((colors, np.array([colors.min(), color.max()])))
+            color = np.concatenate((colors, np.array([colors.min(), colors.max()])))
             #Plotting
-            ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
-            ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = 80, alpha = alpha)
+            ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
+            ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha)
       else:
-            ax1.scatter(Ds, x1s, c = colors, marker = 'o',  s = 80, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
-            ax1.scatter(Ds, x2s, c = colors, marker = 'o',  s = 80, alpha = alpha)
+            ax1.scatter(Ds, x1s, c = colors, marker = 'o',  s = markersize, alpha = alpha, label = label_name + ' ' + 'pair ' + str(I) + str(J))
+            ax1.scatter(Ds, x2s, c = colors, marker = 'o',  s = markersize, alpha = alpha)
 
       if (isinstance(colors[0], np.ndarray)):
             cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(colors.min(), color.max())), ax=ax1, aspect=40, pad=0.01)
@@ -438,21 +430,22 @@ def samples2usefull( sample, pair, p):
       [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
-def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7):
+def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
 
       [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
       [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
 
-      plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha)
+      plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
 
 
-def plot_samples(fig, ax1, sample, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7):
-      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
-      plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha)
+def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
+      for pair, p, color in zip(pairs, ps, cycle(colors)):
+            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
+            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
 
 
 
-def plot_auxiliary(ax1, delta_lim, X_lim):
+def plot_auxiliary(ax1, delta_lim, X_lim, linewidth=4, grid=True):
       delta_min, delta_max = delta_lim
       X_min, X_max = X_lim
 
@@ -476,16 +469,19 @@ def plot_auxiliary(ax1, delta_lim, X_lim):
             Xext[count] = xext
             Xhyp[count] = xhyp
             count = count + 1            
-      ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black', linewidth = 4, linestyle = '-', alpha = 1)
-      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = 4, linestyle = ':', alpha = 1, label = 'Hyperbolic')
-      ax1.plot(delt,             Xint,             color = 'black', linewidth = 4, linestyle = '-', alpha = 1, label = 'Elliptic')
-      ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = 4, linestyle = '-', alpha = 1, label = 'Separatrix')
-      ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = 4, linestyle = '-', alpha = 1)
+      ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black', linewidth = linewidth, linestyle = '-', alpha = 1)
+      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = 1, label = 'Hyperbolic')
+      ax1.plot(delt,             Xint,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = 1, label = 'Elliptic')
+      ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = 1, label = 'Separatrix')
+      ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = 1)
       ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'red', alpha = 0.1)
-      ax1.grid(linewidth=0.3, alpha = 0.5)
+      if grid:
+            ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], delta_lim=(-3,5), X_lim=(-5,5), check_resonance=False):
+def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], 
+                 delta_lim=(-3,5), X_lim=(-5,5), check_resonance=False, 
+                 grid=True, markersize=80, alpha=0.7, linewidth=4):
       """
       Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
 
@@ -504,34 +500,46 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             List of color values to use for plotting each pair/analysis.
             - Each entry in main list corresponds to one analysis.
             - Each entry in nested list corresponds to one pair.
+            - Nested list entries can be strings or numpy arrays to be colormapped. 
       delta_lim : tuple 
             Lower and upper limits of the x-axis (delta).
       X_lim : tuple
             Lower and upper limits of the y-axis (X).
+      check_resonance : bool
+            If True, prints the percentage of samples within the resonance.
+      grid : bool
+            If True, adds a grid to the plot.
+      markersize : float
+            Size of the markers in the scatterplot of samples.
+      alpha : float
+            Transparency of the markers in the scatterplot of samples.
+      linewidth : float
+            Width of the lines representing the equilibrium points and separatrix. 
       """
 
-      plot_params = planet_pairs, resonances
-      ax_limits = delta_lim, X_lim
+      if len(planet_pairs) != len(resonances):
+            raise ValueError('The number of planet pairs must match the number of resonances.')
 
       fig, ax = py.subplots(1, 1, figsize=(9,9))
-      plot_auxiliary(ax, *ax_limits)
+      plot_auxiliary(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
 
       if isinstance(data, list):
             for df_dict, color in zip(data, colors):
                   if check_resonance:
                         print('Analysis', df_dict['sample_name'], ':')
                   sample = np.vstack([df_dict['sample'][col] for col in df_dict['sample'].columns])
-                  plot_samples(fig, ax, sample, *plot_params, colors=color, 
-                               label_name=df_dict['sample_name'], check_resonance=check_resonance)
+                  plot_samples(fig, ax, sample, planet_pairs, resonances, colors=color, 
+                               label_name=df_dict['sample_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, dict):
             sample = np.vstack([data['sample'][col] for col in data['sample'].columns])
-            plot_samples(fig, ax, sample, *plot_params, colors=colors[0], label_name=data['sample_name'],
-                          check_resonance=check_resonance)
+            plot_samples(fig, ax, sample, planet_pairs, resonances, colors=colors[0], label_name=data['sample_name'],
+                          check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, pd.DataFrame):
             sample = np.vstack([data[col] for col in data.columns])
-            plot_samples(fig, ax, sample, *plot_params, colors=colors[0], check_resonance=check_resonance)
+            plot_samples(fig, ax, sample, planet_pairs, resonances, colors=colors[0], 
+                         check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       else:
             raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
