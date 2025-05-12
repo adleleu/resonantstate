@@ -9,12 +9,19 @@ class URLS(Enum):
     
 
 class ObservationsSamplesDictionnary(Enum):
+<<<<<<< HEAD
     SAMPLE_NAME         = "samples_name"  
     SAMPLES             = "samples"
     ADDITIONAL_INFO     = "additional_info"
     README              = "readme"
     PLANETS_LIST        = "planets_list"
     CONTACT_EMAIL       = "contact_email"
+=======
+    SAMPLE_NAME                     = "analysis_name"  
+    SAMPLE                          = "samples"
+    README                          = "readme"
+    NB_PLANETS                      = "nb_planets"
+>>>>>>> origin
    
 
 class SimulationsDictionnary(Enum):
