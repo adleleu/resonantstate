@@ -9,8 +9,8 @@ class URLS(Enum):
     
 
 class ObservationsSamplesDictionnary(Enum):
-    SAMPLE_NAME                     = "sample_name"  
-    SAMPLE                          = "sample"
+    SAMPLE_NAME                     = "samples_name"  
+    SAMPLE                          = "samples"
     README                          = "readme"
     NB_PLANETS                      = "nb_planets"
    
