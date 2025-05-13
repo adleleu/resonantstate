@@ -417,12 +417,9 @@ def samples2ell_twoplanets(sample, pair):
 
 
 
-def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
+def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, label_name='', alpha = 0.7, markersize=80):
       I    = pair[0]
       J    = pair[1]
-
-      if check_resonance:
-            print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
 
       if (isinstance(colors, np.ndarray)):
             #Making sure that all plots use the same colorbar
@@ -442,14 +439,14 @@ def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='',
             cbar.ax.tick_params()
 
 
-def samples2SFM( sample, pair, p):
-      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
+def samples2SFM(sample, pair, p):
+      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
       [X, Y, X2, Y2, delta] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
       return [X, Y, X2, Y2, delta]
 
 
-def samples2usefull( sample, pair, p):
-      [X, Y, X2, Y2, Ds] = samples2SFM( sample, pair, p)
+def samples2usefull(sample, pair, p):
+      [X, Y, X2, Y2, Ds] = samples2SFM(sample, pair, p)
       [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
@@ -458,18 +455,29 @@ def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, co
       [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
       [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
 
-      plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+      if check_resonance:
+            print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
+
+      plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, label_name=label_name, alpha = alpha, markersize=markersize)
 
 
 def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
 
-      if isinstance(pairs, list):
-            for pair, p, color in zip(pairs, ps, cycle(colors)):
-                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
-                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+      if isinstance(ps, (list, np.ndarray)):
+            if len(pairs) != len(ps):
+                  raise ValueError('The number of planet pairs must match the number of resonances.')
+            if isinstance(colors, (list, np.ndarray)):
+                  colors_ = cycle(colors)
+            else:
+                  colors_ = [colors] * len(pairs)
+            for pair, p, color in zip(pairs, ps, colors_):
+                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
+                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, 
+                           label_name=label_name, check_resonance=check_resonance, alpha=alpha, markersize=markersize)
       else:
-            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pairs)
-            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, ps, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pairs)
+            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, ps, colors, 
+                     label_name=label_name, check_resonance=check_resonance, alpha=alpha, markersize=markersize)
 
 
 
@@ -507,12 +515,15 @@ def plot_auxiliary(ax1, delta_lim, X_lim, linewidth=4, grid=True):
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], 
+def plot_ell2SFM(data, planet_pairs=(0,1), resonances=2, colors='green', 
                  delta_lim=(-3,5), X_lim=(-5,5), check_resonance=False, 
                  grid=True, markersize=80, alpha=0.7, linewidth=4):
       """
       Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
-
+      If multiple datasets are provided, they are plotted in the same figure.
+      Alternatively, a single dataset can be plotted with multiple pairs of planets by providing 
+      a list of pairs and resonances.
+      
       Parameters
       ----------
       data : pandas.DataFrame or dict or list of dict
@@ -520,21 +531,21 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             - If DataFrame: used directly as sample input.
             - If dict: must contain keys 'sample' (DataFrame) and 'sample_name' (str).
             - If list: a list of the above dictionaries.
-      planet_pairs : list
-            Pairs of planets to be considered in the sample
-      resonance : list 
+      planet_pairs : tuple of int or str, or list of tuples
+            Pairs of planets to be considered in the sample.
+      resonances : int or list of int
             Resonance of the corresponding pair (p such that resonance is p:p+1).
-      colors : list 
-            List of color values to use for plotting each pair/analysis.
-            - Each entry in main list corresponds to one analysis.
-            - Each entry in nested list corresponds to one pair.
-            - Nested list entries can be strings or numpy arrays to be colormapped. 
+      colors : str, numpy.ndarray, or list
+            Color values to use for plotting each pair/analysis.
+            - Entries can be strings or numpy arrays to be colormapped. 
+            - If list, colors are cycled through each dataset if multiple datasets are provided,
+            or through each pair.
+      check_resonance : bool
+            If True, prints the percentage of samples within the resonance.
       delta_lim : tuple 
             Lower and upper limits of the x-axis (delta). Set to 'auto' for automatic scaling.
       X_lim : tuple
             Lower and upper limits of the y-axis (X). Set to 'auto' for automatic scaling.
-      check_resonance : bool
-            If True, prints the percentage of samples within the resonance.
       grid : bool
             If True, adds a grid to the plot.
       markersize : float
@@ -550,24 +561,22 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             The figure and axes objects of the plot.
       """
 
-      if len(planet_pairs) != len(resonances):
-            raise ValueError('The number of planet pairs must match the number of resonances.')
 
       fig, ax = py.subplots(1, 1, figsize=(9,9))
 
       if isinstance(data, list):
-            for df_dict, color in zip(data, colors):
+            for df_dict, color in zip(data, cycle(colors)):
                   if check_resonance:
                         print('Analysis', df_dict['sample_name'], ':')
                   plot_samples(fig, ax, df_dict['sample'], planet_pairs, resonances, colors=color, 
                                label_name=df_dict['sample_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, dict):
-            plot_samples(fig, ax, data['sample'], planet_pairs, resonances, colors=colors[0], label_name=data['sample_name'],
+            plot_samples(fig, ax, data['sample'], planet_pairs, resonances, colors=colors, label_name=data['sample_name'],
                           check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, pd.DataFrame):
-            plot_samples(fig, ax, data, planet_pairs, resonances, colors=colors[0], 
+            plot_samples(fig, ax, data, planet_pairs, resonances, colors=colors, 
                          check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       else:
