@@ -461,9 +461,15 @@ def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, co
       plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
 
 
-def plot_samples(fig, ax1, sample, pair, p, color, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
-      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
-      plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
+
+      if isinstance(pairs, list):
+            for pair, p, color in zip(pairs, ps, cycle(colors)):
+                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
+                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+      else:
+            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pairs)
+            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, ps, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
 
 
 
