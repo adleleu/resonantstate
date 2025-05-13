@@ -307,7 +307,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
             [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
             x1.append(xx1)
             x2.append(xx2)
-            [xmin, xmax, xint, xext, xhyp] = topologie(delta[i])
+            [xint, xext, xhyp] = topologie_light(delta[i])
             if (delta[i] < 1.):
                   IR.append(0)
             else:
