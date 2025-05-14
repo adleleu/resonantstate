@@ -529,7 +529,7 @@ def plot_ell2SFM(data, planet_pairs=(0,1), resonances=2, colors='green',
       data : pandas.DataFrame or dict or list of dict
             Input data containing the posterior samples.
             - If DataFrame: used directly as sample input.
-            - If dict: must contain keys 'sample' (DataFrame) and 'sample_name' (str).
+            - If dict: must contain keys 'samples' (DataFrame) and 'samples_name' (str).
             - If list: a list of the above dictionaries.
       planet_pairs : tuple of int or str, or list of tuples
             Pairs of planets to be considered in the sample.
@@ -567,12 +567,12 @@ def plot_ell2SFM(data, planet_pairs=(0,1), resonances=2, colors='green',
       if isinstance(data, list):
             for df_dict, color in zip(data, cycle(colors)):
                   if check_resonance:
-                        print('Analysis', df_dict['sample_name'], ':')
-                  plot_samples(fig, ax, df_dict['sample'], planet_pairs, resonances, colors=color, 
-                               label_name=df_dict['sample_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
+                        print('Analysis', df_dict['samples_name'], ':')
+                  plot_samples(fig, ax, df_dict['samples'], planet_pairs, resonances, colors=color, 
+                               label_name=df_dict['samples_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, dict):
-            plot_samples(fig, ax, data['sample'], planet_pairs, resonances, colors=colors, label_name=data['sample_name'],
+            plot_samples(fig, ax, data['samples'], planet_pairs, resonances, colors=colors, label_name=data['samples_name'],
                           check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, pd.DataFrame):
