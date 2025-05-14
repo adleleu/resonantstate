@@ -289,7 +289,7 @@ def topologie(delta):
       #When delta >= 1; then Xhyp <= Xint <= Xmin <= Xres <= Xmax
       if (delta == 1.):
             return [-1., 3., 2., -1., -1.]
-      Sol = cubic(1., 0., -3.*delta, -2.)
+      Sol = cubic(1., 0., -3.*delta, -2.) #Getting Xres, Xint and Xhyp
       if (len(Sol) == 1):
             return [0., 0., Sol[0], 0., 0.]
       else:
@@ -383,7 +383,6 @@ def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_min=None, color_max=
       I    = pair[0]
       J    = pair[1]
 
-      print(type(colors))
       if (isinstance(colors, np.ndarray)):
             #Plotting
             ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_min, vmax=color_max, marker = 'o',  s = markersize, alpha = alpha, label = label_name + f' pair {I} {J}')
