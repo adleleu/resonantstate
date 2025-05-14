@@ -24,49 +24,9 @@ import pandas as pd
 
 # import os 
 
-#dir_path = os.path.dirname(os.path.realpath(__file__))
-
-
-
-#plot_DACE_data = 1 # Determines if the data from a table of the GRSW are plotted in the SFM
-
-# Defining sample to be used (only if plot_DACE_data is 1)
-#path2sample = './Kepler-54_2_samples.csv'
-#pairs       = [[0,1]] # Pairs of planets to be considered in the sample
-#ps          = [2]     # Resonance of the corresponding pair (p such that resonance is p:p+1)
-#sample      = np.loadtxt(path2sample, dtype = np.float64, delimiter=',', unpack=True)
-#colors      = [sample[7,:] + sample[15,:]] # Either a list of numpy arrays or a list of strings like ['green','red']. Here the color is the total mass of the pair over the stellar mass
-#if (isinstance(colors[0], np.ndarray)):
-#      if (len(colors) >= 2):
-#            full_color_array = np.concatenate((colors[0], colors[1]))
-#            for cll in range (2, len(colors)):
-#                  full_color_array = np.concatenate((full_color_array, colors[cll]))
-#            color_min = min(full_color_array)
-#            color_max = max(full_color_array)
-#      else:
-#            color_min = min(colors[0])
-#            color_max = max(colors[0])
-
-#delta_min  = -3. #To be chosen by trial and error. Irrelevant if plot_DACE_data is 0
-#delta_max  = 5.
-#X_min      = -5.
-#X_max      = 5.
-
 #Hamiltonian coefficients
 f1s = [ 1.190493697849547, 2.025222689938346, 2.840431856715441, 3.649618244089652, 4.456142785027623, 5.261253831849899, 6.065523627097718, 6.869251916417852, 7.672611034475267, 8.475707148201764, 9.278609253466129, 10.08136413618922, 10.88400465063751, 11.68655455857515, 12.48903144896030, 13.29144865274429, 14.09381638467312, 14.89614276587963, 15.69843412935734, 16.50069558620453]
 f2s = [-0.428389834143869,-2.484005183303907,-3.283256721821090,-4.083705371769611,-4.884706297511002,-5.686007411626633,-6.487489727907814,-7.289089771453291,-8.090770598035306,-8.892509248107672,-9.694290707819164,-10.49610474146903,-11.29794413782656,-12.09980367496610,-12.90167944505811,-13.70356853306293,-14.50546862185001,-15.30737796425819,-16.10929512977600,-16.91121894121170]
-
-#txt_file = os.path.join(dir_path,'continuedSeparatrix.txt')
-#delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt(txt_file, dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
-
-#delt, Xmin, Xmax, Xint, Xext, Xhyp = np.loadtxt('./continuedSeparatrix.txt', dtype = np.float64, delimiter=' ', unpack=True, usecols=np.array([0, 1, 2, 3, 4, 5]))
-
-#delt = np.flip(delt)
-#Xmin = np.flip(Xmin)
-#Xmax = np.flip(Xmax)
-#Xint = np.flip(Xint)
-#Xext = np.flip(Xext)
-#Xhyp = np.flip(Xhyp)
 
 
 def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
@@ -280,11 +240,11 @@ def X1X2(X, Y, delta):
             print("Warning: Four solutions were found even though delta < 1 in function X1X2")
       topo = topologie_light(delta)
       if (len(topo) == 1):
-            print("Warning: Could not find xhyp and xext in function X1X2")
+            print("Warning: Could not find xhyp and xint in function X1X2")
             return [Sol[0], Sol[3]]
-      [xint, xext, xhyp] = topo
+      [xres, xint, xhyp] = topo
       # A very simple criterion proposed by Max Goldberg to determine which pair of solution should be returned 
-      if ((X - xext)**2 + Y**2 > (xhyp - xext)**2):
+      if ((X - xint)**2 + Y**2 > (xhyp - xint)**2):
             return [Sol[0], Sol[3]]
       else:
             return [Sol[1], Sol[2]]
@@ -307,7 +267,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
             [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
             x1.append(xx1)
             x2.append(xx2)
-            [xint, xext, xhyp] = topologie_light(delta[i])
+            [xres, xint, xhyp] = topologie_light(delta[i])
             if (delta[i] < 1.):
                   IR.append(0)
             else:
@@ -323,8 +283,10 @@ def SFM2useful(X, Y, X2, Y2, delta):
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
 def topologie(delta):
-      #Returns [Xmin, Xmax, Xint, Xext, Xhyp] from analytical expressions instead of reading from file
-      #If delta < 1, returns [0, 0, Xint, 0, 0]
+      #Returns [Xmin, Xmax, Xres, Xint, Xhyp] from analytical expressions instead of reading from file
+      #Xmin and Xmax are the lower and upper separatrices respectively, Xres is the resonance center, Xint is the center of the internal circulation and Xhyp is the hyperbolic fixed point.
+      #If delta < 1, returns [0, 0, Xres, 0, 0]
+      #When delta >= 1; then Xhyp <= Xint <= Xmin <= Xres <= Xmax
       if (delta == 1.):
             return [-1., 3., 2., -1., -1.]
       Sol = cubic(1., 0., -3.*delta, -2.)
@@ -334,22 +296,22 @@ def topologie(delta):
             [S1, S2, S3] = Sol
             if (S2**2 < 3.*delta and S2**2 > delta):
                   xhyp = S2
-                  xext = S3
+                  xint = S3
             else:
                   xhyp = S3
-                  xext = S2
+                  xint = S2
             H  = 1.5*delta*xhyp**2 - 0.25*xhyp**4 + 2.*xhyp
             Sl = quartic(-0.25, 0., 1.5*delta, 2., -H) #Getting Xmin and Xmax
             Sl.sort()
             if (len(Sl) < 2):
                   print("Warning in function topologie : The separatrix could not be obtained at delta =", delta)
-                  return [0., 0., S1, xext, xhyp]
+                  return [0., 0., S1, xint, xhyp]
             if (len(Sl) == 2):
-                  return [Sl[0], Sl[1], S1, xext, xhyp]
-            return [Sl[2], Sl[3], S1, xext, xhyp]
+                  return [Sl[0], Sl[1], S1, xint, xhyp]
+            return [Sl[2], Sl[3], S1, xint, xhyp]
             
 def topologie_light(delta):
-      #Same as topologie but only returns [Xint, Xext, Xhyp]
+      #Same as topologie but only returns [Xres, Xint, Xhyp]
       if (delta == 1.):
             return [2., -1., -1.]
       Sol = cubic(1., 0., -3.*delta, -2.)
@@ -359,11 +321,11 @@ def topologie_light(delta):
             [S1, S2, S3] = Sol
             if (S2**2 < 3.*delta and S2**2 > delta):
                   xhyp = S2
-                  xext = S3
+                  xint = S3
             else:
                   xhyp = S3
-                  xext = S2
-            return [S1, xext, xhyp]
+                  xint = S2
+            return [S1, xint, xhyp]
 
 #Plotting
 #if (plot_DACE_data):
@@ -492,21 +454,21 @@ def plot_topologie(ax1, delta_lim, X_lim, linewidth=4, grid=True):
       delt = np.linspace(delta_min, delta_max, 512)
       Xmin = np.zeros(512)
       Xmax = np.zeros(512)
+      Xres = np.zeros(512)
       Xint = np.zeros(512)
-      Xext = np.zeros(512)
       Xhyp = np.zeros(512)
       count = 0
       for delta in delt:
-            [xmin, xmax, xint, xext, xhyp] = topologie(delta)
+            [xmin, xmax, xres, xint, xhyp] = topologie(delta)
             Xmin[count] = xmin
             Xmax[count] = xmax
+            Xres[count] = xres
             Xint[count] = xint
-            Xext[count] = xext
             Xhyp[count] = xhyp
             count = count + 1            
-      ax1.plot(delt[delt >= 1.], Xext[delt >= 1.], color = 'black', linewidth = linewidth, linestyle = '-', alpha = 1)
+      ax1.plot(delt[delt >= 1.], Xint[delt >= 1.], color = 'black', linewidth = linewidth, linestyle = '-', alpha = 1)
       ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = 1, label = 'Hyperbolic')
-      ax1.plot(delt,             Xint,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = 1, label = 'Elliptic')
+      ax1.plot(delt,             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = 1, label = 'Elliptic')
       ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = 1, label = 'Separatrix')
       ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = 1)
       ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'red', alpha = 0.1)
