@@ -238,7 +238,7 @@ def X1X2(X, Y, delta):
       #Four solutions. Either [Sol[0], Sol[3]] or [Sol[1], Sol[2]] should be returned
       if (delta < 1.): #Four solutions should be impossible when delta < 1
             print("Warning: Four solutions were found even though delta < 1 in function X1X2")
-      topo = topologie_light(delta)
+      topo = topology_light(delta)
       if (len(topo) == 1):
             print("Warning: Could not find xhyp and xint in function X1X2")
             return [Sol[0], Sol[3]]
@@ -267,7 +267,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
             [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
             x1.append(xx1)
             x2.append(xx2)
-            [xres, xint, xhyp] = topologie_light(delta[i])
+            [xres, xint, xhyp] = topology_light(delta[i])
             if (delta[i] < 1.):
                   IR.append(0)
             else:
@@ -282,7 +282,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
       IR = np.array(IR)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
-def topologie(delta):
+def topology(delta):
       #Returns [Xmin, Xmax, Xres, Xint, Xhyp] from analytical expressions instead of reading from file
       #Xmin and Xmax are the lower and upper separatrices respectively, Xres is the resonance center, Xint is the center of the internal circulation and Xhyp is the hyperbolic fixed point.
       #If delta < 1, returns [0, 0, Xres, 0, 0]
@@ -304,14 +304,14 @@ def topologie(delta):
             Sl = quartic(-0.25, 0., 1.5*delta, 2., -H) #Getting Xmin and Xmax
             Sl.sort()
             if (len(Sl) < 2):
-                  print("Warning in function topologie : The separatrix could not be obtained at delta =", delta)
+                  print("Warning in function topology : The separatrix could not be obtained at delta =", delta)
                   return [0., 0., S1, xint, xhyp]
             if (len(Sl) == 2):
                   return [Sl[0], Sl[1], S1, xint, xhyp]
             return [Sl[2], Sl[3], S1, xint, xhyp]
             
-def topologie_light(delta):
-      #Same as topologie but only returns [Xres, Xint, Xhyp]
+def topology_light(delta):
+      #Same as topology but only returns [Xres, Xint, Xhyp]
       if (delta == 1.):
             return [2., -1., -1.]
       Sol = cubic(1., 0., -3.*delta, -2.)
@@ -438,9 +438,9 @@ def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_min=None,
 
 
 
-def plot_topologie(ax1, delta_lim, X_lim, linewidth=4, grid=True):
+def plot_topology(ax1, delta_lim, X_lim, linewidth=4, grid=True):
 
-      ### Plots the topologie of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
+      ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
 
       delta_min, delta_max = delta_lim
       X_min, X_max = X_lim
@@ -458,7 +458,7 @@ def plot_topologie(ax1, delta_lim, X_lim, linewidth=4, grid=True):
       Xhyp = np.zeros(512)
       count = 0
       for delta in delt:
-            [xmin, xmax, xres, xint, xhyp] = topologie(delta)
+            [xmin, xmax, xres, xint, xhyp] = topology(delta)
             Xmin[count] = xmin
             Xmax[count] = xmax
             Xres[count] = xres
@@ -555,7 +555,7 @@ def plot_ell2SFM(data, planet_pairs=(0,1), resonances=2, colors='green',
             if X_lim[1] < 5:
                   X_lim = (X_lim[0], 5)
             ax.set_ylim(X_lim)
-      plot_topologie(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
+      plot_topology(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
 
       py.legend()
       py.tight_layout()
