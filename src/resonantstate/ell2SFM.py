@@ -307,7 +307,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
             [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
             x1.append(xx1)
             x2.append(xx2)
-            [xmin, xmax, xint, xext, xhyp] = topologie(delta[i])
+            [xint, xext, xhyp] = topologie_light(delta[i])
             if (delta[i] < 1.):
                   IR.append(0)
             else:
@@ -417,7 +417,7 @@ def samples2ell_twoplanets(sample, pair):
 
 
 
-def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
+def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, color_min=None, color_max=None, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
       I    = pair[0]
       J    = pair[1]
 
@@ -425,20 +425,15 @@ def plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name='',
             print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
 
       if (isinstance(colors, np.ndarray)):
-            #Making sure that all plots use the same colorbar
-            Ds    = np.concatenate((Ds,  np.array([1.e300, 1.e300])))
-            x1s   = np.concatenate((x1s, np.array([1.e300, 1.e300])))
-            x2s   = np.concatenate((x2s, np.array([1.e300, 1.e300])))
-            color = np.concatenate((colors, np.array([colors.min(), colors.max()])))
             #Plotting
-            ax1.scatter(Ds, x1s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha, label = label_name + f' pair {I} {J}')
-            ax1.scatter(Ds, x2s, c = color, cmap='hsv', marker = 'o',  s = markersize, alpha = alpha)
+            ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_min, vmax=color_max, marker = 'o',  s = markersize, alpha = alpha, label = label_name + f' pair {I} {J}')
+            ax1.scatter(Ds, x2s, c = colors, cmap='hsv', vmin=color_min, vmax=color_max, marker = 'o',  s = markersize, alpha = alpha)
       else:
             ax1.scatter(Ds, x1s, c = colors, marker = 'o',  s = markersize, alpha = alpha, label = label_name + f' pair {I} {J}')
             ax1.scatter(Ds, x2s, c = colors, marker = 'o',  s = markersize, alpha = alpha)
 
-      if (isinstance(colors[0], np.ndarray)):
-            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(colors.min(), color.max())), ax=ax1, aspect=40, pad=0.01)
+      if (isinstance(colors, np.ndarray)):
+            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_min, color_max)), ax=ax1, aspect=40, pad=0.01)
             cbar.ax.tick_params()
 
 
@@ -453,22 +448,30 @@ def samples2usefull( sample, pair, p):
       [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
-def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
+def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, color_min=None, color_max=None, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
 
       [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
       [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
 
-      plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+      plot_SFM(fig, ax1, Ds, x1s, x2s, IsResonant, pair, p, colors, color_min, color_max, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
 
 
-def plot_samples(fig, ax1, sample, pairs, ps, colors, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
-      for pair, p, color in zip(pairs, ps, cycle(colors)):
-            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
-            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+def plot_samples_SFM(fig, ax1, sample, pairs, ps, colors, color_min=None, color_max=None, label_name='', check_resonance=False, alpha = 0.7, markersize=80):
+
+      if (isinstance(pairs, list) and isinstance(ps, list) and isinstance(colors, list)):
+            for pair, p, color in zip(pairs, ps, cycle(colors)):
+                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pair)
+                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, color_min, color_max, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
+      else:
+            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]=samples2ell_twoplanets(sample, pairs)
+            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, ps, colors, color_min, color_max, label_name=label_name, check_resonance=check_resonance, alpha = alpha, markersize=markersize)
 
 
 
-def plot_auxiliary(ax1, delta_lim, X_lim, linewidth=4, grid=True):
+def plot_topologie(ax1, delta_lim=(-3,5), X_lim=(-5,5), linewidth=4, grid=True):
+
+      ### Plots the topologie of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1
+
       delta_min, delta_max = delta_lim
       X_min, X_max = X_lim
 
@@ -503,7 +506,7 @@ def plot_auxiliary(ax1, delta_lim, X_lim, linewidth=4, grid=True):
 
 
 def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']], 
-                 delta_lim=(-3,5), X_lim=(-5,5), check_resonance=False, 
+                 delta_lim=(-3,5), X_lim=(-5,5), color_lim=(None, None), check_resonance=False, 
                  grid=True, markersize=80, alpha=0.7, linewidth=4):
       """
       Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
@@ -544,6 +547,7 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
       fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
             The figure and axes objects of the plot.
       """
+      color_min, color_max = color_lim
 
       if len(planet_pairs) != len(resonances):
             raise ValueError('The number of planet pairs must match the number of resonances.')
@@ -554,15 +558,15 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             for df_dict, color in zip(data, colors):
                   if check_resonance:
                         print('Analysis', df_dict['sample_name'], ':')
-                  plot_samples(fig, ax, df_dict['sample'], planet_pairs, resonances, colors=color, 
+                  plot_samples_SFM(fig, ax, df_dict['sample'], planet_pairs, resonances, colors=color, color_min=color_min, color_max=color_max,
                                label_name=df_dict['sample_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, dict):
-            plot_samples(fig, ax, data['sample'], planet_pairs, resonances, colors=colors[0], label_name=data['sample_name'],
+            plot_samples_SFM(fig, ax, data['sample'], planet_pairs, resonances, colors=colors[0], color_min=color_min, color_max=color_max, label_name=data['sample_name'],
                           check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       elif isinstance(data, pd.DataFrame):
-            plot_samples(fig, ax, data, planet_pairs, resonances, colors=colors[0], 
+            plot_samples_SFM(fig, ax, data, planet_pairs, resonances, colors=colors[0], color_min=color_min, color_max=color_max,
                          check_resonance=check_resonance, markersize=markersize, alpha=alpha)
 
       else:
@@ -584,7 +588,7 @@ def plot_ell2SFM(data, planet_pairs=[[0,1]], resonances=[2], colors=[['green']],
             if X_lim[1] < 5:
                   X_lim = (X_lim[0], 5)
             ax.set_ylim(X_lim)
-      plot_auxiliary(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
+      plot_topologie(ax, delta_lim, X_lim, linewidth=linewidth, grid=grid)
 
       py.legend()
       py.tight_layout()

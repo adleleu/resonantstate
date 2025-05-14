@@ -86,27 +86,38 @@ def download_observations_samples(dataframe, download_destination=None):
     unique_samples_urls = []
     metadata_urls = []
     readme_urls = []
+    additional_infos_urls = []
     planet_metadatas = []
+
     for row in dataframe.iterrows():
         index_row, planet_metadata = row
         
-        url_of_sample   = planet_metadata[mteObs.URL_OF_SAMPLES.value]
-        url_of_metadata = planet_metadata[mteObs.METADATA_FILE.value]
-        url_of_readme   = planet_metadata.get(mteObs.README_FILE.value, None) # may be None
+        url_of_sample           = planet_metadata[mteObs.URL_OF_SAMPLES.value]
+        url_of_metadata         = planet_metadata[mteObs.METADATA_FILE.value]
+        url_of_readme           = planet_metadata.get(mteObs.README_FILE.value, None) # may be None
+        if url_of_readme == "":
+            url_of_readme = None
+        url_of_additional_info  = planet_metadata.get(mteObs.CONFIG_FILE.value, None) # may be None
+        if url_of_additional_info == "":
+            url_of_additional_info = None
+
         if url_of_sample not in unique_samples_urls:
             
             unique_samples_urls.append(url_of_sample)
             metadata_urls.append(url_of_metadata)
             readme_urls.append(url_of_readme)
+            additional_infos_urls.append(url_of_additional_info)
             planet_metadatas.append(planet_metadata)
            
     
     # iterate over the unique urls and download the samples and metadata and add the information dictionnary to the list
     return_samples = []
     for url_index in range(len(unique_samples_urls)):
-        sample_url = unique_samples_urls[url_index]
-        metadata_url = metadata_urls[url_index]
-        readme_url = readme_urls[url_index]
+        sample_url          = unique_samples_urls[url_index]
+        metadata_url        = metadata_urls[url_index]
+        readme_url          = readme_urls[url_index]
+        additional_info_url = additional_infos_urls[url_index]
+        
         planet_metadata = planet_metadatas[url_index]
         file_sample = requests.get(sample_url, verify=False)
         if not file_sample.ok: 
@@ -125,33 +136,44 @@ def download_observations_samples(dataframe, download_destination=None):
             readme = file_readme.text
         else:
             readme = None
+        
+        if additional_info_url is not None:   
+            file_additional_info = requests.get(additional_info_url, verify=False)
+            if not file_additional_info.ok: 
+                raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
+            additional_infos = json.loads(file_additional_info.text) 
+        else:
+            additional_infos = None
+        
         name = f"{metadata[mteObs.STAR_NAME.value]}_{metadata[mteObs.ANALYSIS_ID.value]}"
         
         # name definitions from the table_entries_catalogs.py file
         samples_dict = {
             obsDict.SAMPLE_NAME.value:                  name,
             obsDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
-            
-            obsDict.SAMPLE.value:                       dataframe_sample,
+           
+            obsDict.SAMPLES.value:                      dataframe_sample,
             obsDict.README.value:                       readme,
-            mteObs.AUTHOR_NAME.value:                   metadata.get(mteObs.AUTHOR_NAME.value, None),
-            mteObs.STAR_NAME.value:                     metadata[mteObs.STAR_NAME.value],                     
-            mteObs.ANALYSIS_ID.value:                   metadata[mteObs.ANALYSIS_ID.value],  
-            mteObs.CONTACT_EMAIL.value:                 metadata[mteObs.CONTACT_EMAIL.value],  
-            mteObs.DEFAULT.value:                       metadata[mteObs.DEFAULT.value],  
-            mteObs.ROBUSTNESS.value:                    metadata[mteObs.ROBUSTNESS.value],  
-            mteObs.INITIAL_CONDITION_DATE_BJD.value:    metadata[mteObs.INITIAL_CONDITION_DATE_BJD.value],  
-            mteObs.NB_PLANETS.value:                    len(metadata[mteAuthors.PLANET_LIST.value]),  
-            mteObs.GAIA_ID.value:                       metadata.get(mteObs.GAIA_ID.value, None),  
-            mteObs.MASS_PRIORS.value:                   metadata[mteObs.MASS_PRIORS.value],  
-            mteObs.ECCENTRICITY_PRIORS.value:           metadata[mteObs.ECCENTRICITY_PRIORS.value],  
-            mteObs.TRANSIT_DEFINITION.value:            metadata.get(mteObs.TRANSIT_DEFINITION.value,None),
-            mteObs.METHODS.value:                       metadata[mteObs.METHODS.value],  
-            mteObs.INSTRUMENTS.value:                   metadata[mteObs.INSTRUMENTS.value],  
-            mteObs.BIBTEX.value:                        metadata[mteObs.BIBTEX.value],  
-            mteObs.CODE_USED.value:                     metadata[mteObs.CODE_USED.value],  
-            mteObs.OTHER_REMARKS.value:                 metadata[mteObs.OTHER_REMARKS.value],  
+            obsDict.ADDITIONAL_INFO.value:              additional_infos,
+            mteObs.AUTHOR_NAME.value:                  planet_metadata.get(mteObs.AUTHOR_NAME.value, None),
+            mteObs.STAR_NAME.value:                     planet_metadata[mteObs.STAR_NAME.value],                     
+            mteObs.ANALYSIS_ID.value:                   planet_metadata[mteObs.ANALYSIS_ID.value],  
+            obsDict.CONTACT_EMAIL.value:                 planet_metadata[mteObs.CONTACT_EMAIL.value],  
+            mteObs.DEFAULT.value:                       planet_metadata[mteObs.DEFAULT.value],  
+            mteObs.ROBUSTNESS.value:                    planet_metadata[mteObs.ROBUSTNESS.value],  
+            mteObs.INITIAL_CONDITION_DATE_BJD.value:    planet_metadata[mteObs.INITIAL_CONDITION_DATE_BJD.value],  
+            mteObs.NB_PLANETS.value:                    planet_metadata[mteObs.NB_PLANETS.value],  
+            mteObs.GAIA_ID.value:                       planet_metadata[mteObs.GAIA_ID.value],  
+            mteObs.MASS_PRIORS.value:                   planet_metadata[mteObs.MASS_PRIORS.value],  
+            mteObs.ECCENTRICITY_PRIORS.value:           planet_metadata[mteObs.ECCENTRICITY_PRIORS.value],  
+            mteObs.TRANSIT_DEFINITION.value:            planet_metadata.get(mteObs.TRANSIT_DEFINITION.value, None),
+            mteObs.METHODS.value:                       planet_metadata[mteObs.METHODS.value],  
+            mteObs.INSTRUMENTS.value:                   planet_metadata[mteObs.INSTRUMENTS.value],  
+            mteObs.BIBTEX.value:                        planet_metadata[mteObs.BIBTEX.value],  
+            mteObs.CODE_USED.value:                     planet_metadata[mteObs.CODE_USED.value],  
+            mteObs.OTHER_REMARKS.value:                 planet_metadata[mteObs.OTHER_REMARKS.value],  
         }
+        
         return_samples.append(samples_dict)
     
         # save the files if the download destination is given
@@ -165,6 +187,10 @@ def download_observations_samples(dataframe, download_destination=None):
             if readme is not None:
                 with open(readme_file_name, 'w') as f:
                     f.write(readme)
+            if additional_infos is not None:
+                additional_infos_file_name = download_destination / f"{name}_additional_infos.json"
+                with open(additional_infos_file_name, 'w') as f:
+                    json.dump(additional_infos, f, indent=4)
         
     return return_samples
 
@@ -277,6 +303,7 @@ def download_simulations(dataframe, download_destination=None):
     metadata_urls = []
     additional_infos_urls = []
     readme_files_urls = []
+    planet_metadatas = []
     for row in dataframe.iterrows():
         index_row, metadata_line = row
         
@@ -284,19 +311,21 @@ def download_simulations(dataframe, download_destination=None):
         url_of_metadata         = metadata_line.get(mteSim.METADATA_FILE.value, None)
         url_of_additional_info  = metadata_line.get(mteSim.CONFIG_FILE.value, None) 
         url_of_readme           = metadata_line.get(mteSim.README_FILE.value, None) # may be None
-        if url_of_additional_info is None:
-            pass # no condition on the aditional infos as it may not be present
-        if url_of_readme is None:
+        if url_of_additional_info == "":
+            url_of_additional_info = None
+        if url_of_readme == "":
+            url_of_readme = None
             pass # no condition on the readme as it may not be present
-        if url_of_sample is None:
+        if url_of_sample is None or url_of_sample == "":
             raise ValueError(f"Missing URL_OF_SIMULATION in the metadata line: {metadata_line}")
-        if url_of_metadata is None:
+        if url_of_metadata is None or url_of_metadata == "":
             raise ValueError(f"Missing METADATA_FILE in the metadata line: {metadata_line}")
         if url_of_sample not in unique_simulations_urls:
             unique_simulations_urls.append(url_of_sample)
             metadata_urls.append(url_of_metadata)
             additional_infos_urls.append(url_of_additional_info)
             readme_files_urls.append(url_of_readme)
+            planet_metadatas.append(metadata_line)
 
     
     return_samples = []
@@ -305,6 +334,7 @@ def download_simulations(dataframe, download_destination=None):
         metadata_url = metadata_urls[url_index]
         aditional_info_url = additional_infos_urls[url_index]
         readme_file_rul = readme_files_urls[url_index]
+        planet_metadata = planet_metadatas[url_index]
         file_sample = requests.get(sample_url, verify=False)
         if not file_sample.ok:
             raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
@@ -335,27 +365,28 @@ def download_simulations(dataframe, download_destination=None):
         
         samples_dict = {
             simDict.SIMULATION_NAME.value:              name,
-            simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
             simDict.ADDITIONAL_INFO.value:              additional_infos,
             simDict.SIMULATION.value:                   dataframe_sample,
             simDict.README.value:                       readme,
             
-            mteSim.AUTHOR_NAME.value:                   metadata.get(mteSim.AUTHOR_NAME.value,None),
-            mteSim.STAR_NAME.value:                     metadata.get(mteSim.STAR_NAME.value, None),                    
-
-            mteSim.CONTACT_EMAIL.value:                 metadata[mteSim.CONTACT_EMAIL.value],  
+            simDict.CONTACT_EMAIL.value:                planet_metadata[mteSim.CONTACT_EMAIL.value],
+            mteSim.AUTHOR_NAME.value:                   planet_metadata.get(mteSim.AUTHOR_NAME.value,None),
+            simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
+            mteSim.STAR_NAME.value:                     planet_metadata[mteSim.STAR_NAME.value],
+            mteSim.RUN_ID.value:                        planet_metadata[mteSim.RUN_ID.value],
+            mteSim.SIMULATION_ID.value:                 planet_metadata[mteSim.SIMULATION_ID.value],
+            mteSim.RUN_NAME.value:                      planet_metadata[mteSim.RUN_NAME.value],
+            mteSim.SIMULATION_TYPE.value:               planet_metadata[mteSim.SIMULATION_TYPE.value],
+            mteSim.PHYSICS_IMPLEMENTED.value:           planet_metadata[mteSim.PHYSICS_IMPLEMENTED.value],
+            mteSim.NB_PLANETS.value:                    planet_metadata[mteSim.NB_PLANETS.value],  
+            mteSim.CODE_USED.value:                     planet_metadata[mteSim.CODE_USED.value],
+            mteSim.BIBTEX.value:                        planet_metadata[mteSim.BIBTEX.value],
+            mteSim.OTHER_REMARKS.value:                 planet_metadata[mteSim.OTHER_REMARKS.value],
             
-            mteSim.NB_PLANETS.value:                    len(metadata[mteAuthors.PLANET_LIST.value]),  
-            mteSim.SIMULATION_TYPE.value:               metadata[mteSim.SIMULATION_TYPE.value],
-            mteSim.PHYSICS_IMPLEMENTED.value:           metadata[mteSim.PHYSICS_IMPLEMENTED.value],
             
-            mteSim.RUN_ID.value:                        metadata[mteSim.RUN_ID.value],
-            mteSim.SIMULATION_ID.value:                 metadata[mteSim.SIMULATION_ID.value],
-            mteSim.BIBTEX.value:                        metadata[mteSim.BIBTEX.value],  
-            mteSim.CODE_USED.value:                     metadata[mteSim.CODE_USED.value],  
-            mteSim.OTHER_REMARKS.value:                 metadata[mteSim.OTHER_REMARKS.value],  
         }
-            
+        samples_dict.update(metadata)    
+        
         return_samples.append(samples_dict)
     
         if download_destination is not None:
