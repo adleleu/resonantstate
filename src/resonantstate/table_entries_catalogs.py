@@ -36,7 +36,7 @@ class MetaDataTableEntriesObservations(Enum):
     PLANET_NAME                     = "planet_name"                         # TOI-178 c
     STAR_NAME                       = "star_name"                           # TOI-178
     ANALYSIS_ID                     = "analysis_id"                         # 0,1,2,..
-    CONTACT_EMAIL                   = "contact_mail"                        # adrien.leleu@unige.ch
+    CONTACT_EMAIL                   = "contact_email"                       # adrien.leleu@unige.ch
     AUTHOR_NAME                     = "author_name"                         
     DEFAULT                         = "default"                             # 0 or 1 (int)
     ROBUSTNESS                      = "robustness"                          # between -1, 0 and 1
@@ -82,7 +82,7 @@ class MetaDataTableEntriesSimulations(Enum):
     RUN_ID                          = "run_id"                              # 0,1,2,..
     RUN_NAME                        = "run_name"                             # str
     SIMULATION_ID                   = "simulation_id"
-    CONTACT_EMAIL                   = "contact_mail"                        # adrien.leleu@unige.ch
+    CONTACT_EMAIL                   = "contact_email"                       # adrien.leleu@unige.ch
     AUTHOR_NAME                     = "author_name"                         
 
     PLANET_NAME                     = "planet_name"                         # TOI-178 c
@@ -127,7 +127,7 @@ class MetaDataTableEntriesSimulationsSummary(Enum):
     RUN_NAME                        = "run_name"                             # str
     SIMULATION_ID                   = "simulation_id"
 
-    CONTACT_EMAIL                   = "contact_mail"                        # adrien.leleu@unige.ch
+    CONTACT_EMAIL                   = "contact_email"                       # adrien.leleu@unige.ch
     
     SIMULATION_TYPE                 = "simulation_type"
     
@@ -144,12 +144,12 @@ class MetaDataTableEntriesSimulationsSummary(Enum):
 class AuthorsMetaDataTableEntries(Enum):
     
     ############################### common for both activities ##############
-    CONTACT_EMAIL                   = "contact_mail"
+    CONTACT_EMAIL                   = "contact_email"
     AUTHOR_NAME                     = "author_name"
     BIBTEX                          = "bibtex"
     CODE_USED                       = "code_used"
     STAR_NAME                       = "star_name"
-    PLANET_LIST                     = "planet_list"
+    PLANETS_LIST                    = "planets_list"
     OTHER_REMARKS                   = "other_remarks"
     
     ############################### only in activity A ######################

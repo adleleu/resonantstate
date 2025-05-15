@@ -178,9 +178,9 @@ def plot_histograms(dict_list, param, units='star'):
 
     # Loop through each analysis and plot the histograms
     for df_dict in dict_list:
-        analysis_id = df_dict['sample_name'].split('_')[-1]
+        analysis_id = df_dict['samples_name'].split('_')[-1]
         planets = df_dict['planets_list']
-        df = df_dict['sample']
+        df = df_dict['samples']
 
         for planet in planets:
             p_id = planets.index(planet)
@@ -223,8 +223,8 @@ def plot_samples(dict_list, x_param, y_param, units='star'):
 
     # Loop through each analysis and plot the samples
     for df_dict in dict_list:
-        analysis_id = df_dict['sample_name'].split('_')[-1]
-        df = df_dict['sample']
+        analysis_id = df_dict['samples_name'].split('_')[-1]
+        df = df_dict['samples']
         planets = df_dict['planets_list']
 
         for planet in planets:
@@ -262,8 +262,8 @@ def compare_period_ratios(dict_list, planet_pair):
     planet_pair_norm = [p.lower() for p in planet_pair]
     fig, ax = plt.subplots(1, 1, figsize=(6, 5))
     for df_dict in dict_list:
-        analysis_id = df_dict['sample_name'].split('_')[-1]
-        df = df_dict['sample']
+        analysis_id = df_dict['samples_name'].split('_')[-1]
+        df = df_dict['samples']
         planets = df_dict['planets_list']
         planets_norm = [p.lower() for p in planets]
 
@@ -302,8 +302,8 @@ def plot_adjacent_planets(dict_list, param, planet_pair, units='star'):
     planet_pair_norm = [p.lower() for p in planet_pair]
     fig, ax = plt.subplots(1, 1, figsize=(6, 5))
     for df_dict in dict_list:
-        analysis_id = df_dict['sample_name'].split('_')[-1]
-        df = df_dict['sample']
+        analysis_id = df_dict['samples_name'].split('_')[-1]
+        df = df_dict['samples']
         planets = df_dict['planets_list']
         planets_norm = [p.lower() for p in planets]
 
