@@ -61,13 +61,29 @@ def download_observations_samples(dataframe, download_destination=None):
         A list of dictionnaries with the samples informations and the samples themselves
         keys of the dictionnary are:
         
-        - sample_name:      the name of the sample (str)
+        - samples_name:     the name of the samples (str)
         - planets_list:     the list of planets in the sample (list of str)
-        - code:             the code used to generate the sample (str)
-        - bibtex:           the bibtex reference of the sample (str)
+        - samples:          the samples themselves (pandas.DataFrame) 
+        - readme:           the readme of the samples (str|None)
+        - additional_infos: the additional infos of the samples (str|None)
+        - author_name:      the name of the author of the samples (str)
+        - star_name:        the name of the star of the sampled system (str)
+        - analysis_id:      the analysis id of the samples (str)
         - contact_email:    the email of the contact person for the sample (str)
-        - sample:           the sample itself (pandas.DataFrame) 
-        - readme:           the readme of the sample (str)
+        - default:          the default value of the samples (str)
+        - robustness:       the robustness of the samples (str)
+        - initial_condition_date_bjd: the initial condition date of the samples (str)
+        - nb_planets:       the number of planets in the sample (int)
+        - gaia_id:          the gaia id of the sample (str)
+        - mass_priors:      the mass priors of the sample (str)
+        - eccentricity_priors:  the eccentricity priors of the sample (str)
+        - transit_definition:   the transit definition of the sample (str|None)
+        - methods:          the methods used to generate the sample (str)
+        - instruments:      the instruments used to generate the sample (str)
+        - bibtex:           the bibtex reference of the sample (str)
+        - code:             the code used to generate the sample (str)
+        - other_remarks:    the other remarks of the sample (str)
+        
     """
     # common mistake when manipulating pandas dataframe and does not work with the package so it has its own check
     if isinstance(dataframe, pd.Series):
@@ -266,9 +282,9 @@ def download_simulations(dataframe, download_destination=None):
     Parameters
     ----------
     dataframe : pd.DataFrame
-        The dataframe containing the metadata of the simulations that we want to download
+        The dataframe containing the metadata of the simulations that we want to download.
     download_destination : str or None
-        If given, save the simulations in the given directory with their corresponding metadata
+        If given, save the simulations in the given directory with their corresponding metadatas.
     
     Returns
     -------
@@ -277,12 +293,22 @@ def download_simulations(dataframe, download_destination=None):
         keys in of dictionnary are:
         
         - simulation_name:  the name of the simulation (str)
-        - planets_list:     the list of planets in the simulation (list of str)
-        - code:             the code used for the simulation (str)
-        - bibtex:           the bibtex reference of the simulation (str)
-        - contact_email:    the email of the contact person for the simulation (str)
+        - additional_infos: the additional infos of the simulation (dict)
         - simulation:       the simulation itself (pandas.DataFrame) 
-        - additional_infos: the additional infos of the simulation (str)
+        - readme:           the readme of the simulation (str|None)
+        - contact_email:    the email of the contact person for the simulation (str)
+        - author_name:      the name of the author of the simulation (str)
+        - planets_list:     the list of planets in the simulation (list of str)
+        - star_name:        the name of the star of the simulation (str)
+        - run_id:          the run id of the simulation (str)
+        - simulation_id:    the simulation id of the simulation (str)
+        - run_name:         the run name of the simulation (str)
+        - simulation_type:  the type of the simulation (str)
+        - physics_implemented: the physics implemented in the simulation (str)
+        - nb_planets:       the number of planets in the simulation (int)
+        - code_used:        the code used for the simulation (str)
+        - bibtex:           the bibtex reference of the simulation (str)
+        - other_remarks:    the other remarks of the simulation (str)
     """
     
     # common mistake when manipulating pandas dataframe and does not work with the package so it has its own check
