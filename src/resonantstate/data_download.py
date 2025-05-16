@@ -150,7 +150,7 @@ def download_observations_samples(dataframe, download_destination=None):
         # name definitions from the table_entries_catalogs.py file
         samples_dict = {
             obsDict.SAMPLE_NAME.value:                  name,
-            obsDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
+            obsDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANETS_LIST.value],
            
             obsDict.SAMPLES.value:                      dataframe_sample,
             obsDict.README.value:                       readme,
@@ -371,7 +371,7 @@ def download_simulations(dataframe, download_destination=None):
             
             simDict.CONTACT_EMAIL.value:                planet_metadata[mteSim.CONTACT_EMAIL.value],
             mteSim.AUTHOR_NAME.value:                   planet_metadata.get(mteSim.AUTHOR_NAME.value,None),
-            simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANET_LIST.value],
+            simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANETS_LIST.value],
             mteSim.STAR_NAME.value:                     planet_metadata[mteSim.STAR_NAME.value],
             mteSim.RUN_ID.value:                        planet_metadata[mteSim.RUN_ID.value],
             mteSim.SIMULATION_ID.value:                 planet_metadata[mteSim.SIMULATION_ID.value],
