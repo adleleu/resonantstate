@@ -330,6 +330,77 @@ def topology_light(delta):
 #Plotting
 #if (plot_DACE_data):
 
+def scaled_resonant_period(X, Y, delta):
+      from scipy.special import ellipk
+      H0 = 1.5*delta*(X**2 + Y**2) - 0.25*(X**2 + Y**2)**2 + 2*X
+      a0 = -1
+      a1 = 6*delta/4
+      a2 = (- 2*H0 - 9*delta**2)/6
+      a3 = (8 + 6*delta*H0)/4
+      a4 = -H0**2
+      g2 = a0*a4 - 4*a1*a3 + 3*a2**2
+      g3 = a0*a2*a4 + 2*a1*a2*a3 - a2**3 - a0*a3**2 - a1**2*a4
+      Delta = g2**3 - 27*g3**2
+      if Delta > 0:
+            # Three real roots
+            e3, e2, e1 = np.sort(np.roots([4, 0, -g2, -g3]))
+            k = np.sqrt((e2 - e3)/(e1 - e3))
+            Pt = 2*ellipk(k**2)/np.sqrt(e1 - e3)
+      elif Delta < 0:
+            # e2 is real root, e1 and e3 are complex conjugates
+            roots = np.sort(np.roots([4, 0, -g2, -g3]))
+            e2 = roots[roots.imag == 0].real[0]
+            e1, e3 = roots[roots.imag != 0]
+            alpha = e1.real
+            beta = e1.imag
+            gamma = np.sqrt(9*alpha**2 + beta**2)
+            k = np.sqrt(0.5 - 3*e2/(4*gamma))
+            Pt = 2*ellipk(k**2)/np.sqrt(gamma)
+      else:
+            raise ValueError('Delta must be different from 0')
+      return Pt
+
+def real_resonant_period(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
+      X, Y, X2, Y2, delta = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2)
+      Pt = scaled_resonant_period(X, Y, delta)
+      # Period of inner planet is normalized to 1
+      T2    = T2/T1
+      T1    = T1/T1
+
+      # Getting semi-major axes and Lambda
+      G     = 4.*np.pi**2
+      beta1 = m1/(1. + m1)
+      beta2 = m2/(1. + m2)
+      mu1   = G*(1. + m1)
+      mu2   = G*(1. + m2) 
+      n1    = 2.*np.pi/T1
+      n2    = 2.*np.pi/T2
+      n10   = 2.*np.pi
+      n20   = p*n10/(p + 1)
+      a1    = (mu1/n1**2)**(1./3.)
+      a2    = (mu2/n2**2)**(1./3.)
+      Lbd1  = beta1*np.sqrt(mu1*a1)
+      Lbd2  = beta2*np.sqrt(mu2*a2)
+
+      #Defining the exact resonance
+      a10   = (mu1/n10**2)**(1./3.)
+      a20   = (mu2/n20**2)**(1./3.)
+      Lbd10 = beta1*np.sqrt(mu1*a10)
+      Lbd20 = beta2*np.sqrt(mu2*a20)
+
+      # Getting G and Gamma and normalizing
+      Gamma = (p + 1)*Lbd1 + p*Lbd2
+      C1    = Gamma/Lbd10
+      C2    = Gamma/Lbd20
+
+      #Getting alpha, beta, gamma, delta, R and S
+      f1    = f1s[p - 1]
+      f2    = f2s[p - 1]
+      beta = 1.5*n10*p*(p*C1 + (p+1)*C2)
+      gamma = m1*n20/C2*np.sqrt(f1**2*C1 + f2**2*C2)
+      K     = (2.*beta/gamma)**(-2./3.)
+      omega = beta*(2.*beta/gamma)**(-4./3.)
+      return Pt * K/omega
 
 def samples2ell_twoplanets(sample, pair):
       I    = pair[0]
