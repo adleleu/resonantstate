@@ -363,43 +363,37 @@ def scaled_resonant_period(X, Y, delta):
 def real_resonant_period(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       X, Y, X2, Y2, delta = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2)
       Pt = scaled_resonant_period(X, Y, delta)
-      # Period of inner planet is normalized to 1
-      T2    = T2/T1
-      T1    = T1/T1
 
       # Getting semi-major axes and Lambda
-      G     = 4.*np.pi**2
-      beta1 = m1/(1. + m1)
-      beta2 = m2/(1. + m2)
-      mu1   = G*(1. + m1)
-      mu2   = G*(1. + m2) 
-      n1    = 2.*np.pi/T1
-      n2    = 2.*np.pi/T2
-      n10   = 2.*np.pi
+      G     = 4*np.pi**2
+      beta1 = m1/(1 + m1)
+      beta2 = m2/(1 + m2)
+      mu1   = G*(1 + m1)
+      mu2   = G*(1 + m2)
+      n1    = 2*np.pi/T1
+      n2    = 2*np.pi/T2
+      n10   = n1
       n20   = p*n10/(p + 1)
-      a1    = (mu1/n1**2)**(1./3.)
-      a2    = (mu2/n2**2)**(1./3.)
+      a1    = (mu1/n1**2)**(1/3)
+      a2    = (mu2/n2**2)**(1/3)
       Lbd1  = beta1*np.sqrt(mu1*a1)
       Lbd2  = beta2*np.sqrt(mu2*a2)
 
-      #Defining the exact resonance
-      a10   = (mu1/n10**2)**(1./3.)
-      a20   = (mu2/n20**2)**(1./3.)
+      a10   = (mu1/n10**2)**(1/3)
+      a20   = (mu2/n20**2)**(1/3)
       Lbd10 = beta1*np.sqrt(mu1*a10)
       Lbd20 = beta2*np.sqrt(mu2*a20)
 
-      # Getting G and Gamma and normalizing
       Gamma = (p + 1)*Lbd1 + p*Lbd2
       C1    = Gamma/Lbd10
       C2    = Gamma/Lbd20
 
-      #Getting alpha, beta, gamma, delta, R and S
       f1    = f1s[p - 1]
       f2    = f2s[p - 1]
       beta = 1.5*n10*p*(p*C1 + (p+1)*C2)
       gamma = m1*n20/C2*np.sqrt(f1**2*C1 + f2**2*C2)
-      K     = (2.*beta/gamma)**(-2./3.)
-      omega = beta*(2.*beta/gamma)**(-4./3.)
+      K     = (2*beta/gamma)**(-2/3)
+      omega = beta*(2*beta/gamma)**(-4/3)
       return Pt * K/omega
 
 def samples2ell_twoplanets(sample, pair):
