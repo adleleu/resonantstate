@@ -360,11 +360,7 @@ def scaled_resonant_period(X, Y, delta):
             raise ValueError('Delta must be different from 0')
       return Pt
 
-def real_resonant_period(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
-      X, Y, X2, Y2, delta = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2)
-      Pt = scaled_resonant_period(X, Y, delta)
-
-      # Getting semi-major axes and Lambda
+def time_scaling_factor(p, m1, m2, T1, T2):
       G     = 4*np.pi**2
       beta1 = m1/(1 + m1)
       beta2 = m2/(1 + m2)
@@ -394,7 +390,13 @@ def real_resonant_period(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       gamma = m1*n20/C2*np.sqrt(f1**2*C1 + f2**2*C2)
       K     = (2*beta/gamma)**(-2/3)
       omega = beta*(2*beta/gamma)**(-4/3)
-      return Pt * K/omega
+      return K/omega
+
+def real_resonant_period(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
+      X, Y, X2, Y2, delta = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2)
+      Pt = scaled_resonant_period(X, Y, delta)
+      scaling_factor = time_scaling_factor(p, m1, m2, T1, T2)
+      return Pt * scaling_factor
 
 def samples2ell_twoplanets(sample, pair):
       I    = pair[0]
