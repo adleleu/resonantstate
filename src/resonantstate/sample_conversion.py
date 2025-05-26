@@ -2,25 +2,26 @@
 
 # We provide here 6 conversion functions for the samples of the workshop.
 # A row of sample is : Id or timestamp, lbd(°), Period(days), k, h, Inclination(°), Omega(°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-# Columns Id or timestamp, m/M*, R/R*, M* (Msun), R* (Rsun) are NOT modified by these functions.
+# Columns Id or timestamp, mj/Mj*, Rj/Rj*, M* (Msun), R* (Rsun) are NOT modified by these functions.
 # Only columns lbd(°), Period(days), k, h, Inclination(°), Omega(°) are modified for each planet.
 
 
 # - Sample2cart(sample, typeOfCoordinates, adcol)   -->  Converts the sample to cartesian coordinates.
 #                                                        The columns are now Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-#                                                        typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+#                                                        typeOfCoordinates is either 'Jacobi', 'JacobiWisdomHolman' or 'Heliocentric'
+#                                                        Jacobi differs from JacobiWisdomHolman in the sense that the mu is defined differently. See Wisdom & Holman 1991
 #                                                        adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
 # - Sample2aeiMoO(sample, typeOfCoordinates, adcol) -->  Converts the sample to elliptic coordinates (a, e, i, M, omega, Omega) = (semi-major axis, eccentricity, inclination, 
 #                                                        mean anomaly, argument of periapsis, longitude of ascending node).
 #                                                        The columns are now Id or timestamp, a, e, i(rad), M(rad), omega(rad), Omega(rad), m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-#                                                        typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+#                                                        typeOfCoordinates is either 'Jacobi', 'JacobiWisdomHolman' or 'Heliocentric'
 #                                                        adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
 # - Sample2alkhqp(sample, typeOfCoordinates, adcol) -->  Converts the sample to elliptic coordinates (a, lbd, k, h, q, p) = (semi-major axis, mean longitude,
 #                                                        e*cos(varpi), e*sin(varpi), sin(i/2)*cos(Omega), sin(i/2)*sin(Omega)).
 #                                                        The columns are now Id or timestamp, a, lbd(rad), k, h, q, p, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
-#                                                        typeOfCoordinates is either 'Jacobi' or 'Heliocentric'
+#                                                        typeOfCoordinates is either 'Jacobi', 'JacobiWisdomHolman' or 'Heliocentric'
 #                                                        adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
 # - Cart2sample(sample, typeOfCoordinates, adcol)   -->  Inverse of Sample2cart.
@@ -29,11 +30,17 @@
 #           For example, if your sample is in Jacobi coordinates, Sample2cart(sample, 'Jacobi') will convert it into Jacobi cartesian coordinates, whereas
 #           Sample2cart(sample, 'Heliocentric') will have undefined behavior. Use functions Jac2Hel and Hel2Jac for conversion Jacobi <--> Heliocentric
 
-# - Jac2Hel(sample, adcol) --> Converts the sample from Jacobi coordinates to Heliocentric coordinates
-#                              adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
+# - Jac2Hel(sample, adcol)   --> Converts the sample from Jacobi coordinates to Heliocentric coordinates. The regular Jacobi convention mu = G(M* + m1 + ... + mj) is used
+#                                adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
-# - Hel2Jac(sample, adcol) --> Converts the sample from Heliocentric coordinates to Jacobi coordinates
-#                              adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
+# - Hel2Jac(sample, adcol)   --> Converts the sample from Heliocentric coordinates to Jacobi coordinates. The regular Jacobi convention mu = G(M* + m1 + ... + mj) is used
+#                                adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
+
+# - JacWH2Hel(sample, adcol) --> Converts the sample from Jacobi coordinates to Heliocentric coordinates. The WisdomHolman convention mu = GM*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) is used
+#                                adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
+
+# - Hel2JacWH(sample, adcol) --> Converts the sample from Heliocentric coordinates to Jacobi coordinates. The WisdomHolman convention mu = GM*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) is used
+#                                adcol is the number of additional columns in the sample (often 0 unless otherwise specified by the sample's author)
 
 # These functions convert into a system of units where : (see https://iau-a3.gitlab.io/NSFA/IAU2009_consts.html)
 # - The unit of length is the astronomical unit (1.49597870700e11 m, as recommended by the IAU)
@@ -66,9 +73,9 @@ def ell2cart_true(aeinuoO, mass):
 
       #Returns the cartesian coordinates. This is an auxiliary function
 
-      #aeinuoO = [a, e, i, nu, omega, Omega] = [semi-major axis, eccentricity, inclination, true longitude, argument of the periapsis, longitude of the ascending node]
+      #aeinuoO = [a, e, i, nu, omega, Omega] = [semi-major axis, eccentricity, inclination, true anomaly, argument of the periapsis, longitude of the ascending node]
       #i, nu, omega, Omega are in radians
-      #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
       
       #Extracted from NcorpiON software and translated from C to python
       
@@ -92,7 +99,7 @@ def ell2cart_true(aeinuoO, mass):
       dpq      = 2.*p*q
       
       ## In the orbital plane (see e.g. Laskar & Robutel 1995) ##
-      r = a*(1. - e*e)/(1. + e*cosnu)
+      r       = a*(1. - e*e)/(1. + e*cosnu)
       g       = np.sqrt(mu*a*(1. - e*e))
       dnudt   = g/(r*r)
       drdt    = a*e*dnudt*sinnu*(1. - e*e)/((1. + e*cosnu)*(1. + e*cosnu))
@@ -111,11 +118,58 @@ def ell2cart_true(aeinuoO, mass):
       
       return [X, Y, Z, vX, vY, vZ]
       
+      
+def ell2cart_eccentric(aeiEoO, mass):
+
+      #Returns the cartesian coordinates. This is an auxiliary function
+
+      #aeiEoO = [a, e, i, E, omega, Omega] = [semi-major axis, eccentricity, inclination, eccentric anomaly, argument of the periapsis, longitude of the ascending node]
+      #i, E, omega, Omega are in radians
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
+      
+      #Extracted from NcorpiON software and translated from C to python
+      
+      a        = aeiEoO[0]
+      e        = aeiEoO[1]
+      i        = aeiEoO[2]
+      E        = aeiEoO[3]
+      omega    = aeiEoO[4]
+      Omega    = aeiEoO[5]
+      
+      mu       = G*mass
+      cosE     = np.cos(E)
+      sinE     = np.sin(E)
+      cosvarpi = np.cos(omega + Omega)
+      sinvarpi = np.sin(omega + Omega)
+      q        = np.sin(i/2.)*np.cos(Omega)
+      p        = np.sin(i/2.)*np.sin(Omega)
+      chi      = np.cos(i/2.)
+      pp       = 1. - 2.*p*p
+      qq       = 1. - 2.*q*q
+      dpq      = 2.*p*q
+      
+      ## In the orbital plane (see e.g. Laskar & Robutel 1995) ##
+      na      = np.sqrt(mu/a)
+      X_buff  = a*(cosE - e)
+      Y_buff  = a*sinE*np.sqrt(1. - e*e)
+      vX_buff = -na*sinE/(1. - e*cosE)
+      vY_buff = na*np.sqrt(1. - e*e)*cosE/(1. - e*cosE)
+
+      ## Rotations to convert to reference plane (see e.g. Laskar & Robutel 1995) ##      
+      X  =  X_buff*(pp*cosvarpi + dpq*sinvarpi) +  Y_buff*(dpq*cosvarpi - pp*sinvarpi)
+      vX = vX_buff*(pp*cosvarpi + dpq*sinvarpi) + vY_buff*(dpq*cosvarpi - pp*sinvarpi)
+      Y  =  X_buff*(qq*sinvarpi + dpq*cosvarpi) +  Y_buff*(qq*cosvarpi  - dpq*sinvarpi)
+      vY = vX_buff*(qq*sinvarpi + dpq*cosvarpi) + vY_buff*(qq*cosvarpi  - dpq*sinvarpi)
+      Z  =  X_buff*(2.*q*chi*sinvarpi - 2.*p*chi*cosvarpi) +  Y_buff*(2.*p*chi*sinvarpi + 2.*q*chi*cosvarpi)
+      vZ = vX_buff*(2.*q*chi*sinvarpi - 2.*p*chi*cosvarpi) + vY_buff*(2.*p*chi*sinvarpi + 2.*q*chi*cosvarpi)
+      
+      return [X, Y, Z, vX, vY, vZ]
+      
 
 def cart2ell(XYZvXvYvZ, mass):
 
       #Converts the cartesian coordinates into the elliptic elements [a, lambda, k, h, q, p] where k + ih = e*exp(i*varpi) and q + ip = sin(I/2)*exp(i*Omega)
-      #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
       
       #This function was originally provided by Mickaël Gastineau of the IMMCE lab for NcorpiON software and converted from C to python for the workshop
 
@@ -217,7 +271,7 @@ def get_true_anomaly(aeiMoO, mass):
       ##### dnu/dt = sqrt(mu)*(1 + e cos nu)^2/(a(1-e^2))^(3/2) using a Runge-Kutta 4 method #####
       ##### This is equivalent to solving Kepler's equation.                                 #####
       
-      #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
 
       #Extracted from NcorpiON software and translated from C to python
 
@@ -269,11 +323,74 @@ def get_true_anomaly(aeiMoO, mass):
       return [a, e, i, nu, o, O]
 
 
+def l2F(l,k,h):
+      #Solves the Kepler equation without a numerical integration. Much faster than the above function
+      #Returns F = E + varpi
+      #(l, k, h) = (Mean longitude, e*cos(varpi), e*sin(varpi))
+      #Written by ASD Team LTE lab (former IMCCE)
+
+      eps = 2*2.26e-16
+      imax = 20
+      # depart methode d'ordre 3
+      a=l
+      ca=np.cos(a)
+      sa=np.sin(a)
+      se=k*sa-h*ca
+      ce=k*ca+h*sa
+      fa=a-se-l
+      f1a=1.0-ce
+      f2a=se/2.0
+      f3a=ce/6.0
+      d1=-fa/f1a
+      d2=-fa/(f1a-d1*f2a)
+      d3 =-fa/(f1a+d2*(f2a+d2*f3a))
+      a=a+d3
+      # methode d'ordre 6
+      ca=np.cos(a)
+      sa=np.sin(a)
+      se=k*sa-h*ca
+      ce=k*ca+h*sa
+      fa=a-se-l
+      f1a=1.0-ce
+      f2a=se/2.0
+      f3a=ce/6.0
+      f4a=-se/24.0
+      f5a=-ce/120.0
+      d1=-fa/f1a
+      d2=-fa/(f1a-d1*f2a)
+      d3=-fa/(f1a+d2*(f2a+d2*f3a))
+      d4=-fa/(f1a+d3*(f2a+d3*(f3a+d3*f4a)))
+      d5=-fa/( f1a+d4*(f2a+d4*(f3a+d4*(f4a+d4*f5a))))
+      a=a+d5
+      #     return
+      #     on teste la precision obtenue
+      i=0
+      while True:
+            i=i+1
+            ca=np.cos(a)
+            sa=np.sin(a)
+            se=k*sa-h*ca
+            fa=a-se-l
+            ce=k*ca+h*sa
+            f1a=1.0-ce
+            d1=-fa/f1a
+            #     si la precison n'est pas bonne, on continue les calculs
+            #     en iterant la methode d'ordre 1
+            if (abs(d1)/max(1.0,abs(a)) > eps):
+                  if (i > imax):
+                        #     write(*,*) 'erreur fatale dans elliptid:keplkh2'
+                        #     write(*,*) 'erreur :',abs(d1)/dmax1(1.0,abs(a))
+                        return(a)
+                  a=a+d1
+            else:
+                  return(a)
+
+
 def lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT):
 
-      #Converts from the workshop format to elliptic elements [semi-major axis, eccentricity, inclination, mean longitude, argument of periapsis, longitude of ascending node]
+      #Converts from the workshop format to elliptic elements [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]
       #lPkhiO = [mean longitude (deg), Period (days), k, h, inclination(deg), longitude of the ascending node(deg)]
-      #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
 
       
       mu    = G*mass
@@ -300,9 +417,9 @@ def lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT):
       
 def aeiMoO_to_alkhqp(aeiMoO, mass, daysInUOT):
 
-      #Converts from elliptic elements [semi-major axis, eccentricity, inclination, mean longitude, argument of periapsis, longitude of ascending node]
+      #Converts from elliptic elements [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]
       #to elliptic elements [semi-major axis, mean longitude (deg), k, h, q, p]
-      #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
 
       
       mu    = G*mass
@@ -327,11 +444,23 @@ def lPkhiO_to_cart(lPkhiO, mass, daysInUOT):
 
       #Converts from the workshop format to cartesian coordinates
       #lPkhiO = [mean longitude (deg), Period (days), k, h, inclination(deg), longitude of the ascending node(deg)]
-      #mass is the central mass. e.g. mass = M_star + m_j for heliocentric or M_star + m_1 + ... + m_j for Jacobi.
+      #mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi
 
-      aeiMoO  = lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT)
-      aeinuoO = get_true_anomaly(aeiMoO, mass)
-      cart    = ell2cart_true(aeinuoO, mass)
+      aeiMoO = lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT)
+      a = aeiMoO[0]
+      e = aeiMoO[1]
+      i = aeiMoO[2]
+      M = aeiMoO[3]
+      o = aeiMoO[4]
+      O = aeiMoO[5]
+      #aeinuoO = get_true_anomaly(aeiMoO, mass)
+      #cart    = ell2cart_true(aeinuoO, mass)
+      vrp = o + O
+      l   = M + vrp
+      k   = e*np.cos(vrp)
+      h   = e*np.sin(vrp)
+      aeiEoO  = [a, e, i, l2F(l,k,h) - vrp, o, O]
+      cart    = ell2cart_eccentric(aeiEoO, mass)
 
       return cart;
 
@@ -339,7 +468,7 @@ def lPkhiO_to_cart(lPkhiO, mass, daysInUOT):
 def sample2cart_row(row, typeOfCoordinates, adcol):
 
       #Converts one row of the workshop into the same row in cartesian coordinates
-      #typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'
+      #typeOfCoordinates is either 'Jacobi', 'JacobiWisdomHolman' or 'Heliocentric'
       #typeOfCoordinates must be the type of coordinates into which the sample is given !
       #This function cannot be used to change the type of coordinates ! Its purpose is only to convert to cartesian
       #Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row
@@ -363,8 +492,13 @@ def sample2cart_row(row, typeOfCoordinates, adcol):
                         mass = mass + row[7 + 8*j]
             elif (typeOfCoordinates == 'Heliocentric'):
                   mass = 1. + row[7 + 8*i]
+            elif (typeOfCoordinates == 'JacobiWisdomHolman'):
+                  massum = 1. # M* + m1 + ... + mi
+                  for j in range(i + 1):
+                        massum = massum + row[7 + 8*j]
+                  mass = massum/(massum - row[7 + 8*i]) # M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})
             else:
-                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
+                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric' or 'JacobiWisdomHolman'.")
             mass = mass*row[-2-adcol]
             cart   = np.array(lPkhiO_to_cart(lPkhiO, mass, daysInUOT))
             output = np.concatenate((output, cart, np.array([row[7 + 8*i], row[8 + 8*i]])))
@@ -379,7 +513,7 @@ def sample2aeiMoO_row(row, typeOfCoordinates, adcol):
 
       #Converts one row of the workshop into the same row in coordinates a, e, i, M, o, O
       #[a, e, i, M, o, O] = [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]
-      #typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'
+      #typeOfCoordinates is either 'Jacobi', 'JacobiWisdomHolman' or 'Heliocentric'
       #typeOfCoordinates must be the type of coordinates into which the sample is given !
       #This function cannot be used to change the type of coordinates ! Its purpose is only to convert to a, e, i, M, o, O
       #Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row
@@ -403,8 +537,13 @@ def sample2aeiMoO_row(row, typeOfCoordinates, adcol):
                         mass = mass + row[7 + 8*j]
             elif (typeOfCoordinates == 'Heliocentric'):
                   mass = 1. + row[7 + 8*i]
+            elif (typeOfCoordinates == 'JacobiWisdomHolman'):
+                  massum = 1. # M* + m1 + ... + mi
+                  for j in range(i + 1):
+                        massum = massum + row[7 + 8*j]
+                  mass = massum/(massum - row[7 + 8*i]) # M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})
             else:
-                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
+                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric' or 'JacobiWisdomHolman'.")
             mass = mass*row[-2-adcol]
             aeiMoO = np.array(lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT))
             output = np.concatenate((output, aeiMoO, np.array([row[7 + 8*i], row[8 + 8*i]])))
@@ -420,7 +559,7 @@ def sample2alkhqp_row(row, typeOfCoordinates, adcol):
 
       #Converts one row of the workshop into the same row in coordinates a, lbd, k, h, q, p
       #[a, lbd, k, h, q, p] = [semi-major axis, mean longitude, e*cos(varpi), e*sin(varpi), sin(i/2)*cos(Omega), sin(i/2)*sin(Omega)]
-      #typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'
+      #typeOfCoordinates is either 'Jacobi', 'JacobiWisdomHolman' or 'Heliocentric'
       #typeOfCoordinates must be the type of coordinates into which the sample is given !
       #This function cannot be used to change the type of coordinates ! Its purpose is only to convert to a, lbd, k, h, q, p
       #Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row
@@ -444,8 +583,13 @@ def sample2alkhqp_row(row, typeOfCoordinates, adcol):
                         mass = mass + row[7 + 8*j]
             elif (typeOfCoordinates == 'Heliocentric'):
                   mass = 1. + row[7 + 8*i]
+            elif (typeOfCoordinates == 'JacobiWisdomHolman'):
+                  massum = 1. # M* + m1 + ... + mi
+                  for j in range(i + 1):
+                        massum = massum + row[7 + 8*j]
+                  mass = massum/(massum - row[7 + 8*i]) # M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})
             else:
-                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
+                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric' or 'JacobiWisdomHolman'.")
             mass = mass*row[-2-adcol]
             aeiMoO = lPkhiO_to_aeiMoO(lPkhiO, mass, daysInUOT)
             alkhqp = aeiMoO_to_alkhqp(aeiMoO, mass, daysInUOT)
@@ -479,8 +623,13 @@ def cart2sample_row(row, typeOfCoordinates, adcol):
                         mass = mass + row[7 + 8*j]
             elif (typeOfCoordinates == 'Heliocentric'):
                   mass = 1. + row[7 + 8*i]
+            elif (typeOfCoordinates == 'JacobiWisdomHolman'):
+                  massum = 1. # M* + m1 + ... + mi
+                  for j in range(i + 1):
+                        massum = massum + row[7 + 8*j]
+                  mass = massum/(massum - row[7 + 8*i]) # M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})
             else:
-                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric'.")
+                  raise Exception("typeOfCoordinates can be either 'Jacobi' or 'Heliocentric' or 'JacobiWisdomHolman'.")
             mass = mass*row[-2-adcol]
             alkhqp = cart2ell(XYZvXvYvZ, mass)
             a      = alkhqp[0]
@@ -522,7 +671,7 @@ def Jac2Hel_rowCart(row, adcol):
       for i in range(len(row)):
             output[i] = row[i]
       
-      masses = [1.]
+      masses     = [1.]
       total_mass = [1.]
       
       for i in range(N):
@@ -602,7 +751,7 @@ def Hel2Jac_rowCart(row, adcol):
       for i in range(len(row)):
             output[i] = row[i]
       
-      masses = [1.]
+      masses     = [1.]
       total_mass = [1.]
       
       for i in range(N):
@@ -679,11 +828,31 @@ def Jac2Hel_row(row, adcol):
 
 def Hel2Jac_row(row, adcol):
 
-      #Converts one row of sample from Jacobi to Heliocentric
+      #Converts one row of sample from Heliocentric to Jacobi
       
       rowCartHel       = sample2cart_row(row, 'Heliocentric', adcol)
       rowCartJac       = Hel2Jac_rowCart(rowCartHel, adcol)
       rowlPkhiO        = cart2sample_row(rowCartJac, 'Jacobi', adcol)
+      return rowlPkhiO
+      
+      
+def JacWH2Hel_row(row, adcol):
+
+      #Converts one row of sample from JacobiWisdomHolman to Heliocentric
+      
+      rowCartJac       = sample2cart_row(row, 'JacobiWisdomHolman', adcol)
+      rowCartHel       = Jac2Hel_rowCart(rowCartJac, adcol)
+      rowlPkhiO        = cart2sample_row(rowCartHel, 'Heliocentric', adcol)
+      return rowlPkhiO
+      
+
+def Hel2JacWH_row(row, adcol):
+
+      #Converts one row of sample from Heliocentric to JacobiWisdomHolman
+      
+      rowCartHel       = sample2cart_row(row, 'Heliocentric', adcol)
+      rowCartJac       = Hel2Jac_rowCart(rowCartHel, adcol)
+      rowlPkhiO        = cart2sample_row(rowCartJac, 'JacobiWisdomHolman', adcol)
       return rowlPkhiO
 
 
@@ -793,6 +962,39 @@ def Hel2Jac(sample, adcol):
                   print("Progress = ", progress, "%")
       return output
       
+def JacWH2Hel(sample, adcol):
+
+      n = sample.shape[1]
+      output = np.copy(sample)
+      print("Converting sample from JacobiWisdomHolman to Heliocentric coordinates")
+      print("Progress = ", 0., "%")
+      K = n // 100
+      for i in range(n):
+            row    = sample[:,i]
+            Newrow = JacWH2Hel_row(row, adcol)
+            output[:,i] = Newrow
+            if ((i+1)%K == 0):
+                  progress = 100.*(i + 1)/n
+                  print("Progress = ", progress, "%")
+      return output
+      
+      
+def Hel2JacWH(sample, adcol):
+
+      n = sample.shape[1]
+      output = np.copy(sample)
+      print("Converting sample from Heliocentric to JacobiWisdomHolman coordinates")
+      print("Progress = ", 0., "%")
+      K = n // 100
+      for i in range(n):
+            row    = sample[:,i]
+            Newrow = Hel2JacWH_row(row, adcol)
+            output[:,i] = Newrow
+            if ((i+1)%K == 0):
+                  progress = 100.*(i + 1)/n
+                  print("Progress = ", progress, "%")
+      return output
+      
       
 ##########################################################################################################################
 ##########################################################################################################################
@@ -803,7 +1005,7 @@ def Hel2Jac(sample, adcol):
 
 '''
 path = 'path_towards_sample.csv'
-sample = np.loadtxt(path, dtype = np.float64, delimiter=',', unpack=True)
+sample = np.loadtxt(path, dtype = np.float64, delimiter=',', unpack=True) #A sample in Heliocentric coordinates
 
 
 S1 = Sample2cart(sample, 'Heliocentric', 0)         # Converts the sample into Heliocentric cartesian coordinates
@@ -817,6 +1019,8 @@ S4 = Sample2alkhqp(sample, 'Heliocentric', 0)       # Converts the sample into H
 S5 = Sample2aeiMoO(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, e, i, M, omega, Omega)
 
 S6 = Sample2alkhqp(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, l, k, h, q, p)
+
+S7 = Sample2cart(Hel2JacWH(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi cartesian coordinates with the Wisdom-Holman convention for mu
 '''
 
 
