@@ -381,21 +381,21 @@ def samples2ell_twoplanets(sample, pair):
 
 
 
-def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, label='', color_min=None, color_max=None, alpha=0.7, markersize=80):
+def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim=(None,None), label='', alpha=0.7, markersize=80):
       I    = pair[0]
       J    = pair[1]
 
       if (isinstance(colors, np.ndarray)):
             #Plotting
-            ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_min, vmax=color_max, marker = 'o',  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
-            ax1.scatter(Ds, x2s, c = colors, cmap='hsv', vmin=color_min, vmax=color_max, marker = 'o',  s = markersize, alpha = alpha)
+            ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = 'o',  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
+            ax1.scatter(Ds, x2s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = 'o',  s = markersize, alpha = alpha)
       else:
             ax1.scatter(Ds, x1s, color = colors, marker = 'o',  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
             ax1.scatter(Ds, x2s, color = colors, marker = 'o',  s = markersize, alpha = alpha)
 
-      if (isinstance(colors, np.ndarray)):
-            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_min, color_max)), ax=ax1, aspect=40, pad=0.01)
-            cbar.ax.tick_params()
+      #if (isinstance(colors, np.ndarray)):
+      #      cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), ax=ax1, aspect=40, pad=0.01)
+      #      cbar.ax.tick_params()
 
 
 def samples2SFM(sample, pair, p):
@@ -409,16 +409,16 @@ def samples2usefull(sample, pair, p):
       [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
-def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, label):
+def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, color_lim, label):
 
       [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
       [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
 
       print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
-      plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, label)
+      plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim, label)
 
 
-def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, label):
+def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim, label):
 
       ### Plots the sample in the phase space of the Second Fundamental Model ###
 
@@ -427,10 +427,10 @@ def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, label):
                   colors = cycle(colors)
             for pair, p, color in zip(pairs, p_indexes, colors):
                   [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
-                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, label)
+                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, color_lim, label)
       else:
             [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pairs)
-            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, p_indexes, colors, label)
+            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, p_indexes, colors, color_lim, label)
 
 
 #def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_min=None, color_max=None):
@@ -508,9 +508,8 @@ def plot_topology(ax1, linewidth=4, alpha=1, grid=True):
 
 
 
-def plot_ell2SFM(data, colors=None):
+def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
       fig, ax = py.subplots(1, 1, figsize=(9,9))
-
 
       if isinstance(data, dict):
             samples = data['samples']
@@ -536,16 +535,24 @@ def plot_ell2SFM(data, colors=None):
             cmap = py.get_cmap('tab10')
             colors = [cmap(i % cmap.N) for i in range(len(planet_pairs))]
 
+      if any(isinstance(c, (np.ndarray, list)) for c in colors):
+            flat_colors = np.concatenate([np.asarray(c).flatten() for c in colors])
+            color_min = flat_colors.min() if color_lim[0] is None else color_lim[0]
+            color_max = flat_colors.max() if color_lim[1] is None else color_lim[1]
+            color_lim = (color_min, color_max)
+            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), ax=ax, aspect=40, pad=0.01)
+            cbar.ax.tick_params()
+
       # Plot the samples
-      plot_samples_SFM(fig, ax, samples, planet_pairs, p_indexes, colors, label='')
+      plot_samples_SFM(fig, ax, samples, planet_pairs, p_indexes, colors, color_lim, label='')
       plot_topology(ax)
       py.legend()
       py.tight_layout()
       py.show()
       return fig, ax
 
-def plot_ell2SFM_comparison(data_list, planet_pair, resonance, colors=None):
-    
+
+def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
       fig, ax = py.subplots(figsize=(9, 9))
 
       cmap = py.get_cmap('tab10')
@@ -563,7 +570,7 @@ def plot_ell2SFM_comparison(data_list, planet_pair, resonance, colors=None):
                   pair = planet_pair
 
             # Plot for this analysis
-            plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, label=label)
+            plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, color_lim=(None,None), label=label)
       plot_topology(ax)
 
       py.legend()
