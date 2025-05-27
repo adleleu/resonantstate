@@ -22,7 +22,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # OBSERVATIONS FUNCTION #################################################################################
 # #######################################################################################################
 
-def get_metadata_observations():
+def get_metadata_observations(path):
     """This method retrieves the metadata table for the observations and returns it in a pandas dataframe
 
     Returns
@@ -32,18 +32,20 @@ def get_metadata_observations():
     
     """
     
-    url = urls.OBSERVATIONS_METADATA_TABLE.value
+    #url = urls.OBSERVATIONS_METADATA_TABLE.value
 
     # we query the table from DACE and make sure the status code is sucessful (http 200 OK = sucessful http request)
-    file = requests.get(url, verify=False)
-    if not file.ok: # check if the request was successful
-        raise Exception(f"URL {url} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
+    # file = requests.get(url, verify=False)
+    # if not file.ok: # check if the request was successful
+    #     raise Exception(f"URL {url} responded with status code: {file.status_code}")
+    # dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
+    obs_table = Path(path) / "observations" / "tables" / "metadata_table.parquet"
+    dataframe = pd.read_parquet(obs_table) # read the parquet file from the given path
     
     return dataframe
 
 
-def download_observations_samples(dataframe, download_destination=None):
+def download_observations_samples(path, dataframe, download_destination=None):
     """This method retrieves the samples for the systems in the given dataframe, and returns a dictionnary that contains informations about the samples and the samples themselves. 
     
     If a download destination is given, it saves the samples and the coresponding metadata in the given directory.
@@ -135,29 +137,33 @@ def download_observations_samples(dataframe, download_destination=None):
         additional_info_url = additional_infos_urls[url_index]
         
         planet_metadata = planet_metadatas[url_index]
-        file_sample = requests.get(sample_url, verify=False)
-        if not file_sample.ok: 
-            raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
-        dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
-        
-        file_metadata = requests.get(metadata_url, verify=False)
-        if not file_metadata.ok: 
-            raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
-        metadata = json.loads(file_metadata.text)
+        # file_sample = requests.get(sample_url, verify=False)
+        # if not file_sample.ok: 
+        #     raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
+        # dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
+        sample_file = Path(sample_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+        dataframe_sample = pd.read_parquet(io.BytesIO(sample_file.read_bytes()))
+        # file_metadata = requests.get(metadata_url, verify=False)
+        # if not file_metadata.ok: 
+        #     raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
+        file_metadata = Path(metadata_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+        metadata = json.loads(file_metadata.read_text())
 
         if readme_url is not None:
-            file_readme = requests.get(readme_url, verify=False)
-            if not file_readme.ok: 
-                raise Exception(f"URL {readme_url} responded with status code: {file_readme.status_code}")
-            readme = file_readme.text
+            # file_readme = requests.get(readme_url, verify=False)
+            # if not file_readme.ok: 
+            #     raise Exception(f"URL {readme_url} responded with status code: {file_readme.status_code}")
+            file_readme = Path(readme_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+            readme = file_readme.read_text()
         else:
             readme = None
         
         if additional_info_url is not None:   
-            file_additional_info = requests.get(additional_info_url, verify=False)
-            if not file_additional_info.ok: 
-                raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
-            additional_infos = json.loads(file_additional_info.text) 
+            # file_additional_info = requests.get(additional_info_url, verify=False)
+            # if not file_additional_info.ok: 
+            #     raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
+            file_additional_info = Path(additional_info_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+            additional_infos = json.loads(file_additional_info.read_text()) 
         else:
             additional_infos = None
         
@@ -217,7 +223,7 @@ def download_observations_samples(dataframe, download_destination=None):
 # SIMULATIONS FUNCTION ##################################################################################
 # #######################################################################################################
 
-def get_metadata_simulations():
+def get_metadata_simulations(path):
     """This method retrieves the summary metadata table for the simulations and return it in a pandas dataframe
     
     Returns
@@ -226,20 +232,22 @@ def get_metadata_simulations():
         The simulations metadata table in a pandas dataframe
     
     """
-    url = urls.SIMULATIONS_METADATA_TABLE.value
+    # url = urls.SIMULATIONS_METADATA_TABLE.value
   
     
-    # we query the table from DACE and make sure the status code is sucessful (OK = sucessful http request)
-    file = requests.get(url, verify=False)
-    if not file.ok: # check if the request was successful
-        raise Exception(f"URL {url} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
-        
+    # # we query the table from DACE and make sure the status code is sucessful (OK = sucessful http request)
+    # file = requests.get(url, verify=False)
+    # if not file.ok: # check if the request was successful
+    #     raise Exception(f"URL {url} responded with status code: {file.status_code}")
+    # dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
+    sim_table = Path(path) / "simulations" / "tables" / "metadata_table.parquet"
+    dataframe = pd.read_parquet(sim_table) # read the parquet file from the given path
+    
     return dataframe  
 
 
 
-def download_simulations_run_table(dataframe):
+def download_simulations_run_table(path, dataframe):
     """
     This method retrieves the runs tables from the selected line of the summary metadata datafame, and returns another dataframe with more details about the chosen run. For now, only allows to retrieve a single run table at a time.
     Parameters
@@ -266,17 +274,19 @@ def download_simulations_run_table(dataframe):
     
     url_of_table = dataframe[mteSimSum.URL_OF_TABLE.value].values[0]
     
-    file = requests.get(url_of_table, verify=False)
-    if not file.ok: 
-        raise Exception(f"URL {url_of_table} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content))
+    # file = requests.get(url_of_table, verify=False)
+    # if not file.ok: 
+    #     raise Exception(f"URL {url_of_table} responded with status code: {file.status_code}")
+    # dataframe = pd.read_parquet(io.BytesIO(file.content))
+    url_of_table = Path(url_of_table.replace("https://dace.unige.ch/downloads/resonant_state", path) )
+    dataframe = pd.read_parquet(io.BytesIO(url_of_table.read_bytes())) # read the parquet file from the given path
 
     return dataframe
 
 
 
 
-def download_simulations(dataframe, download_destination=None):
+def download_simulations(path, dataframe, download_destination=None):
     """This method retrieves the simulations present in the given dataframe, and returns a list of dictionnary that contains information about the evolutions and the evolutions themselves. If a download destination is given, it saves the evolutions in the given directory.
 
     Parameters
@@ -361,29 +371,40 @@ def download_simulations(dataframe, download_destination=None):
         aditional_info_url = additional_infos_urls[url_index]
         readme_file_rul = readme_files_urls[url_index]
         planet_metadata = planet_metadatas[url_index]
-        file_sample = requests.get(sample_url, verify=False)
-        if not file_sample.ok:
-            raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
-        dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
         
-        file_metadata = requests.get(metadata_url, verify=False)
-        if not file_metadata.ok:
-            raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
-        metadata = json.loads(file_metadata.text)
+        # file_sample = requests.get(sample_url, verify=False)
+        # if not file_sample.ok:
+        #     raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
+        # dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
+        sample_file = Path(sample_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+        dataframe_sample = pd.read_parquet(io.BytesIO(sample_file.read_bytes()))
+        
+        # file_metadata = requests.get(metadata_url, verify=False)
+        # if not file_metadata.ok:
+        #     raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
+        # metadata = json.loads(file_metadata.text)
+        
+        metadata_url = Path(metadata_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+        metadata = json.loads(metadata_url.read_text())
+        
         
         if aditional_info_url is not None:
-            file_additional_info = requests.get(aditional_info_url, verify=False)
-            if not file_additional_info.ok:
-                raise Exception(f"URL {aditional_info_url} responded with status code: {file_additional_info.status_code}")
-            additional_infos = json.loads(file_additional_info.text)
+            # file_additional_info = requests.get(aditional_info_url, verify=False)
+            # if not file_additional_info.ok:
+            #     raise Exception(f"URL {aditional_info_url} responded with status code: {file_additional_info.status_code}")
+            #additional_infos = json.loads(file_additional_info.text)
+            file_additional_info = Path(aditional_info_url.replace("https://dace.unige.ch/downloads/resonant_state", path))
+            additional_infos = json.loads(file_additional_info.read_text())
         else:
             additional_infos = None
         
         if readme_file_rul is not None:
-            file_readme = requests.get(readme_file_rul, verify=False)
-            if not file_readme.ok:
-                raise Exception(f"URL {readme_file_rul} responded with status code: {file_readme.status_code}")
-            readme = file_readme.text
+            # file_readme = requests.get(readme_file_rul, verify=False)
+            # if not file_readme.ok:
+            #     raise Exception(f"URL {readme_file_rul} responded with status code: {file_readme.status_code}")
+            # readme = file_readme.text
+            file_readme = Path(readme_file_rul.replace("https://dace.unige.ch/downloads/resonant_state", path))
+            readme = file_readme.read_text()
         else:
             readme = None
         
