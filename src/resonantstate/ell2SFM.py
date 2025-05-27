@@ -509,6 +509,25 @@ def plot_topology(ax1, linewidth=4, alpha=1, grid=True):
 
 
 def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
+      """
+      Finds and plots the samples of near resonant planet pairs into the phase space of the second fundamental model (SFM) of resonance.
+
+      Parameters
+      ----------
+      data : pandas.DataFrame or np.ndarray or dict
+            Input data containing the posterior samples.
+            - If DataFrame or np.ndarray: used directly as sample input.
+            - If dict: must contain keys 'sample' (DataFrame) and 'samples_name' (str).
+      colors : list of np.ndarray or list of str, optional 
+            Numpy array used for colormapping the samples.
+      color_lim : tuple, optional 
+            Lower and upper limits for the color scale. If None, uses the min and max of the provided colormap array.
+      
+      Returns
+      -------
+      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes objects of the plot.
+      """
       fig, ax = py.subplots(1, 1, figsize=(9,9))
 
       if isinstance(data, dict):
@@ -520,8 +539,16 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
       else:
             raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a numpy array, or a dictionary containing the "samples" key.')
 
-      # Get the pairs of planets in resonance
-      pairs_resonances = get_near_resonant_pairs(samples, 0)
+      row = -1
+
+      # Check if samples are ordered by increasing period
+      if isinstance(samples, pd.DataFrame):
+            periods_values = get_periods(samples, row)
+            if not np.all(np.diff(periods_values) > 0):
+                  samples = reorder_data(samples, row)
+
+      # Get first-order resonant pairs
+      pairs_resonances = get_near_resonant_pairs(samples, row)
       first_order_pairs = [(pair.tolist(), res, order) for pair, res, order in pairs_resonances if order == 1]
       print('Found', len(first_order_pairs), 'first order pairs.')
 
@@ -540,7 +567,9 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
             color_min = flat_colors.min() if color_lim[0] is None else color_lim[0]
             color_max = flat_colors.max() if color_lim[1] is None else color_lim[1]
             color_lim = (color_min, color_max)
-            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), ax=ax, aspect=40, pad=0.01)
+            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, 
+                                                    norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), 
+                                                    ax=ax, aspect=40, pad=0.01)
             cbar.ax.tick_params()
 
       # Plot the samples
@@ -553,11 +582,29 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
 
 
 def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
+      """
+      Compares the samples of different analyses in the phase space of the second fundamental model (SFM) of resonance.
+
+      Parameters
+      ----------
+      data_list : list of dict
+            List of dictionaries, each containing 'samples' (DataFrame) and 'analysis_id' (str).
+      planet_pair : list or np.ndarray
+            Pair of planets to be considered in the sample.
+      resonance : int
+            Resonance of the corresponding pair (p such that resonance is p:p+1).
+
+      Returns
+      -------
+      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes objects of the plot.
+      """
       fig, ax = py.subplots(figsize=(9, 9))
 
       cmap = py.get_cmap('tab10')
       colors = [cmap(i % cmap.N) for i in range(len(data_list))]
 
+      # Loop over each analysis in the list of dictionaries
       for i, data in enumerate(data_list):
             samples = data['samples']
             label = f'analysis {data['analysis_id']}'
@@ -569,7 +616,6 @@ def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
             else:
                   pair = planet_pair
 
-            # Plot for this analysis
             plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, color_lim=(None,None), label=label)
       plot_topology(ax)
 
@@ -580,92 +626,3 @@ def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
 
 
 
-
-
-
-#def plot_ell2SFM(data, planet_pairs=(0,1), resonances=2, colors='green', 
-#                 delta_lim=(-3,5), X_lim=(-5,5), color_lim=(None, None), check_resonance=False, 
-#                 grid=True, markersize=80, alpha=0.7, linewidth=4):
-#      """
-#      Converts and plots the elliptic elements into the Second Fundamental Model of resonance (SFM).
-#
-#      Parameters
-#      ----------
-#      data : pandas.DataFrame or np.ndarray or dict or list of dict
-#            Input data containing the posterior samples.
-#            - If DataFrame or np.ndarray: used directly as sample input.
-#            - If dict: must contain keys 'sample' (DataFrame) and 'samples_name' (str).
-#            - If list: a list of the above dictionaries.
-#      planet_pairs : list
-#            Pairs of planets to be considered in the sample
-#      resonance : list 
-#            Resonance of the corresponding pair (p such that resonance is p:p+1).
-#      colors : list 
-#            List of color values to use for plotting each pair/analysis.
-#            - Each entry in main list corresponds to one analysis.
-#            - Each entry in nested list corresponds to one pair.
-#            - Nested list entries can be strings or numpy arrays to be colormapped. 
-#      delta_lim : tuple 
-#            Lower and upper limits of the x-axis (delta). Set to 'auto' for automatic scaling.
-#      X_lim : tuple
-#            Lower and upper limits of the y-axis (X). Set to 'auto' for automatic scaling.
-#      check_resonance : bool
-#            If True, prints the percentage of samples within the resonance.
-#      grid : bool
-#            If True, adds a grid to the plot.
-#      markersize : float
-#            Size of the markers in the scatterplot of samples.
-#      alpha : float
-#            Transparency of the markers in the scatterplot of samples.
-#      linewidth : float
-#            Width of the lines representing the equilibrium points and separatrix. 
-#      
-#      Returns
-#      -------
-#      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
-#            The figure and axes objects of the plot.
-#      """
-#      color_min, color_max = color_lim
-#
-#      fig, ax = py.subplots(1, 1, figsize=(9,9))
-#
-#      if isinstance(data, list):
-#            for df_dict, color in zip(data, cycle(colors)):
-#                  if check_resonance:
-#                        print('Analysis', df_dict['samples_name'], ':')
-#                  plot_samples_SFM(fig, ax, df_dict['samples'], planet_pairs, resonances, colors=color, color_min=color_min, color_max=color_max,
-#                               label_name=df_dict['samples_name'], check_resonance=check_resonance, markersize=markersize, alpha=alpha)
-#
-#      elif isinstance(data, dict):
-#            plot_samples_SFM(fig, ax, data['samples'], planet_pairs, resonances, colors=colors, color_min=color_min, color_max=color_max, label_name=data['samples_name'],
-#                          check_resonance=check_resonance, markersize=markersize, alpha=alpha)
-#
-#      elif isinstance(data, pd.DataFrame) or isinstance(data, np.ndarray):
-#            plot_samples_SFM(fig, ax, data, planet_pairs, resonances, colors=colors, color_min=color_min, color_max=color_max,
-#                         check_resonance=check_resonance, markersize=markersize, alpha=alpha)
-#
-#      else:
-#            raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a dictionary, or a list of dictionaries.')
-#
-#      if delta_lim == 'auto':
-#            ax.autoscale(axis='x')
-#            delta_lim = ax.get_xlim()
-#            if delta_lim[0] > -3:
-#                  delta_lim = (-3, delta_lim[1])
-#            if delta_lim[1] < 5:
-#                  delta_lim = (delta_lim[0], 5)
-#            ax.set_xlim(delta_lim)
-#      if X_lim == 'auto':
-#            ax.autoscale(axis='y')
-#            X_lim = ax.get_ylim()
-#            if X_lim[0] > -5:
-#                  X_lim = (-5, X_lim[1])
-#            if X_lim[1] < 5:
-#                  X_lim = (X_lim[0], 5)
-#            ax.set_ylim(X_lim)
-#      plot_topology(ax, delta_lim, X_lim)
-#
-#      py.legend()
-#      py.tight_layout()
-#      py.show()
-#      return fig, ax
