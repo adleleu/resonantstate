@@ -528,12 +528,10 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
       fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
             The figure and axes objects of the plot.
       """
-      fig, ax = py.subplots(1, 1, figsize=(9,9))
 
       if isinstance(data, dict):
             samples = data['samples']
             analysis_id = data['samples_name']
-            fig.suptitle(f'Analysis {analysis_id}', fontsize=16)
       elif isinstance(data, pd.DataFrame) or isinstance(data, np.ndarray):
             samples = data
       else:
@@ -550,7 +548,17 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
       # Get first-order resonant pairs
       pairs_resonances = get_near_resonant_pairs(samples, row)
       first_order_pairs = [(pair.tolist(), res, order) for pair, res, order in pairs_resonances if order == 1]
+
+      if not first_order_pairs:
+            print('No first order pairs found.')
+            return None, None
+      
       print('Found', len(first_order_pairs), 'first order pairs.')
+
+      # Create figure to plot samples if first order pairs are found
+      fig, ax = py.subplots(1, 1, figsize=(9,9))
+      if isinstance(data, dict):
+            fig.suptitle(f'Analysis {analysis_id}', fontsize=16)
 
       # Print the pairs and their resonances
       planet_pairs, p_indexes, orders = map(list, zip(*first_order_pairs))
