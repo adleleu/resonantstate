@@ -466,7 +466,6 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Tr
       
 
       if delta_lim==None:
-            print('WHENT HERE')
             ax1.autoscale(axis='x')
             delta_lim = ax1.get_xlim()
             if delta_lim[0] > -3:
@@ -474,7 +473,7 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Tr
             if delta_lim[1] < 5:
                   delta_lim = (delta_lim[0], 5)
 
-      print('DELTA LIM',delta_lim)
+
       ax1.set_xlim(delta_lim)
 
       
