@@ -330,7 +330,6 @@ def topology_light(delta):
             return [S1, xint, xhyp]
 
 #Plotting
-#if (plot_DACE_data):
 
 
 def samples2ell_twoplanets(sample, pair):
@@ -515,6 +514,41 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Tr
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
+def get_p_by_pair(samples):
+
+      #Returns (pairs, ps) where pairs = [(i1, j1), (i2, j2), ...] is a list of pairs close to a resonance p:p+1 and ps = [p1, p2, ...] contains the associated values of p
+      #samples is a dataframe
+      
+      data = samples[samples.columns[samples.columns.str.contains('period')]]
+      
+      stdd = data['period_days_0'].std() #If the standard deviation of the periods is very low, the sample is likely an observation, otherwise, it is likely a simulation
+
+      if (stdd < 0.05): #The sample is probably an observation, we take the median
+            data = data.median().sort_values()
+      else:            #The sample is probably a simulation, we take the last row
+            last_row = samples.index[-1]
+            data = data.iloc[last_row].sort_values()
+            
+      periods = np.array(data.values)
+      N       = len(periods)
+      
+      pairs = []
+      ps    = []
+      for j in range(N):
+            for i in range(j):
+                  #Pair is (i,j)                   
+                  PeriodRatio = periods[j]/periods[i]
+                  if (PeriodRatio < 2.1 and PeriodRatio > 1.0488):
+                        distance = 1.e300
+                        for p in range(1, 21): #Resonance 21:22 and onward are unsupported
+                              if (abs(PeriodRatio - (p + 1)/p)/((p + 1)/p) < distance):
+                                    distance = abs(PeriodRatio - (p + 1)/p)/((p + 1)/p)
+                                    the_p    = p
+                        if (distance < 0.05): 
+                              pairs.append((i,j))
+                              ps.append(the_p)
+      return (pairs, ps)
+
 
 def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
       """
@@ -554,14 +588,12 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
                   samples = reorder_data(samples, row)
 
       # Get first-order resonant pairs
-      pairs_resonances = get_near_resonant_pairs(samples, row)
-      first_order_pairs = [(pair.tolist(), res, order) for pair, res, order in pairs_resonances if order == 1]
+      #pairs_resonances = get_near_resonant_pairs(samples, row)
+      #first_order_pairs = [(pair.tolist(), res, order) for pair, res, order in pairs_resonances if order == 1]
 
-      if not first_order_pairs:
-            print('No first order pairs found.')
-            return None, None
-      
-      print('Found', len(first_order_pairs), 'first order pairs.')
+      #if not first_order_pairs:
+      #      print('No first order pairs found.')
+      #      return None, None
 
       # Create figure to plot samples if first order pairs are found
       fig, ax = py.subplots(1, 1, figsize=(9,9))
@@ -569,7 +601,12 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
             fig.suptitle(f'Analysis {analysis_id}', fontsize=16)
 
       # Print the pairs and their resonances
-      planet_pairs, p_indexes, orders = map(list, zip(*first_order_pairs))
+      #planet_pairs, p_indexes, orders = map(list, zip(*first_order_pairs))
+      
+      # Get first-order resonant pairs
+      planet_pairs, p_indexes = get_p_by_pair(samples)
+      
+      print('Found', len(planet_pairs), 'first order pairs.')
       print('Pairs:', planet_pairs)
       print('Resonances:', p_indexes)
 
