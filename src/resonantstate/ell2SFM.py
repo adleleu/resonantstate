@@ -380,7 +380,7 @@ def samples2ell_twoplanets(sample, pair):
 
 
 
-def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim=(None,None), label='', alpha=0.7, markersize=80, marker= 'o'):
+def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim=None, label='', alpha=0.7, markersize=80, marker= 'o'):
       I    = pair[0]
       J    = pair[1]
 
@@ -417,7 +417,7 @@ def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, co
       plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim, label,alpha =alpha,markersize=markersize, marker = marker)
 
 
-def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim=(None,None), label='',alpha = 1,markersize=20,marker='o'):
+def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o'):
 
       ### Plots the sample in the phase space of the Second Fundamental Model ###
 
@@ -550,7 +550,7 @@ def get_p_by_pair(samples):
       return (pairs, ps)
 
 
-def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
+def plot_ell2SFM(data, colors=None, color_lim=None, delta_lim=None, X_lim=None):
       """
       Finds and plots the samples of near resonant planet pairs into the phase space of the second fundamental model (SFM) of resonance.
 
@@ -564,6 +564,10 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
             Numpy array used for colormapping the samples.
       color_lim : tuple, optional 
             Lower and upper limits for the color scale. If None, uses the min and max of the provided colormap array.
+      delta_lim : tuple, optional
+            Lower and upper limits of the x-axis. If None, scales automatically with data.
+      X_lim : tuple, optional
+            Lower and upper limits of the y-axis. If None, scales automatically with data.
       
       Returns
       -------
@@ -617,8 +621,8 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
 
       if any(isinstance(c, (np.ndarray, list)) for c in colors):
             flat_colors = np.concatenate([np.asarray(c).flatten() for c in colors])
-            color_min = flat_colors.min() if color_lim[0] is None else color_lim[0]
-            color_max = flat_colors.max() if color_lim[1] is None else color_lim[1]
+            color_min = flat_colors.min() if color_lim is None else color_lim[0]
+            color_max = flat_colors.max() if color_lim is None else color_lim[1]
             color_lim = (color_min, color_max)
             cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, 
                                                     norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), 
@@ -627,14 +631,14 @@ def plot_ell2SFM(data, colors=None, color_lim=(None, None)):
 
       # Plot the samples
       plot_samples_SFM(fig, ax, samples, planet_pairs, p_indexes, colors, color_lim=color_lim, label='')
-      plot_topology(ax)
+      plot_topology(ax, delta_lim, X_lim)
       py.legend()
       py.tight_layout()
       py.show()
       return fig, ax
 
 
-def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
+def plot_ell2SFM_comparison(data_list, planet_pair, resonance, delta_lim=None, X_lim=None):
       """
       Compares the samples of different analyses in the phase space of the second fundamental model (SFM) of resonance.
 
@@ -646,7 +650,11 @@ def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
             Pair of planets to be considered in the sample.
       resonance : int
             Resonance of the corresponding pair (p such that resonance is p:p+1).
-
+      delta_lim : tuple, optional
+            Lower and upper limits of the x-axis. If None, scales automatically with data.
+      X_lim : tuple, optional
+            Lower and upper limits of the y-axis. If None, scales automatically with data.
+            
       Returns
       -------
       fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
@@ -669,8 +677,8 @@ def plot_ell2SFM_comparison(data_list, planet_pair, resonance):
             else:
                   pair = planet_pair
 
-            plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, color_lim=(None,None), label=label)
-      plot_topology(ax)
+            plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, color_lim=None, label=label)
+      plot_topology(ax, delta_lim, X_lim)
 
       py.legend()
       py.tight_layout()
