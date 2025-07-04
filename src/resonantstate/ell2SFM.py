@@ -452,7 +452,7 @@ def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim=None,
 
 
 
-def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=True):
+def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False):
 
       ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
 
@@ -504,12 +504,21 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Tr
             Xint[count] = xint
             Xhyp[count] = xhyp
             count = count + 1            
-      ax1.plot(delt[delt >= 1.], Xint[delt >= 1.], color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha)
-      ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'Hyperbolic')
-      ax1.plot(delt,             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'Elliptic')
-      ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'Separatrix')
-      ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha)
-      ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'red', alpha = 0.1)
+      if dark:        
+            ax1.plot(delt[delt >= 1.], Xint[delt >= 1.], color = 'white', linewidth = linewidth, linestyle = '-', alpha = alpha)
+            ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'Hyperbolic')
+            ax1.plot(delt,             Xres,             color = 'white', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'Elliptic')
+            ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'Separatrix')
+            ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+            ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'pink', alpha = 0.1)
+      else:
+            ax1.plot(delt[delt >= 1.], Xint[delt >= 1.], color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha)
+            ax1.plot(delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'Hyperbolic')
+            ax1.plot(delt,             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'Elliptic')
+            ax1.plot(delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'Separatrix')
+            ax1.plot(delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+            ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'red', alpha = 0.1)
+
       if grid:
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
