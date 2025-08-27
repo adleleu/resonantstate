@@ -74,8 +74,12 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
 
       # Getting G and Gamma and normalizing
       G     = Lbd1 + Lbd2 - D1 - D2
+      DG    = Lbd1 - Lbd10 + Lbd2 - Lbd20 - D1 - D2
       Gamma = (p + 1)*Lbd1 + p*Lbd2
+      DGamma= Gamma - ((p + 1)*Lbd10 + p*Lbd20)
       g     = G/Gamma
+      Dg    = DG/Gamma
+      Dgamma= DGamma/Gamma
       d1    = D1/Gamma
       d2    = D2/Gamma
       C1    = Gamma/Lbd10
@@ -86,7 +90,8 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       f2    = f2s[p - 1]
       R     = (f1**2*C1*d1 + f2**2*C2*d2 + 2.*f1*f2*np.sqrt(C1*d1*C2*d2)*np.cos(vp1 - vp2))/(f1**2*C1 + f2**2*C2)
       S     = (f1**2*C1*d2 + f2**2*C2*d1 - 2.*f1*f2*np.sqrt(C1*d1*C2*d2)*np.cos(vp1 - vp2))/(f1**2*C1 + f2**2*C2)
-      alpha = -3.*n10*p*((g + S)*(p*C1 + (p + 1)*C2) - C1 - C2)
+      #alpha = -3.*n10*p*((g + S)*(p*C1 + (p + 1)*C2) - (C1 + C2)) #Old expression. Equal to the new one although written differently
+      alpha = -3.*n10*p*((Dg + S)*(p*C1 + (p + 1)*C2) - (C1 + C2)*Dgamma)
       beta  = 1.5*n10*p*(p*C1 + (p + 1)*C2)
       gamma = m1*n20/C2*np.sqrt(f1**2*C1 + f2**2*C2)
       delta = alpha*(4./(27.*beta*gamma**2))**(1./3.)
