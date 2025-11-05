@@ -283,11 +283,11 @@ def SFM2useful(X, Y, X2, Y2, delta):
                   if (H > Hseparatrix):
                         IR.append(1)
                   else:
-                        if max(x1,x2)<xint:
+                        if max(xx1,xx2)<xres:
                               IR.append(-1)
                         else:
                               IR.append(0)
-                              
+
       x1 = np.array(x1)
       x2 = np.array(x2)
       IR = np.array(IR)
