@@ -31,16 +31,44 @@ f1s = [ 1.190493697849547, 2.025222689938346, 2.840431856715441, 3.6496182440896
 f2s = [-0.428389834143869,-2.484005183303907,-3.283256721821090,-4.083705371769611,-4.884706297511002,-5.686007411626633,-6.487489727907814,-7.289089771453291,-8.090770598035306,-8.892509248107672,-9.694290707819164,-10.49610474146903,-11.29794413782656,-12.09980367496610,-12.90167944505811,-13.70356853306293,-14.50546862185001,-15.30737796425819,-16.10929512977600,-16.91121894121170]
 
 
-def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
-      # Converts from elliptic elements to the coordinates (X, Y, X2, Y2, delta) of the Second Fondamental Model of resonance (SFM).
-      # (X, Y) corresponds to the unique degree of freedom of the SFM and (X2, Y2) to the first integral. delta is the unique parameter of the SFM
-
-      # Assumptions : e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2 are 1-dimensional numpy arrays. (e.g. outputs of a MCMC posterior analysis)
-      # Subscript 1 (resp. 2) is for the inner (resp. outer) planet
-      # The masses m1 and m2 are relative to the star. e1 and e2 are the eccentricities.
-      # vp1 and vp2 are the longitudes of the periapsis, lbd1 and lbd2 are the mean longitudes, in radians
-      # T1 and T2 are the periods. They can be given in any unit because they will be renormalized by the inner period.
-      # p is an integer such that the pair is close to the resonance p : p + 1
+def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):    
+      r"""
+      Converts from elliptic elements to the coordinates :math:`\left(X, Y, X_2, Y_2, \delta\right)` of the Second Fondamental Model of resonance (SFM).
+      :math:`\left(X, Y\right)` corresponds to the unique degree of freedom of the SFM and :math:`\left(X_2, Y_2\right)` to the first integral. :math:`\delta` is the unique parameter of the SFM
+      The SFM is described byt the Hamiltonian :math:`\mathcal{H}(\Sigma,\sigma)=3\delta\Sigma-\Sigma^2+2\sqrt{2\Sigma}\cos\sigma` where :math:`X+iY=\sqrt{2\Sigma}e^{i\sigma}`.
+      
+      Author : Jeremy Couturier. https://jeremycouturier.com
+      
+      Parameters
+      ----------
+      p: int
+            Integer such that the two planets are in resonance :math:`p` : :math:`p+1`.
+      e1: float or 1-dimensional numpy array of floats
+            The eccentricity :math:`e_1` of the inner planet.
+      e2: float or 1-dimensional numpy array of floats
+            The eccentricity :math:`e_2` of the outer planet.
+      vp1: float or 1-dimensional numpy array of floats
+            The longitude of periapsis :math:`\varpi_1` of the inner planet, in radians.
+      vp2: float or 1-dimensional numpy array of floats
+            The longitude of periapsis :math:`\varpi_2` of the outer planet, in radians.
+      m1: float or 1-dimensional numpy array of floats
+            The mass :math:`m_1` of the inner planet in units of the stellar mass.
+      m2: float or 1-dimensional numpy array of floats
+            The mass :math:`m_2` of the outer planet in units of the stellar mass.
+      T1: float or 1-dimensional numpy array of floats
+            The period :math:`2\pi/n_1` of the inner planet in any units. Such that :math:`\mathcal{G}\left(m_0+m_1\right)=n_1^2a_1^3`.
+      T2: float or 1-dimensional numpy array of floats
+            The period :math:`2\pi/n_2` of the outer planet in the same units as T1. Such that :math:`\mathcal{G}\left(m_0+m_2\right)=n_2^2a_2^3`.
+      lbd1: float or 1-dimensional numpy array of floats
+            The mean longitude :math:`\lambda_1` of the inner planet, in radians.
+      lbd2: float or 1-dimensional numpy array of floats
+            The mean longitude :math:`\lambda_2` of the outer planet, in radians.
+            
+      Returns
+      -------
+      l : List
+            The list :math:`\left[X, Y, X_2, Y_2, \delta\right]` of elements of the Second Fondamental Model of resonance.
+      """
 
       if (p > 20 or p < 1):
             raise Exception('The index p of the resonance must be between 1 and 20 included')
