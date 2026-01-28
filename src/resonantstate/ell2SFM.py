@@ -305,8 +305,9 @@ def SFM2useful(X, Y, X2, Y2, delta):
             x1.append(xx1)
             x2.append(xx2)
             [xres, xint, xhyp] = topology_light(delta[i])
+            [lib1,lib2]= X1X2(0, 0, delta[i])
             if (delta[i] < 1.):
-                  [lib1,lib2]= X1X2(0, 0, delta[i])
+                  
                   if  max(xx1,xx2)<max(lib1,lib2):    
                         IR.append(2) #external libration
                   else:
