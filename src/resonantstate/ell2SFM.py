@@ -318,7 +318,10 @@ def SFM2useful(X, Y, X2, Y2, delta):
                         IR.append(1) #formally resonant
                   else:
                         if max(xx1,xx2)<xres:
-                              IR.append(-1) #internal circulation
+                              if min(xx1,xx2)>min(lib1,lib2):
+                                    IR.append(-2) #internal libration
+                              else:
+                                    IR.append(-1) #internal circulation
                         else:
                               IR.append(0) #external circulation
 
