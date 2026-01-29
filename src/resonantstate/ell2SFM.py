@@ -122,8 +122,6 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       alpha = -3.*n10*p*((Dg + S)*(p*C1 + (p + 1)*C2) - (C1 + C2)*Dgamma)
       beta  = 1.5*n10*p*(p*C1 + (p + 1)*C2)
       gamma = m1*n20/C2*np.sqrt(f1**2*C1 + f2**2*C2)
-      print('alpha,beta,gamma',alpha[-1],beta[-1],gamma[-1])
-      print('m1,n20,C2,f1,C1,f2,C2',m1[-1],n20,C2[-1],f1,C1[-1],f2)
       delta = alpha*(4./(27.*beta*gamma**2))**(1./3.)
 
       #Getting X and Y
