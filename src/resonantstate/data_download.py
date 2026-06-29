@@ -256,35 +256,51 @@ def download_observations_samples(dataframe, local_path=None, download_destinati
 # SIMULATIONS FUNCTION ##################################################################################
 # #######################################################################################################
 
-def get_metadata_simulations():
+def get_metadata_simulations(local_path=None):
     """This method retrieves the summary metadata table for the simulations and return it in a pandas dataframe
     
     Returns
     -------
     pd.DataFrame
         The simulations metadata table in a pandas dataframe
+
+
+    Parameters
+    ----------
+    local_path : Path or str or None
+        use a local version of the database if local_path is given, query DACE if not.
     
     """
-    url = urls.SIMULATIONS_METADATA_TABLE.value
-  
     
-    # we query the table from DACE and make sure the status code is sucessful (OK = sucessful http request)
-    file = requests.get(url, verify=False)
-    if not file.ok: # check if the request was successful
-        raise Exception(f"URL {url} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
+    
+    
+    if local_path is not None:
+        if not isinstance(local_path, Path):
+            local_path = Path(local_path)
+        obs_table = local_path / "simulations" / "tables" / "metadata_table.parquet"
+        dataframe = pd.read_parquet(obs_table) # translate the content of the parquet file into a pandas dataframe
+
+    else:
+        url = urls.SIMULATIONS_METADATA_TABLE.value  
+        # we query the table from DACE and make sure the status code is sucessful (OK = sucessful http request)
+        file = requests.get(url, verify=False)
+        if not file.ok: # check if the request was successful
+            raise Exception(f"URL {url} responded with status code: {file.status_code}")
+        dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
         
     return dataframe  
 
 
 
-def download_simulations_run_table(dataframe):
+def download_simulations_run_table(dataframe,local_path=None):
     """
     This method retrieves the runs tables from the selected line of the summary metadata datafame, and returns another dataframe with more details about the chosen run. For now, only allows to retrieve a single run table at a time.
     Parameters
     ----------
     dataframe : pd.DataFrame
         The dataframe containing the metadata of the simulation run that we want to download
+    local_path : Path or str or None
+        use a local version of the database if local_path is given, query DACE if not.
     
     Returns
     -------
@@ -304,24 +320,35 @@ def download_simulations_run_table(dataframe):
         raise ValueError(f"The dataframe should only contain one line (header non included). Given shape: {dataframe.shape}")
     
     url_of_table = dataframe[mteSimSum.URL_OF_TABLE.value].values[0]
-    
-    file = requests.get(url_of_table, verify=False)
-    if not file.ok: 
-        raise Exception(f"URL {url_of_table} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content))
+
+    if local_path is not None:
+        if isinstance(local_path, Path):
+            local_path = str(local_path)
+
+        url_of_table = Path(url_of_table.replace("https://dace.unige.ch/downloads/resonant_state", local_path) )
+        dataframe = pd.read_parquet(io.BytesIO(url_of_table.read_bytes())) # read the parquet file from the given path
+
+    else:
+        
+        file = requests.get(url_of_table, verify=False)
+        if not file.ok: 
+            raise Exception(f"URL {url_of_table} responded with status code: {file.status_code}")
+        dataframe = pd.read_parquet(io.BytesIO(file.content))
 
     return dataframe
 
 
 
 
-def download_simulations(dataframe, download_destination=None):
+def download_simulations(dataframe,local_path=None, download_destination=None):
     """This method retrieves the simulations present in the given dataframe, and returns a list of dictionnary that contains information about the evolutions and the evolutions themselves. If a download destination is given, it saves the evolutions in the given directory.
 
     Parameters
     ----------
     dataframe : pd.DataFrame
         The dataframe containing the metadata of the simulations that we want to download.
+    local_path : Path or str or None
+        use a local version of the database if local_path is given, query DACE if not.
     download_destination : str or None
         If given, save the simulations in the given directory with their corresponding metadatas.
     
@@ -400,31 +427,60 @@ def download_simulations(dataframe, download_destination=None):
         aditional_info_url = additional_infos_urls[url_index]
         readme_file_rul = readme_files_urls[url_index]
         planet_metadata = planet_metadatas[url_index]
-        file_sample = requests.get(sample_url, verify=False)
-        if not file_sample.ok:
-            raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
-        dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
-        
-        file_metadata = requests.get(metadata_url, verify=False)
-        if not file_metadata.ok:
-            raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
-        metadata = json.loads(file_metadata.text)
-        
-        if aditional_info_url is not None:
-            file_additional_info = requests.get(aditional_info_url, verify=False)
-            if not file_additional_info.ok:
-                raise Exception(f"URL {aditional_info_url} responded with status code: {file_additional_info.status_code}")
-            additional_infos = json.loads(file_additional_info.text)
+
+
+
+        if local_path is not None:
+            if isinstance(local_path, Path):
+                local_path = str(local_path)
+
+            sample_file = Path(sample_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+            dataframe_sample = pd.read_parquet(io.BytesIO(sample_file.read_bytes()))
+            
+            
+            metadata_url = Path(metadata_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+            metadata = json.loads(metadata_url.read_text())
+            
+            
+            if aditional_info_url is not None:
+                file_additional_info = Path(aditional_info_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+                additional_infos = json.loads(file_additional_info.read_text())
+            else:
+                additional_infos = None
+            
+            if readme_file_rul is not None:
+                file_readme = Path(readme_file_rul.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+                readme = file_readme.read_text()
+            else:
+                readme = None
+
         else:
-            additional_infos = None
-        
-        if readme_file_rul is not None:
-            file_readme = requests.get(readme_file_rul, verify=False)
-            if not file_readme.ok:
-                raise Exception(f"URL {readme_file_rul} responded with status code: {file_readme.status_code}")
-            readme = file_readme.text
-        else:
-            readme = None
+            file_sample = requests.get(sample_url, verify=False)
+            if not file_sample.ok:
+                raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
+            dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
+            
+            file_metadata = requests.get(metadata_url, verify=False)
+            if not file_metadata.ok:
+                raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
+            metadata = json.loads(file_metadata.text)
+            
+            if aditional_info_url is not None:
+                file_additional_info = requests.get(aditional_info_url, verify=False)
+                if not file_additional_info.ok:
+                    raise Exception(f"URL {aditional_info_url} responded with status code: {file_additional_info.status_code}")
+                additional_infos = json.loads(file_additional_info.text)
+            else:
+                additional_infos = None
+            
+            if readme_file_rul is not None:
+                file_readme = requests.get(readme_file_rul, verify=False)
+                if not file_readme.ok:
+                    raise Exception(f"URL {readme_file_rul} responded with status code: {file_readme.status_code}")
+                readme = file_readme.text
+            else:
+                readme = None
+
         #print('metadata.keys()',planet_metadata.keys())
         if 'simulation_type' not in metadata.keys():
             name = f"population_synthesis_{metadata['run_ID']}_{metadata['System_ID']}"
