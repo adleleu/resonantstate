@@ -22,24 +22,36 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # OBSERVATIONS FUNCTION #################################################################################
 # #######################################################################################################
 
-def get_metadata_observations():
+def get_metadata_observations(local_path=None):
     """This method retrieves the metadata table for the observations and returns it in a pandas dataframe
 
     Returns
     -------
     pd.DataFrame
         The observations metadata table in a pandas dataframe
-    
+
+    Parameters
+    ----------
+    local_path : str or None
+        use a local version of the database if local_path is given, query DACE if not.
     """
     
-    url = urls.OBSERVATIONS_METADATA_TABLE.value
-
-    # we query the table from DACE and make sure the status code is sucessful (http 200 OK = sucessful http request)
-    file = requests.get(url, verify=False)
-    if not file.ok: # check if the request was successful
-        raise Exception(f"URL {url} responded with status code: {file.status_code}")
-    dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
+    if local_path is not None:
+        if not isinstance(local_path, Path):
+            local_path = Path(local_path)
+        obs_table = local_path / "observations" / "tables" / "metadata_table.parquet"
+        dataframe = pd.read_parquet(obs_table) # translate the content of the parquet file into a pandas dataframe
     
+
+    else :
+        url = urls.OBSERVATIONS_METADATA_TABLE.value
+        # we query the table from DACE and make sure the status code is sucessful (http 200 OK = sucessful http request)
+        file = requests.get(url, verify=False)
+        if not file.ok: # check if the request was successful
+            raise Exception(f"URL {url} responded with status code: {file.status_code}")
+        dataframe = pd.read_parquet(io.BytesIO(file.content)) # translate the content of the parquet file into a pandas dataframe
+
+
     return dataframe
 
 
@@ -386,31 +398,59 @@ def download_simulations(dataframe, download_destination=None):
             readme = file_readme.text
         else:
             readme = None
-        
-        name = f"{metadata[mteSim.SIMULATION_TYPE.value]}_{metadata[mteSim.RUN_ID.value]}_{metadata[mteSim.SIMULATION_ID.value]}"
-        
-        samples_dict = {
-            simDict.SIMULATION_NAME.value:              name,
-            simDict.ADDITIONAL_INFO.value:              additional_infos,
-            simDict.SIMULATION.value:                   dataframe_sample,
-            simDict.README.value:                       readme,
+        #print('metadata.keys()',planet_metadata.keys())
+        if 'simulation_type' not in metadata.keys():
+            name = f"population_synthesis_{metadata['run_ID']}_{metadata['System_ID']}"
+            samples_dict = {
+                simDict.SIMULATION_NAME.value:              name,
+                simDict.ADDITIONAL_INFO.value:              additional_infos,
+                simDict.SIMULATION.value:                   dataframe_sample,
+                simDict.README.value:                       readme,
+                
+                simDict.CONTACT_EMAIL.value:                planet_metadata[mteSim.CONTACT_EMAIL.value],
+                mteSim.AUTHOR_NAME.value:                   planet_metadata.get(mteSim.AUTHOR_NAME.value,None),
+                simDict.PLANETS_LIST.value:                 metadata['planet_list'],
+                mteSim.STAR_NAME.value:                     planet_metadata[mteSim.STAR_NAME.value],
+                mteSim.RUN_ID.value:                        planet_metadata['run_id'],
+                mteSim.SIMULATION_ID.value:                 planet_metadata['simulation_id'],
+                mteSim.RUN_NAME.value:                      planet_metadata[mteSim.RUN_NAME.value],
+                mteSim.SIMULATION_TYPE.value:               'population_synthesis',#planet_metadata['population_synthesis'],
+                mteSim.PHYSICS_IMPLEMENTED.value:           planet_metadata[mteSim.PHYSICS_IMPLEMENTED.value],
+                mteSim.NB_PLANETS.value:                    planet_metadata[mteSim.NB_PLANETS.value],  
+                mteSim.CODE_USED.value:                     planet_metadata[mteSim.CODE_USED.value],
+                mteSim.BIBTEX.value:                        planet_metadata[mteSim.BIBTEX.value],
+                mteSim.OTHER_REMARKS.value:                 planet_metadata[mteSim.OTHER_REMARKS.value],
+                
+                
+            }
+
+
+        else:
             
-            simDict.CONTACT_EMAIL.value:                planet_metadata[mteSim.CONTACT_EMAIL.value],
-            mteSim.AUTHOR_NAME.value:                   planet_metadata.get(mteSim.AUTHOR_NAME.value,None),
-            simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANETS_LIST.value],
-            mteSim.STAR_NAME.value:                     planet_metadata[mteSim.STAR_NAME.value],
-            mteSim.RUN_ID.value:                        planet_metadata[mteSim.RUN_ID.value],
-            mteSim.SIMULATION_ID.value:                 planet_metadata[mteSim.SIMULATION_ID.value],
-            mteSim.RUN_NAME.value:                      planet_metadata[mteSim.RUN_NAME.value],
-            mteSim.SIMULATION_TYPE.value:               planet_metadata[mteSim.SIMULATION_TYPE.value],
-            mteSim.PHYSICS_IMPLEMENTED.value:           planet_metadata[mteSim.PHYSICS_IMPLEMENTED.value],
-            mteSim.NB_PLANETS.value:                    planet_metadata[mteSim.NB_PLANETS.value],  
-            mteSim.CODE_USED.value:                     planet_metadata[mteSim.CODE_USED.value],
-            mteSim.BIBTEX.value:                        planet_metadata[mteSim.BIBTEX.value],
-            mteSim.OTHER_REMARKS.value:                 planet_metadata[mteSim.OTHER_REMARKS.value],
-            
-            
-        }
+            name = f"{metadata[mteSim.SIMULATION_TYPE.value]}_{metadata[mteSim.RUN_ID.value]}_{metadata[mteSim.SIMULATION_ID.value]}"
+
+            samples_dict = {
+                simDict.SIMULATION_NAME.value:              name,
+                simDict.ADDITIONAL_INFO.value:              additional_infos,
+                simDict.SIMULATION.value:                   dataframe_sample,
+                simDict.README.value:                       readme,
+                
+                simDict.CONTACT_EMAIL.value:                planet_metadata[mteSim.CONTACT_EMAIL.value],
+                mteSim.AUTHOR_NAME.value:                   planet_metadata.get(mteSim.AUTHOR_NAME.value,None),
+                simDict.PLANETS_LIST.value:                 metadata[mteAuthors.PLANETS_LIST.value],
+                mteSim.STAR_NAME.value:                     planet_metadata[mteSim.STAR_NAME.value],
+                mteSim.RUN_ID.value:                        planet_metadata[mteSim.RUN_ID.value],
+                mteSim.SIMULATION_ID.value:                 planet_metadata[mteSim.SIMULATION_ID.value],
+                mteSim.RUN_NAME.value:                      planet_metadata[mteSim.RUN_NAME.value],
+                mteSim.SIMULATION_TYPE.value:               planet_metadata[mteSim.SIMULATION_TYPE.value],
+                mteSim.PHYSICS_IMPLEMENTED.value:           planet_metadata[mteSim.PHYSICS_IMPLEMENTED.value],
+                mteSim.NB_PLANETS.value:                    planet_metadata[mteSim.NB_PLANETS.value],  
+                mteSim.CODE_USED.value:                     planet_metadata[mteSim.CODE_USED.value],
+                mteSim.BIBTEX.value:                        planet_metadata[mteSim.BIBTEX.value],
+                mteSim.OTHER_REMARKS.value:                 planet_metadata[mteSim.OTHER_REMARKS.value],
+                
+                
+            }
         samples_dict.update(metadata)    
         
         return_samples.append(samples_dict)
