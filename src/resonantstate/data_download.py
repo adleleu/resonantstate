@@ -32,7 +32,7 @@ def get_metadata_observations(local_path=None):
 
     Parameters
     ----------
-    local_path : str or None
+    local_path : Path or str or None
         use a local version of the database if local_path is given, query DACE if not.
     """
     
@@ -55,7 +55,7 @@ def get_metadata_observations(local_path=None):
     return dataframe
 
 
-def download_observations_samples(dataframe, download_destination=None):
+def download_observations_samples(dataframe, local_path=None, download_destination=None):
     """This method retrieves the samples for the systems in the given dataframe, and returns a dictionnary that contains informations about the samples and the samples themselves. 
     
     If a download destination is given, it saves the samples and the coresponding metadata in the given directory.
@@ -64,6 +64,8 @@ def download_observations_samples(dataframe, download_destination=None):
     ----------
     dataframe : pd.DataFrame
         The dataframe containing the metadata of the planets samples that we want to download
+    local_path : Path or str or None
+        use a local version of the database if local_path is given, query DACE if not.
     download_destination : str or None
         If given, save each sample and metadata in the given directory 
     
@@ -147,31 +149,56 @@ def download_observations_samples(dataframe, download_destination=None):
         additional_info_url = additional_infos_urls[url_index]
         
         planet_metadata = planet_metadatas[url_index]
-        file_sample = requests.get(sample_url, verify=False)
-        if not file_sample.ok: 
-            raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
-        dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
-        
-        file_metadata = requests.get(metadata_url, verify=False)
-        if not file_metadata.ok: 
-            raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
-        metadata = json.loads(file_metadata.text)
 
-        if readme_url is not None:
-            file_readme = requests.get(readme_url, verify=False)
-            if not file_readme.ok: 
-                raise Exception(f"URL {readme_url} responded with status code: {file_readme.status_code}")
-            readme = file_readme.text
+        if local_path is not None:
+            if isinstance(local_path, Path):
+                local_path = str(local_path)
+            
+
+            sample_file = Path(sample_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+            dataframe_sample = pd.read_parquet(io.BytesIO(sample_file.read_bytes()))
+
+            file_metadata = Path(metadata_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+            metadata = json.loads(file_metadata.read_text())
+
+            if readme_url is not None:
+                file_readme = Path(readme_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+                readme = file_readme.read_text()
+            else:
+                readme = None
+            
+            if additional_info_url is not None:   
+                file_additional_info = Path(additional_info_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
+                additional_infos = json.loads(file_additional_info.read_text()) 
+            else:
+                additional_infos = None
+
         else:
-            readme = None
-        
-        if additional_info_url is not None:   
-            file_additional_info = requests.get(additional_info_url, verify=False)
-            if not file_additional_info.ok: 
-                raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
-            additional_infos = json.loads(file_additional_info.text) 
-        else:
-            additional_infos = None
+            file_sample = requests.get(sample_url, verify=False)
+            if not file_sample.ok: 
+                raise Exception(f"URL {sample_url} responded with status code: {file_sample.status_code}")
+            dataframe_sample = pd.read_parquet(io.BytesIO(file_sample.content))
+            
+            file_metadata = requests.get(metadata_url, verify=False)
+            if not file_metadata.ok: 
+                raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
+            metadata = json.loads(file_metadata.text)
+
+            if readme_url is not None:
+                file_readme = requests.get(readme_url, verify=False)
+                if not file_readme.ok: 
+                    raise Exception(f"URL {readme_url} responded with status code: {file_readme.status_code}")
+                readme = file_readme.text
+            else:
+                readme = None
+            
+            if additional_info_url is not None:   
+                file_additional_info = requests.get(additional_info_url, verify=False)
+                if not file_additional_info.ok: 
+                    raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
+                additional_infos = json.loads(file_additional_info.text) 
+            else:
+                additional_infos = None
         
         name = f"{metadata[mteObs.STAR_NAME.value]}_{metadata[mteObs.ANALYSIS_ID.value]}"
         
