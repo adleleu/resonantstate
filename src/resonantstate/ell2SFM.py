@@ -18,17 +18,16 @@ import matplotlib.pyplot as py
 import matplotlib as mpl
 import numpy as np
 from itertools import cycle
-
 import pandas as pd
-
+from resonantstate.constants import *
 from resonantstate.simulations_resonance_analysis import *
 
 
 # import os 
 
 #Hamiltonian coefficients
-f1s = [ 1.190493697849547, 2.025222689938346, 2.840431856715441, 3.649618244089652, 4.456142785027623, 5.261253831849899, 6.065523627097718, 6.869251916417852, 7.672611034475267, 8.475707148201764, 9.278609253466129, 10.08136413618922, 10.88400465063751, 11.68655455857515, 12.48903144896030, 13.29144865274429, 14.09381638467312, 14.89614276587963, 15.69843412935734, 16.50069558620453]
-f2s = [-0.428389834143869,-2.484005183303907,-3.283256721821090,-4.083705371769611,-4.884706297511002,-5.686007411626633,-6.487489727907814,-7.289089771453291,-8.090770598035306,-8.892509248107672,-9.694290707819164,-10.49610474146903,-11.29794413782656,-12.09980367496610,-12.90167944505811,-13.70356853306293,-14.50546862185001,-15.30737796425819,-16.10929512977600,-16.91121894121170]
+#f1s = [ 1.190493697849547, 2.025222689938346, 2.840431856715441, 3.649618244089652, 4.456142785027623, 5.261253831849899, 6.065523627097718, 6.869251916417852, 7.672611034475267, 8.475707148201764, 9.278609253466129, 10.08136413618922, 10.88400465063751, 11.68655455857515, 12.48903144896030, 13.29144865274429, 14.09381638467312, 14.89614276587963, 15.69843412935734, 16.50069558620453]
+#f2s = [-0.428389834143869,-2.484005183303907,-3.283256721821090,-4.083705371769611,-4.884706297511002,-5.686007411626633,-6.487489727907814,-7.289089771453291,-8.090770598035306,-8.892509248107672,-9.694290707819164,-10.49610474146903,-11.29794413782656,-12.09980367496610,-12.90167944505811,-13.70356853306293,-14.50546862185001,-15.30737796425819,-16.10929512977600,-16.91121894121170]
 
 
 def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):    
@@ -572,6 +571,89 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
 
       if grid:
             ax1.grid(linewidth=0.3, alpha = 0.5)
+
+
+
+def plot_topology_DMMR(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,legend=True):
+
+      ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
+
+      #delta_min, delta_max = delta_lim
+      #X_min, X_max = X_lim
+
+      #ax1.set_xlim(xmin = delta_min, xmax = delta_max)
+      #ax1.set_ylim(ymin = X_min,     ymax = X_max)
+
+      if delta_lim==None:
+            ax1.autoscale(axis='x')
+            delta_lim = ax1.get_xlim()
+            if delta_lim[0] > -3:
+                  delta_lim = (-3, delta_lim[1])
+            if delta_lim[1] < 5:
+                  delta_lim = (delta_lim[0], 5)
+
+
+      ax1.set_xlim(delta_lim)
+
+      if X_lim==None:
+            ax1.autoscale(axis='y')
+            X_lim = ax1.get_ylim()
+            if X_lim[0] > -5:
+                  X_lim = (-5, X_lim[1])
+            if X_lim[1] < 5:
+                  X_lim = (X_lim[0], 5)
+
+      
+      bound=(max(np.abs(X_lim))**2+max(np.abs(delta_lim)))/3
+      ax1.set_ylim(X_lim)
+
+      ax1.tick_params(axis='both', which='major')
+      ax1.set_xlabel(xlabel=r"$\Delta_{MMR}$", labelpad = 3)
+      ax1.set_ylabel(ylabel=r"$e_r$",      labelpad = 4, rotation = 0)
+      #delt = np.linspace(delta_lim[0]-X2max, delta_lim[1]+X2max, 512)
+      delt = np.arange(-bound, bound, .01)
+      Xmin = np.zeros(delt.size)
+      Xmax = np.zeros(delt.size)
+      Xres = np.zeros(delt.size)
+      Xint = np.zeros(delt.size)
+      Xhyp = np.zeros(delt.size)
+      count = 0
+      for count,delta in enumerate(delt):
+            [xmin, xmax, xres, xint, xhyp] = topology(delta)
+            Xmin[count] = xmin
+            Xmax[count] = xmax
+            Xres[count] = xres
+            Xint[count] = xint
+            Xhyp[count] = xhyp
+
+      if dark:        
+            ax1.plot(Xint[delt >= 1.]**2-3*delt[delt >= 1.], Xint[delt >= 1.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'secondary')
+            if legend:
+                  ax1.plot(Xhyp[delt >= 1.]**2-3*delt[delt >= 1.], Xhyp[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'hyperbolic')
+                  ax1.plot(Xres**2-3*delt,             Xres,             color = 'white', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'primary')
+                  ax1.plot(Xmin[delt >= 1.]**2-3*delt[delt >= 1.], Xmin[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'separatrix')
+            else:
+                  ax1.plot(Xhyp[delt >= 1.]**2-3*delt[delt >= 1.], Xhyp[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = ':', alpha = alpha)
+                  ax1.plot(Xres**2-3*delt,             Xres,             color = 'white', linewidth = linewidth, linestyle = '-', alpha = alpha)
+                  ax1.plot( Xmin[delt >= 1.]**2-3*delt[delt >= 1.], Xmin[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+            ax1.plot(Xmax[delt >= 1.]**2-3*delt[delt >= 1.], Xmax[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+            #ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'pink', alpha = alpha_fill)
+      else:
+            ax1.plot(Xint[delt >= 1.]**2-3*delt[delt >= 1.], Xint[delt >= 1.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha)
+            if legend:
+                  ax1.plot(Xhyp[delt >= 1.]**2-3*delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'hyperbolic')
+                  ax1.plot(Xres**2-3*delt,             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'primary')
+                  ax1.plot(Xmin[delt >= 1.]**2-3*delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'separatrix')
+            else:
+                  ax1.plot(Xhyp[delt >= 1.]**2-3*delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha)
+                  ax1.plot(Xres**2-3*delt,             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xmin[delt >= 1.]**2-3*delt[delt >= 1.], Xmin[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha)    
+            ax1.plot(Xmax[delt >= 1.]**2-3*delt[delt >= 1.], Xmax[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+            #ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'red', alpha = alpha_fill)
+
+      if grid:
+            ax1.grid(linewidth=0.3, alpha = 0.5)
+
 
 
 
