@@ -639,7 +639,7 @@ def plot_topology_DMMR(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, gr
             ax1.plot(Xmax[delt >= 1.]**2-3*delt[delt >= 1.], Xmax[delt >= 1.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha)
             #ax1.fill_between(delt[delt >= 1.], Xmin[delt >= 1.], Xmax[delt >= 1.], color = 'pink', alpha = alpha_fill)
       else:
-            ax1.plot(Xint[delt >= 1.]**2-3*delt[delt >= 1.], Xint[delt >= 1.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha)
+            ax1.plot(Xint[delt >= 1.]**2-3*delt[delt >= 1.], Xint[delt >= 1.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'secondary')
             if legend:
                   ax1.plot(Xhyp[delt >= 1.]**2-3*delt[delt >= 1.], Xhyp[delt >= 1.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'hyperbolic')
                   ax1.plot(Xres**2-3*delt,             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'primary')
