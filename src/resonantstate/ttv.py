@@ -1,8 +1,9 @@
 
 import ttvfast
 import numpy as np
-pi=np.pi
-AUpdaytomps=149597870700/(24*3600)
+from resonantstate.constants import *
+
+
 
 def forward_modeling(sample,nb_planets,t_ini, dt, t_end,input_flag=1,rv_times=[]):
     '''

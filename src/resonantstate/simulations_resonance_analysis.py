@@ -84,7 +84,7 @@ def reorder_data(data, row_number):
 
 
 
-def get_nearest_resonance(period_ratio, second_order = False, kmax=12, difference_order = 0.5):
+def get_nearest_resonance(period_ratio, second_order = False, kmax=12, difference_order = 0.5, zeta=False):
     """Simple function to get the nearest resonance for a pair of planets based on their period ratio.
 
     Args:
@@ -97,23 +97,32 @@ def get_nearest_resonance(period_ratio, second_order = False, kmax=12, differenc
         tuple: resonance k, order and Delta value associated to the closest resonance
     """
     
-    # Get closest first order resonance
-    ks = np.arange(1, kmax)
-    possible_Delta = period_ratio * ks / (ks + 1) - 1
-    k = ks[np.argmin(np.abs(possible_Delta))]
-    min_Delta = np.min(np.abs(possible_Delta))
+    if zeta==True:
+        # Get closest first order resonance
+        ks = np.arange(1, kmax)
+        possible_zeta = 3*(1/(period_ratio-1)-np.round(1/(period_ratio-1)))
+        k = ks[np.argmin(np.abs(possible_zeta))]
+        min_zeta = np.min(np.abs(possible_zeta))
+        return k, 1, min_zeta
     
-    # Get closest second order resonance
-    if second_order:
-        possible_Delta = period_ratio * ks / (ks + 2) - 1
-        k2 = ks[np.argmin(np.abs(possible_Delta))]
-        min_Delta2 = np.min(np.abs(possible_Delta))
+    else:
+        # Get closest first order resonance
+        ks = np.arange(1, kmax)
+        possible_Delta = period_ratio * ks / (ks + 1) - 1
+        k = ks[np.argmin(np.abs(possible_Delta))]
+        min_Delta = np.min(np.abs(possible_Delta))
         
-        # If second order matches better first order, return it
-        if min_Delta2 < difference_order * min_Delta:
-            return k2, 2, min_Delta2
-    
-    return k, 1, min_Delta
+        # Get closest second order resonance
+        if second_order:
+            possible_Delta = period_ratio * ks / (ks + 2) - 1
+            k2 = ks[np.argmin(np.abs(possible_Delta))]
+            min_Delta2 = np.min(np.abs(possible_Delta))
+            
+            # If second order matches better first order, return it
+            if min_Delta2 < difference_order * min_Delta:
+                return k2, 2, min_Delta2
+        
+        return k, 1, min_Delta
 
 
 def get_near_resonant_pairs(data, row_number, max_Delta = 1e-2):
