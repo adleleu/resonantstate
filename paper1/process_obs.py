@@ -92,7 +92,7 @@ def process_obs(case,
         df_keep.loc[index,['resonantstate']]=IRv[np.argmax(IRc)]
         df_keep.loc[index,['er','er_e1','er_e2']]=np.quantile(xres,(0.5,.16,.84))
         df_keep.loc[index,['delta','delta_e1','delta_e2']]=np.quantile(delta,(0.5,.16,.84))
-        df_keep.loc[index,['DMMR','DMMR_e1','DMMR_e2']]=np.quantile(xres**2-3*delta,(0.5,.16,.84))
+        df_keep.loc[index,['DMMR','DMMR_e1','DMMR_e2']]=np.quantile(xres**2-3*(delta+1),(0.5,.16,.84))
         df_keep.loc[index,['es','es_e1','es_e2']]=np.quantile(np.sqrt(2*Sig2),(0.5,.16,.84))
         df_keep.loc[index,['Der','Der_e1','Der_e2']]=np.quantile(xlib,(0.5,.16,.84))
         df_keep.loc[index,['ein','ein_e1','ein_e2']]=np.quantile(np.sqrt(samples['h_'+str(Id1)]**2+samples['k_'+str(Id1)]**2),(0.5,.16,.84))
