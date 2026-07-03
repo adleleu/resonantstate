@@ -22,33 +22,6 @@ def process_obs(case,
     df_keep=pd.read_parquet('data/keep_'+case)
 
 
-    #We pre allocate the new quantities we compute in this function
-    T_additional_columns=['xres','xres_e1','xres_e2',
-                        'delta','delta_e1','delta_e2',  
-                        'xsec','xsec_e1','xsec_e2',
-                        'Prdist','Prdist_e1','Prdist_e2',
-                        'ein','ein_e1','ein_e2','eout','eout_e1','eout_e2',
-                        'xlib','xlib_e1','xlib_e2',
-                        'mutinc','mutinc_e1','mutinc_e2',
-                        'ttv_amp_1','ttv_amp_2',
-                        'ttv_phase_1','ttv_phase_2',
-                        'author_name','prior_e',
-                        'nb_planets',
-                        'nb_nearby_planets','resonantstate','bibtex']
-
-
-    for col in T_additional_columns:
-        df_keep[col] = None
-
-
-    #We also store 300 samples of some chosen quantities. this allow properly explore potential orrelations between parameters
-    T_samples_columns=['author','reason','Pmin','delta','xres','xsec','xlib','mutinc','rhoin','rhoout']
-    df_samples = pd.DataFrame(None, index=range(df_keep.shape[0]*300), columns=T_samples_columns)
-
-
-
-
-    nb_pair=df_keep.shape[0]
     nb_pair_done=0
 
 
@@ -106,4 +79,4 @@ def process_obs(case,
 
     
     df_keep.to_parquet('data/'+case+'_rs')
-    df_samples.to_parquet('data/'+case+'_rs_samples')
+    
