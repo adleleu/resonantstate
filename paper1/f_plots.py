@@ -184,7 +184,7 @@ def theory_background(ax,DMMR_lim,er_lim):
 
     #cyan
     Id=np.where(delta_grid>-2)[0]
-    DMMR_grid=fixp_grid**2-3*delta_grid
+    DMMR_grid=fixp_grid**2-3*(delta_grid+1)
 
     Id2=np.where(delta_grid>0)[0]
 
@@ -194,14 +194,14 @@ def theory_background(ax,DMMR_lim,er_lim):
 
 
     Id3=np.where((delta_grid<=1)&(delta_grid>-2))[0][::-1]
-    x_rentrance_2=(fixp_grid[Id3]+1)**2-3*delta_grid[Id3]#DMMR_grid[Id3]
+    x_rentrance_2=(fixp_grid[Id3]+1)**2-3*(1+delta_grid[Id3])#DMMR_grid[Id3]
     y_rentrance_2=fixp_grid[Id3]+1
 
 
     Iddeltap=np.where(delta_grid>=1)[0][::-1]
 
 
-    xfill=np.concatenate((DMMR_grid[Id],x_rentrance_1,x_rentrance_2,sepp_grid[Iddeltap]**2-3*delta_grid[Iddeltap]))
+    xfill=np.concatenate((DMMR_grid[Id],x_rentrance_1,x_rentrance_2,sepp_grid[Iddeltap]**2-3*(1+delta_grid[Iddeltap])))
     yfill=np.concatenate((fixp_grid[Id],y_rentrance_1,y_rentrance_2,sepp_grid[Iddeltap]))
 
     ax.fill(xfill,yfill,alpha=alpha_area,color='cyan',label=label)
@@ -209,10 +209,10 @@ def theory_background(ax,DMMR_lim,er_lim):
 
     #green
     Id = np.where(delta_grid>-2.83/3)[0]
-    ax.fill_betweenx(fixp_grid[Id],fixp_grid[Id]**2-3*delta_grid[Id],fixp_grid[Id]**2-3*delta_grid[Id]+width_lines*5,color='green',label='Laminar/Stable libration',alpha=alpha_line)
+    ax.fill_betweenx(fixp_grid[Id],fixp_grid[Id]**2-3*(1+delta_grid[Id]),fixp_grid[Id]**2-3*(1+delta_grid[Id])+width_lines*5,color='green',label='Laminar/Stable libration',alpha=alpha_line)
     Id = np.where((delta_grid<-2.83/3)&(delta_grid>-2))[0]
     print(Id.size,'ID-size')
-    ax.fill_between(fixp_grid[Id]**2-3*delta_grid[Id],fixp_grid[Id],fixp_grid[Id]+width_lines,color='green',alpha=alpha_line)
+    ax.fill_between(fixp_grid[Id]**2-3*(1+delta_grid[Id]),fixp_grid[Id],fixp_grid[Id]+width_lines,color='green',alpha=alpha_line)
 
 
 
@@ -222,32 +222,32 @@ def theory_background(ax,DMMR_lim,er_lim):
     label ="$\left\{  \\begin{array}{l} \\textnormal{Tides} \\\ \\textnormal{Planetesimal disk} \end{array}  \\right.$"#  \\ \\
 
 
-    x_blue_upper=fixp_grid[Id_blue_upper]**2-3*delta_grid[Id_blue_upper]
+    x_blue_upper=fixp_grid[Id_blue_upper]**2-3*(1+delta_grid[Id_blue_upper])
     y_blue_upper=fixp_grid[Id_blue_upper]
     ax.fill_between(x_blue_upper,y_blue_upper,y_blue_upper+width_lines,color='blue',label=label,alpha=alpha_line)
 
     Id = np.where(np.abs(delta_grid+1.35)<.15)[0]
-    ax.fill_between(fixp_grid[Id]**2-3*delta_grid[Id],fixp_grid[Id],fixp_grid[Id]+width_lines,color='blue',alpha=alpha_line)
+    ax.fill_between(fixp_grid[Id]**2-3*(1+delta_grid[Id]),fixp_grid[Id],fixp_grid[Id]+width_lines,color='blue',alpha=alpha_line)
     Id = np.where(np.abs(delta_grid+.75)<.15)[0]
-    ax.fill_between(fixp_grid[Id]**2-3*delta_grid[Id],fixp_grid[Id],fixp_grid[Id]+width_lines,color='blue',alpha=alpha_line)
+    ax.fill_between(fixp_grid[Id]**2-3*(1+delta_grid[Id]),fixp_grid[Id],fixp_grid[Id]+width_lines,color='blue',alpha=alpha_line)
 
     Id = np.where(delta_grid>2.7)[0]
-    ax.fill_between(intc_grid[Id]**2-3*delta_grid[Id],intc_grid[Id],intc_grid[Id]-width_lines,color='blue',alpha=alpha_line)
+    ax.fill_between(intc_grid[Id]**2-3*(1+delta_grid[Id]),intc_grid[Id],intc_grid[Id]-width_lines,color='blue',alpha=alpha_line)
 
     Id = np.where(np.abs(delta_grid-2.2)<.15)[0]
-    ax.fill_between(intc_grid[Id]**2-3*delta_grid[Id],intc_grid[Id],intc_grid[Id]-width_lines,color='blue',alpha=alpha_line)
+    ax.fill_between(intc_grid[Id]**2-3*(1+delta_grid[Id]),intc_grid[Id],intc_grid[Id]-width_lines,color='blue',alpha=alpha_line)
     Id = np.where(np.abs(delta_grid-1.6)<.15)[0]
-    ax.fill_between(intc_grid[Id]**2-3*delta_grid[Id],intc_grid[Id],intc_grid[Id]-width_lines,color='blue',alpha=alpha_line)
+    ax.fill_between(intc_grid[Id]**2-3*(1+delta_grid[Id]),intc_grid[Id],intc_grid[Id]-width_lines,color='blue',alpha=alpha_line)
 
 
     #yellow lower
     Id_delp1=np.where(delta_grid>1)
 
     yfixpint=intc_grid[Id_delp1]
-    xfixpint=intc_grid[Id_delp1]**2-3*delta_grid[Id_delp1]
+    xfixpint=intc_grid[Id_delp1]**2-3*(1+delta_grid[Id_delp1])
 
     yhyp=hyp_grid[Id_delp1]
-    xhyp=hyp_grid[Id_delp1]**2-3*delta_grid[Id_delp1]
+    xhyp=hyp_grid[Id_delp1]**2-3*(1+delta_grid[Id_delp1])
 
     xfill=np.concatenate((xfixpint,xhyp[::-1],np.array([DMMR_lim[0]])))
     yfill=np.concatenate((yfixpint,yhyp[::-1],np.array([er_lim[0]])))
@@ -257,7 +257,7 @@ def theory_background(ax,DMMR_lim,er_lim):
     #yellow upper
     Idsepp=np.where(sepp_grid)[0]
     ysepp=sepp_grid[Idsepp]
-    xsepp=sepp_grid[Idsepp]**2-3*delta_grid[Idsepp]
+    xsepp=sepp_grid[Idsepp]**2-3*(1+delta_grid[Idsepp])
 
 
     xfill=np.concatenate((xsepp,x_rentrance_2[::-1],x_rentrance_1[::-1],x_blue_upper,np.array([DMMR_lim[1]])))
