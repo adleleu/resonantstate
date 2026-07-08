@@ -554,3 +554,82 @@ def download_simulations(dataframe,local_path=None, download_destination=None):
                     f.write(readme)
         
     return return_samples
+
+
+
+
+def fetch_bibtex(bibcode,api_token) :
+    """fetch the citation export from ADS for a given bibcode
+
+    Parameters
+    ----------
+    bibcode : str
+        bibcode of the data used
+    api_token : str
+        api token, This can be found on your ADS account under : https://ui.adsabs.harvard.edu/user/settings/token
+
+    Returns
+    -------
+    str
+        ADS citation export
+
+    Raises
+    ------
+    RuntimeError
+        _description_
+    """
+
+    url = f"https://api.adsabs.harvard.edu/v1/export/bibtex"
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+
+    json_in = {
+        "bibcode": [bibcode],
+        "sort": "date desc",
+        "maxauthor": 1000
+    }
+
+    response = requests.post(url, json=json_in, headers=headers)
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"ADS API error {response.status_code}: {response.text}"
+        )
+
+    data = response.json()
+    return data["export"]   # ADS returns the BibTeX in "export" field
+
+
+
+def create_bibfile(Tbibtext,path,api_token):
+    """create a .bib file to export citations in latex
+
+    Parameters
+    ----------
+    Tbibtext : list of str
+        list or array of Bibcodes or list of dictionaries of loaded analysis
+    path : str
+        path where to create the .bib file
+    api_token : str
+        api token, This can be found on your ADS account under : https://ui.adsabs.harvard.edu/user/settings/token
+    """
+    T_exp=[]
+    tex_string='\citep{'
+    for bib in Tbibtext:
+        try:
+            if isinstance(bib, str):
+                T_exp.append(fetch_bibtex(bib,api_token))
+                tex_string+=bib+','
+            elif 'bibtex' in bib:
+                T_exp.append(fetch_bibtex(bib['bibtex'],api_token))
+                tex_string+=bib['bibtex']+','
+        except:
+            print('cant do '+bib)
+
+    tex_string+='}'
+
+    print(tex_string)
+    with open(path+"/biblio.bib", "w") as file:
+        file.write("\n".join(T_exp))
