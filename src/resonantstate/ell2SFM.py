@@ -1,17 +1,3 @@
-# This notebook manipulates 1-dimensional numpy arrays of elliptic elements to convert and plot into the Second Fundamental Model of resonance (SFM).
-# The definition of the SFM used here is detailed at https://jeremycouturier.com/img/SFM.pdf
-# The numpy arrays can come from posterior data of MCMC analysis or from numerical simulations.
-# The user can (optionally) import a sample from the DACE table of the Geneva Resonant State Workshop (GRSW) for analysis
-
-# Author : Jérémy COUTURIER
-
-# Functions : 
-# - ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2) -> Returns the coordinates (X, Y, X2, Y2, delta) of the SFM. (X, Y) corresponds to the unique degree of freedom
-#                                                               of the SFM and (X2, Y2) to the first integral. delta is the unique parameter of the SFM
-# - SFM2useful(X, Y, X2, Y2, delta) -> Returns [sig, Sig, sig2, Sig2, x1, x2, IsResonant] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
-#                                      x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
-#                                      IsResonant is 1 if the system is in the resonance, and 0 else.
-
 # import math as m
 import cmath as cm
 import matplotlib.pyplot as py
@@ -22,6 +8,106 @@ import pandas as pd
 from resonantstate.constants import *
 from resonantstate.simulations_resonance_analysis import *
 
+
+Tp=np.arange(1,20)
+def _dist_Dpp1p(Pr):
+
+
+    if Pr>2.5 or Pr<1.1:
+        return np.inf,-1,False
+    
+    else :
+        dist_H= -2*(np.abs(f1s[Tp-1])/3/Tp**(1/2))**(-2/3)*(1-(Pr*Tp/(Tp+1))**(1/3))
+        Id_closest=np.abs(dist_H).argmin()
+
+        dist_H_best,p_best=dist_H[Id_closest],Tp[Id_closest]
+
+        if dist_H_best>0:
+            Pr_test=(2-(p_best/(1+p_best)*Pr)**(1/3))**3*(p_best+1)/p_best
+            dist_H_test= -2*(np.abs(f1s[Tp-1])/3/Tp**(1/2))**(-2/3)*(1-(Pr_test*Tp/(Tp+1))**(1/3))
+            Id_closest_test=np.abs(dist_H_test).argmin()
+            
+            if Tp[Id_closest_test]==p_best:
+                sym=True
+            else:
+                sym=False
+        else:
+            sym=True
+
+        
+        return dist_H[Id_closest],Tp[Id_closest],sym
+
+def dist_Dpp1p(Pr):
+    """deal with different entry shape for Pr
+
+    Parameters
+    ----------
+    Pr : float or array
+        period ratios
+
+    Returns
+    -------
+    dist : float
+
+    p : integer
+
+    sym: boolean
+        
+    """
+
+    if isinstance(Pr,np.ndarray):
+        if len(Pr.shape)==1:
+            dist_H,Tp,sym=np.zeros(Pr.size),np.zeros(Pr.size),np.zeros(Pr.size,dtype=bool)
+            for k,pr in enumerate(Pr):
+                dist_H[k],Tp[k],sym[k]=_dist_Dpp1p(pr)
+            return dist_H,Tp,sym
+    else:
+        return  _dist_Dpp1p(Pr)
+    
+def samples2ell_twoplanets(sample, pair):
+      I    = pair[0]
+      J    = pair[1]
+      if isinstance(sample, pd.DataFrame) and isinstance(I, str) and isinstance(J, str):
+            lbd1 = sample[f'mean_longitude_deg_{I}'].values
+            lbd2 = sample[f'mean_longitude_deg_{J}'].values
+            P1   = sample[f'period_days_{I}'].values
+            P2   = sample[f'period_days_{J}'].values
+            k1 = sample[f'k_{I}'].values
+            k2 = sample[f'k_{J}'].values
+            h1 = sample[f'h_{I}'].values
+            h2 = sample[f'h_{J}'].values
+            m1 = sample[f'planet_star_mass_ratio_{I}'].values
+            m2 = sample[f'planet_star_mass_ratio_{J}'].values
+      elif isinstance(sample, pd.DataFrame) and isinstance(I, (int, np.integer)) and isinstance(J, (int, np.integer)):
+            lbd1 = sample.iloc[:, 1 + 8*I].values
+            lbd2 = sample.iloc[:, 1 + 8*J].values
+            P1   = sample.iloc[:, 2 + 8*I].values
+            P2   = sample.iloc[:, 2 + 8*J].values
+            k1   = sample.iloc[:, 3 + 8*I].values
+            k2   = sample.iloc[:, 3 + 8*J].values
+            h1   = sample.iloc[:, 4 + 8*I].values
+            h2   = sample.iloc[:, 4 + 8*J].values
+            m1   = sample.iloc[:, 7 + 8*I].values
+            m2   = sample.iloc[:, 7 + 8*J].values
+      else:
+            lbd1 = sample[1 + 8*I,:]
+            lbd2 = sample[1 + 8*J,:]
+            P1   = sample[2 + 8*I,:]
+            P2   = sample[2 + 8*J,:]
+            k1   = sample[3 + 8*I,:]
+            k2   = sample[3 + 8*J,:]
+            h1   = sample[4 + 8*I,:]
+            h2   = sample[4 + 8*J,:]
+            m1   = sample[7 + 8*I,:]
+            m2   = sample[7 + 8*J,:]
+      e1   = np.sqrt(k1**2 + h1**2)
+      e2   = np.sqrt(k2**2 + h2**2)
+      vp1  = np.arctan2(h1, k1)
+      vp2  = np.arctan2(h2, k2)
+      lbd2 = lbd2*np.pi/180.
+      lbd1 = lbd1*np.pi/180.
+
+      return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
 
 def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):    
       r"""
@@ -366,128 +452,91 @@ def topology_light(delta):
                   xint = S2
             return [S1, xint, xhyp]
 
-#Plotting
-
-
-def samples2ell_twoplanets(sample, pair):
-      I    = pair[0]
-      J    = pair[1]
-      if isinstance(sample, pd.DataFrame) and isinstance(I, str) and isinstance(J, str):
-            lbd1 = sample[f'mean_longitude_deg_{I}'].values
-            lbd2 = sample[f'mean_longitude_deg_{J}'].values
-            P1   = sample[f'period_days_{I}'].values
-            P2   = sample[f'period_days_{J}'].values
-            k1 = sample[f'k_{I}'].values
-            k2 = sample[f'k_{J}'].values
-            h1 = sample[f'h_{I}'].values
-            h2 = sample[f'h_{J}'].values
-            m1 = sample[f'planet_star_mass_ratio_{I}'].values
-            m2 = sample[f'planet_star_mass_ratio_{J}'].values
-      elif isinstance(sample, pd.DataFrame) and isinstance(I, (int, np.integer)) and isinstance(J, (int, np.integer)):
-            lbd1 = sample.iloc[:, 1 + 8*I].values
-            lbd2 = sample.iloc[:, 1 + 8*J].values
-            P1   = sample.iloc[:, 2 + 8*I].values
-            P2   = sample.iloc[:, 2 + 8*J].values
-            k1   = sample.iloc[:, 3 + 8*I].values
-            k2   = sample.iloc[:, 3 + 8*J].values
-            h1   = sample.iloc[:, 4 + 8*I].values
-            h2   = sample.iloc[:, 4 + 8*J].values
-            m1   = sample.iloc[:, 7 + 8*I].values
-            m2   = sample.iloc[:, 7 + 8*J].values
-      else:
-            lbd1 = sample[1 + 8*I,:]
-            lbd2 = sample[1 + 8*J,:]
-            P1   = sample[2 + 8*I,:]
-            P2   = sample[2 + 8*J,:]
-            k1   = sample[3 + 8*I,:]
-            k2   = sample[3 + 8*J,:]
-            h1   = sample[4 + 8*I,:]
-            h2   = sample[4 + 8*J,:]
-            m1   = sample[7 + 8*I,:]
-            m2   = sample[7 + 8*J,:]
-      e1   = np.sqrt(k1**2 + h1**2)
-      e2   = np.sqrt(k2**2 + h2**2)
-      vp1  = np.arctan2(h1, k1)
-      vp2  = np.arctan2(h2, k2)
-      lbd2 = lbd2*np.pi/180.
-      lbd1 = lbd1*np.pi/180.
-
-      return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
-
-
-
-
-def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim=None, label='', alpha=0.7, markersize=80, marker= 'o'):
-      I    = pair[0]
-      J    = pair[1]
-
-      if (isinstance(colors, np.ndarray)):
-            #Plotting
-            ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
-            ax1.scatter(Ds, x2s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha)
-      else:
-            ax1.scatter(Ds, x1s, color = colors, marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
-            ax1.scatter(Ds, x2s, color = colors, marker = marker,  s = markersize, alpha = alpha)
-
-      #if (isinstance(colors, np.ndarray)):
-      #      cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), ax=ax1, aspect=40, pad=0.01)
-      #      cbar.ax.tick_params()
-
-
 def samples2SFM(sample, pair, p):
       [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
       [X, Y, X2, Y2, delta] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
       return [X, Y, X2, Y2, delta]
-
 
 def samples2usefull(sample, pair, p):
       [X, Y, X2, Y2, Ds] = samples2SFM(sample, pair, p)
       [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
-def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, color_lim, label,alpha = 1,markersize=20, marker = 'o'):
+def get_SFM_quantities(samples,pair,p=None,sampling=1):
+    """call functions of the package to extract the quantities used in the first paper : delta, DMMR, er, Der, es, IR, p
 
-      [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
-      [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
+    Parameters
+    ----------
+    samples : pandas dataframe
+        posterior of a dynamical analysis
+    pair : tuple of ints
+        identifiant of the pair to consider
+    p : int, optional
+        p+1:p first order MMR to consider
+    sampling : int, optional
+        thinning of the samples
 
-      print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
-      plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim, label,alpha =alpha,markersize=markersize, marker = marker)
+    Returns
+    -------
+    delta : np.array of floats of the lengh of the thinned samples
+        delta parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)
+    DMMR : np.array of floats of the lengh of the thinned samples
+        er^2-3*delta
+    er : np.array of floats of the lengh of the thinned samples
+        rer parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities
+    Der : np.array of floats of the lengh of the thinned samples
+        Der parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) 
+    es : np.array of floats of the lengh of the thinned samples
+        secular eccentricities (see GRSW paper 1 - Leleu et al 2026) 
+    IR : np.array of floats of the lengh of the thinned samples
+        position of the sample in the second fundamental model:
+            2 : upper libration
+            1 : formally resonant
+            0 : upper circulation
+            -1 : lower circulation
+            -2 : lower libration
+    p : int
+        pair attributed to the p+1:p MMR
+    
+    """
+
+    P1=np.mean(samples['period_days_'+str(pair[0])].values)
+    P2=np.mean(samples['period_days_'+str(pair[1])].values)
+
+    if isinstance(samples, pd.DataFrame):
+            samples=np.vstack([samples[col] for col in samples.columns])
+    
+
+    if p==None:
+        dist,p,sym=dist_Dpp1p(P2/P1)
+    
+    [X, Y, X2, Y2, delta]=samples2SFM( samples[:,::sampling], pair, p)
+    [sig, Sig, sig2, Sig2, x1, x2, IR] = samples2usefull( samples[:,::sampling], pair,p)
+    
+    es=np.sqrt(2*Sig2)
+
+    Der=np.zeros(delta.size)
+    er=np.zeros(delta.size)
 
 
-def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o'):
-
-      ### Plots the sample in the phase space of the Second Fundamental Model ###
-
-      if isinstance(p_indexes, (list, np.ndarray)):
-            if isinstance(colors, (list, np.ndarray)):
-                  colors = cycle(colors)
-            for pair, p, color in zip(pairs, p_indexes, colors):
-                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
-                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, color_lim, label,alpha =alpha, markersize=markersize, marker=marker)
-      else:
-            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pairs)
-            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, p_indexes, colors, color_lim, label,alpha = alpha, markersize=markersize, marker=marker)
+    for kl in range(delta.size):
+        [fixp,o1,o2]=topology_light(delta[kl])
+        Vx=np.array([x1[kl], x2[kl]])
+        Idmaxx=abs(Vx).argmax()
+        Idxlib=abs(Vx[Idmaxx]-np.array([fixp,o1,o2])).argmin()
+        Der[kl]=Vx[Idmaxx]-np.array([fixp,o1,o2])[Idxlib]
+        er[kl]=Vx[Idmaxx]
 
 
-#def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_min=None, color_max=None):
-#
-#      ### Plots the sample in the phase space of the Second Fundamental Model ###
-#
-#      if isinstance(p_indexes, (list, np.ndarray)):
-#            #if len(pairs) != len(p_indexes):
-#            #      raise ValueError('The number of planet pairs must match the number of resonances.')
-#            #if isinstance(colors, (list, np.ndarray)):
-#            #      colors_ = cycle(colors)
-#            #else:
-#            #      colors_ = [colors] * len(pairs)
-#            for pair, p, color in zip(pairs, p_indexes, colors):
-#                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
-#                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, color_min, color_max)
-#      else:
-#            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pairs)
-#            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, p_indexes, colors, color_min, color_max)
+
+    DMMR=er**2-3*(delta+1)
 
 
+    return delta, DMMR, er, Der, es, IR, p
+
+
+
+#Plotting
 
 def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,alpha_fill=0.1,legend=True):
 
@@ -566,27 +615,20 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-
-def plot_topology_DMMR(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,legend=True):
+def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,legend=True):
 
       ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
 
-      #delta_min, delta_max = delta_lim
-      #X_min, X_max = X_lim
-
-      #ax1.set_xlim(xmin = delta_min, xmax = delta_max)
-      #ax1.set_ylim(ymin = X_min,     ymax = X_max)
-
-      if delta_lim==None:
+      if DMMR_lim==None:
             ax1.autoscale(axis='x')
-            delta_lim = ax1.get_xlim()
-            if delta_lim[0] > -3:
-                  delta_lim = (-3, delta_lim[1])
-            if delta_lim[1] < 5:
-                  delta_lim = (delta_lim[0], 5)
+            DMMR_lim = ax1.get_xlim()
+            if DMMR_lim[0] > -3:
+                  DMMR_lim = (-3, DMMR_lim[1])
+            if DMMR_lim[1] < 5:
+                  DMMR_lim = (DMMR_lim[0], 5)
 
 
-      ax1.set_xlim(delta_lim)
+      ax1.set_xlim(DMMR_lim)
 
       if X_lim==None:
             ax1.autoscale(axis='y')
@@ -597,7 +639,7 @@ def plot_topology_DMMR(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, gr
                   X_lim = (X_lim[0], 5)
 
       
-      bound=(max(np.abs(X_lim))**2+max(np.abs(delta_lim)))/3
+      bound=(max(np.abs(X_lim))**2+max(np.abs(DMMR_lim)))/3
       ax1.set_ylim(X_lim)
 
       ax1.tick_params(axis='both', which='major')
@@ -652,6 +694,41 @@ def plot_topology_DMMR(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, gr
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
+def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim=None, label='', alpha=0.7, markersize=80, marker= 'o'):
+      I    = pair[0]
+      J    = pair[1]
+
+      if (isinstance(colors, np.ndarray)):
+            #Plotting
+            ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
+            ax1.scatter(Ds, x2s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha)
+      else:
+            ax1.scatter(Ds, x1s, color = colors, marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
+            ax1.scatter(Ds, x2s, color = colors, marker = marker,  s = markersize, alpha = alpha)
+
+
+def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, color_lim, label,alpha = 1,markersize=20, marker = 'o'):
+
+      [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
+      [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
+
+      print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
+      plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim, label,alpha =alpha,markersize=markersize, marker = marker)
+
+
+def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o'):
+
+      ### Plots the sample in the phase space of the Second Fundamental Model ###
+
+      if isinstance(p_indexes, (list, np.ndarray)):
+            if isinstance(colors, (list, np.ndarray)):
+                  colors = cycle(colors)
+            for pair, p, color in zip(pairs, p_indexes, colors):
+                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
+                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, color_lim, label,alpha =alpha, markersize=markersize, marker=marker)
+      else:
+            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pairs)
+            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, p_indexes, colors, color_lim, label,alpha = alpha, markersize=markersize, marker=marker)
 
 
 
@@ -691,140 +768,6 @@ def get_p_by_pair(samples):
       return (pairs, ps)
 
 
-def plot_ell2SFM(data, colors=None, color_lim=None, delta_lim=None, X_lim=None):
-      """
-      Finds and plots the samples of near resonant planet pairs into the phase space of the second fundamental model (SFM) of resonance.
-
-      Parameters
-      ----------
-      data : pandas.DataFrame or np.ndarray or dict
-            Input data containing the posterior samples.
-            - If DataFrame or np.ndarray: used directly as sample input.
-            - If dict: must contain keys 'sample' (DataFrame) and 'samples_name' (str).
-      colors : list of np.ndarray or list of str, optional 
-            Numpy array used for colormapping the samples.
-      color_lim : tuple, optional 
-            Lower and upper limits for the color scale. If None, uses the min and max of the provided colormap array.
-      delta_lim : tuple, optional
-            Lower and upper limits of the x-axis. If None, scales automatically with data.
-      X_lim : tuple, optional
-            Lower and upper limits of the y-axis. If None, scales automatically with data.
-      
-      Returns
-      -------
-      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
-            The figure and axes objects of the plot.
-      """
-
-      if isinstance(data, dict):
-            samples = data['samples']
-            analysis_id = data['samples_name']
-      elif isinstance(data, pd.DataFrame) or isinstance(data, np.ndarray):
-            samples = data
-      else:
-            raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a numpy array, or a dictionary containing the "samples" key.')
-
-      row = -1
-
-      # Check if samples are ordered by increasing period
-      if isinstance(samples, pd.DataFrame):
-            periods_values = get_periods(samples, row)
-            if not np.all(np.diff(periods_values) > 0):
-                  samples = reorder_data(samples, row)
-
-      # Get first-order resonant pairs
-      #pairs_resonances = get_near_resonant_pairs(samples, row)
-      #first_order_pairs = [(pair.tolist(), res, order) for pair, res, order in pairs_resonances if order == 1]
-
-      #if not first_order_pairs:
-      #      print('No first order pairs found.')
-      #      return None, None
-
-      # Create figure to plot samples if first order pairs are found
-      fig, ax = py.subplots(1, 1, figsize=(9,9))
-      if isinstance(data, dict):
-            fig.suptitle(f'Analysis {analysis_id}', fontsize=16)
-
-      # Print the pairs and their resonances
-      #planet_pairs, p_indexes, orders = map(list, zip(*first_order_pairs))
-      
-      # Get first-order resonant pairs
-      planet_pairs, p_indexes = get_p_by_pair(samples)
-      
-      print('Found', len(planet_pairs), 'first order pairs.')
-      print('Pairs:', planet_pairs)
-      print('Resonances:', p_indexes)
-
-      # Use a colormap if colors is not provided
-      if colors is None:
-            cmap = py.get_cmap('tab10')
-            colors = [cmap(i % cmap.N) for i in range(len(planet_pairs))]
-
-      if any(isinstance(c, (np.ndarray, list)) for c in colors):
-            flat_colors = np.concatenate([np.asarray(c).flatten() for c in colors])
-            color_min = flat_colors.min() if color_lim is None else color_lim[0]
-            color_max = flat_colors.max() if color_lim is None else color_lim[1]
-            color_lim = (color_min, color_max)
-            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, 
-                                                    norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), 
-                                                    ax=ax, aspect=40, pad=0.01)
-            cbar.ax.tick_params()
-
-      # Plot the samples
-      plot_samples_SFM(fig, ax, samples, planet_pairs, p_indexes, colors, color_lim=color_lim, label='')
-      plot_topology(ax, delta_lim, X_lim)
-      py.legend()
-      py.tight_layout()
-      py.show()
-      return fig, ax
-
-
-def plot_ell2SFM_comparison(data_list, planet_pair, resonance, delta_lim=None, X_lim=None):
-      """
-      Compares the samples of different analyses in the phase space of the second fundamental model (SFM) of resonance.
-
-      Parameters
-      ----------
-      data_list : list of dict
-            List of dictionaries, each containing 'samples' (DataFrame) and 'analysis_id' (str).
-      planet_pair : list or np.ndarray
-            Pair of planets to be considered in the sample.
-      resonance : int
-            Resonance of the corresponding pair (p such that resonance is p:p+1).
-      delta_lim : tuple, optional
-            Lower and upper limits of the x-axis. If None, scales automatically with data.
-      X_lim : tuple, optional
-            Lower and upper limits of the y-axis. If None, scales automatically with data.
-            
-      Returns
-      -------
-      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
-            The figure and axes objects of the plot.
-      """
-      fig, ax = py.subplots(figsize=(9, 9))
-
-      cmap = py.get_cmap('tab10')
-      colors = [cmap(i % cmap.N) for i in range(len(data_list))]
-
-      # Loop over each analysis in the list of dictionaries
-      for i, data in enumerate(data_list):
-            samples = data['samples']
-            label = f'analysis {data["analysis_id"]}'
-            print('Analysis ID:', data['analysis_id'])
-            color = colors[i]
-
-            if isinstance(planet_pair, np.ndarray):
-                  pair = planet_pair.tolist()
-            else:
-                  pair = planet_pair
-
-            plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, color_lim=None, label=label)
-      plot_topology(ax, delta_lim, X_lim)
-
-      py.legend()
-      py.tight_layout()
-      py.show()
-      return fig, ax
 
 
 

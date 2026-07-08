@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy import constants as c
+from resonantstate.ell2SFM import *
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -110,7 +111,7 @@ def get_samples(df, param,  p, units):
 
     Returns:
     --------
-    numpy.ndarray
+    numplt.ndarray
         Converted samples for the selected parameter and planet.
     """
 
@@ -324,3 +325,142 @@ def plot_adjacent_planets(dict_list, param, planet_pair, units='star'):
         ax.legend()   
     plt.tight_layout()
     plt.show()
+
+
+def plot_ell2SFM_comparison(data_list, planet_pair, resonance, delta_lim=None, X_lim=None):
+      """
+      Compares the samples of different analyses in the phase space of the second fundamental model (SFM) of resonance.
+
+      Parameters
+      ----------
+      data_list : list of dict
+            List of dictionaries, each containing 'samples' (DataFrame) and 'analysis_id' (str).
+      planet_pair : list or np.ndarray
+            Pair of planets to be considered in the sample.
+      resonance : int
+            Resonance of the corresponding pair (p such that resonance is p:p+1).
+      delta_lim : tuple, optional
+            Lower and upper limits of the x-axis. If None, scales automatically with data.
+      X_lim : tuple, optional
+            Lower and upper limits of the y-axis. If None, scales automatically with data.
+            
+      Returns
+      -------
+      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes objects of the plot.
+      """
+      fig, ax = plt.subplots(figsize=(9, 9))
+
+      cmap = plt.get_cmap('tab10')
+      colors = [cmap(i % cmap.N) for i in range(len(data_list))]
+
+      # Loop over each analysis in the list of dictionaries
+      for i, data in enumerate(data_list):
+            samples = data['samples']
+            label = f'analysis {data["analysis_id"]}'
+            print('Analysis ID:', data['analysis_id'])
+            color = colors[i]
+
+            if isinstance(planet_pair, np.ndarray):
+                  pair = planet_pair.tolist()
+            else:
+                  pair = planet_pair
+
+            plot_samples_SFM(fig, ax, samples, pair, resonance, colors=color, color_lim=None, label=label)
+      plot_topology(ax, delta_lim, X_lim)
+
+      plt.legend()
+      plt.tight_layout()
+      plt.show()
+      return fig, ax
+
+
+
+
+def plot_ell2SFM(data, colors=None, color_lim=None, delta_lim=None, X_lim=None):
+      """
+      Finds and plots the samples of near resonant planet pairs into the phase space of the second fundamental model (SFM) of resonance.
+
+      Parameters
+      ----------
+      data : pandas.DataFrame or np.ndarray or dict
+            Input data containing the posterior samples.
+            - If DataFrame or np.ndarray: used directly as sample input.
+            - If dict: must contain keys 'sample' (DataFrame) and 'samples_name' (str).
+      colors : list of np.ndarray or list of str, optional 
+            Numpy array used for colormapping the samples.
+      color_lim : tuple, optional 
+            Lower and upper limits for the color scale. If None, uses the min and max of the provided colormap array.
+      delta_lim : tuple, optional
+            Lower and upper limits of the x-axis. If None, scales automatically with data.
+      X_lim : tuple, optional
+            Lower and upper limits of the y-axis. If None, scales automatically with data.
+      
+      Returns
+      -------
+      fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes objects of the plot.
+      """
+
+      if isinstance(data, dict):
+            samples = data['samples']
+            analysis_id = data['samples_name']
+      elif isinstance(data, pd.DataFrame) or isinstance(data, np.ndarray):
+            samples = data
+      else:
+            raise TypeError('Unsupported data type. Input has to be a pandas DataFrame, a numpy array, or a dictionary containing the "samples" key.')
+
+      row = -1
+
+      # Check if samples are ordered by increasing period
+      if isinstance(samples, pd.DataFrame):
+            periods_values = get_periods(samples, row)
+            if not np.all(np.diff(periods_values) > 0):
+                  samples = reorder_data(samples, row)
+
+      # Get first-order resonant pairs
+      #pairs_resonances = get_near_resonant_pairs(samples, row)
+      #first_order_pairs = [(pair.tolist(), res, order) for pair, res, order in pairs_resonances if order == 1]
+
+      #if not first_order_pairs:
+      #      print('No first order pairs found.')
+      #      return None, None
+
+      # Create figure to plot samples if first order pairs are found
+      fig, ax = py.subplots(1, 1, figsize=(9,9))
+      if isinstance(data, dict):
+            fig.suptitle(f'Analysis {analysis_id}', fontsize=16)
+
+      # Print the pairs and their resonances
+      #planet_pairs, p_indexes, orders = map(list, zip(*first_order_pairs))
+      
+      # Get first-order resonant pairs
+      planet_pairs, p_indexes = get_p_by_pair(samples)
+      
+      print('Found', len(planet_pairs), 'first order pairs.')
+      print('Pairs:', planet_pairs)
+      print('Resonances:', p_indexes)
+
+      # Use a colormap if colors is not provided
+      if colors is None:
+            cmap = py.get_cmap('tab10')
+            colors = [cmap(i % cmap.N) for i in range(len(planet_pairs))]
+
+      if any(isinstance(c, (np.ndarray, list)) for c in colors):
+            flat_colors = np.concatenate([np.asarray(c).flatten() for c in colors])
+            color_min = flat_colors.min() if color_lim is None else color_lim[0]
+            color_max = flat_colors.max() if color_lim is None else color_lim[1]
+            color_lim = (color_min, color_max)
+            cbar=fig.colorbar(mpl.cm.ScalarMappable(cmap=mpl.cm.hsv, 
+                                                    norm=mpl.colors.Normalize(color_lim[0], color_lim[1])), 
+                                                    ax=ax, aspect=40, pad=0.01)
+            cbar.ax.tick_params()
+
+      # Plot the samples
+      plot_samples_SFM(fig, ax, samples, planet_pairs, p_indexes, colors, color_lim=color_lim, label='')
+      plot_topology(ax, delta_lim, X_lim)
+      py.legend()
+      py.tight_layout()
+      py.show()
+      return fig, ax
+
