@@ -694,80 +694,35 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim=None, label='', alpha=0.7, markersize=80, marker= 'o'):
+def plot_samples_SFM_pair( ax1, sample, pair, p, color, color_lim=None, label='',alpha = 1,markersize=20,marker='o',flag_DMMR=True):
+      delta, DMMR, er, Der, es, IR, p= get_SFM_quantities(sample,pair,p=p)
       I    = pair[0]
       J    = pair[1]
 
-      if (isinstance(colors, np.ndarray)):
-            #Plotting
-            ax1.scatter(Ds, x1s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
-            ax1.scatter(Ds, x2s, c = colors, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha)
+      if flag_DMMR==True:
+            px=DMMR
       else:
-            ax1.scatter(Ds, x1s, color = colors, marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
-            ax1.scatter(Ds, x2s, color = colors, marker = marker,  s = markersize, alpha = alpha)
+            px=delta
+
+      if (isinstance(color, np.ndarray)):
+            #Plotting
+            ax1.scatter(px, er, c = color, cmap='hsv', vmin=color_lim[0], vmax=color_lim[1], marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
+            
+      else:
+            ax1.scatter(px, er, color = color, marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
 
 
-def plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, colors, color_lim, label,alpha = 1,markersize=20, marker = 'o'):
-
-      [X, Y, X2, Y2, Ds] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
-      [sig, Sig, sig2, Sig2, x1s, x2s, IsResonant] = SFM2useful(X, Y, X2, Y2, Ds)
-
-      print('pair',pair, ':', 100*np.mean(IsResonant), '% within resonance.')
-      plot_SFM(fig, ax1, Ds, x1s, x2s, pair, p, colors, color_lim, label,alpha =alpha,markersize=markersize, marker = marker)
-
-
-def plot_samples_SFM(fig, ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o'):
-
+def plot_samples_SFM( ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o',flag_DMMR=True):
       ### Plots the sample in the phase space of the Second Fundamental Model ###
 
       if isinstance(p_indexes, (list, np.ndarray)):
             if isinstance(colors, (list, np.ndarray)):
                   colors = cycle(colors)
             for pair, p, color in zip(pairs, p_indexes, colors):
-                  [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
-                  plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pair, p, color, color_lim, label,alpha =alpha, markersize=markersize, marker=marker)
-      else:
-            [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pairs)
-            plot_ell(fig, ax1, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, pairs, p_indexes, colors, color_lim, label,alpha = alpha, markersize=markersize, marker=marker)
 
-
-
-def get_p_by_pair(samples):
-
-      #Returns (pairs, ps) where pairs = [(i1, j1), (i2, j2), ...] is a list of pairs close to a resonance p:p+1 and ps = [p1, p2, ...] contains the associated values of p
-      #samples is a dataframe
-      
-      data = samples[samples.columns[samples.columns.str.contains('period')]]
-      
-      stdd = data['period_days_0'].std() #If the standard deviation of the periods is very low, the sample is likely an observation, otherwise, it is likely a simulation
-
-      if (stdd < 0.05): #The sample is probably an observation, we take the median
-            data = data.median().sort_values()
-      else:            #The sample is probably a simulation, we take the last row
-            last_row = samples.index[-1]
-            data = data.iloc[last_row].sort_values()
-            
-      periods = np.array(data.values)
-      N       = len(periods)
-      
-      pairs = []
-      ps    = []
-      for j in range(N):
-            for i in range(j):
-                  #Pair is (i,j)                   
-                  PeriodRatio = periods[j]/periods[i]
-                  if (PeriodRatio < 2.1 and PeriodRatio > 1.0488):
-                        distance = 1.e300
-                        for p in range(1, 21): #Resonance 21:22 and onward are unsupported
-                              if (abs(PeriodRatio - (p + 1)/p)/((p + 1)/p) < distance):
-                                    distance = abs(PeriodRatio - (p + 1)/p)/((p + 1)/p)
-                                    the_p    = p
-                        if (distance < 0.05): 
-                              pairs.append((i,j))
-                              ps.append(the_p)
-      return (pairs, ps)
-
-
-
-
+                  plot_samples_SFM_pair( ax1, sample, pair, p, color, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
+                           
+            else:
+                  plot_samples_SFM_pair( ax1, sample, pairs, p_indexes, colors, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
+                  
 
