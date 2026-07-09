@@ -5,8 +5,6 @@ from resonantstate.analyse_samples import *
 from resonantstate.ell2SFM import *
 from resonantstate.simulations_resonance_analysis import *
 from resonantstate.utils import *
-from resonantstate import ttv
-from astropy.timeseries import LombScargle
 from tqdm import tqdm
 
 
