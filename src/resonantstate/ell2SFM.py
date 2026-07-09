@@ -542,12 +542,6 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
 
       ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
 
-      #delta_min, delta_max = delta_lim
-      #X_min, X_max = X_lim
-
-      #ax1.set_xlim(xmin = delta_min, xmax = delta_max)
-      #ax1.set_ylim(ymin = X_min,     ymax = X_max)
-
       if delta_lim==None:
             ax1.autoscale(axis='x')
             delta_lim = ax1.get_xlim()
