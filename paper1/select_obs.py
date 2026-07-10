@@ -3,9 +3,23 @@ from resonantstate.data_download  import get_metadata_observations, download_obs
 from resonantstate.analyse_samples import *
 from resonantstate.ell2SFM import *
 from resonantstate.simulations_resonance_analysis import *
-from resonantstate.utils import *
 from tqdm import tqdm
 
+def get_PRM(samples,df_ana):
+    nb_planets=len(df_ana['planets_list'])
+
+    TP=np.zeros(nb_planets)
+    TR=np.zeros(nb_planets)
+    TM=np.zeros(nb_planets)
+
+    for k in range(nb_planets):
+        TP[k]=samples['period_days_'+str(k)].mean()
+        TR[k]=(samples['radius_planet_star_ratio_'+str(k)]*samples['radius_star_r_sun']/(Rearth/Rsun)).mean()
+        TM[k]=(samples['mass_planet_star_ratio_'+str(k)].values*samples['mass_star_m_sun'].values/(Mearth/Msun)).mean()
+
+    Idsort=TP.argsort()
+
+    return TP,TR,TM,nb_planets,Idsort
 
     
 def choose_obs(case,
