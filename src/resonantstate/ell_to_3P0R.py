@@ -20,11 +20,12 @@ import celeries.ellipseries as es
 import celeries.prime as pm
 se.setdisplay('expi')
 se.setseparator('\n')
+ctx = se.mf.mp
 ctx.dps = 128 #Guaranteeing correct computation of Xi for large p,q or atypical n1/n2 and n2/n3
 se.mf.setctx(ctx)
 
 
-def ell2pendulum(p, q, m1, m2, m3, T1, T2, T3, lbd1, lbd2, lbd3, Xi = 0., verbose=True):
+def ell_to_3P0R(p, q, m1, m2, m3, T1, T2, T3, lbd1, lbd2, lbd3, Xi = 0., verbose=True):
       # Converts from elliptic elements to the coordinates (Sig, sig, delta) of the pendulum of a three-planet 0th degree resonance
       # p and q are such that the triplet is close from MMR p*n1 - (p+q)*n2 + q*n3 = 0
       # The planetary masses are relative to the star's mass
@@ -42,7 +43,7 @@ def ell2pendulum(p, q, m1, m2, m3, T1, T2, T3, lbd1, lbd2, lbd3, Xi = 0., verbos
             if (T1 > T2 or T2 > T3):
                   raise Exception("      Error: The periods must verify T1 < T2 < T3")
             
-      if (p <= 0 or q <= 0)
+      if (p <= 0 or q <= 0):
             raise Exception("      Error: p and q must both be strictly positive integers")
 
       # Period of inner planet is normalized to 1
@@ -111,7 +112,7 @@ def ell2pendulum(p, q, m1, m2, m3, T1, T2, T3, lbd1, lbd2, lbd3, Xi = 0., verbos
                       H3 = h3.PerHam3pla(degree = 0, n0 = (n10, n20, n30), ev = True, keplerian=True)
                 Xi = -2.*H3.angle((p, -p-q, q))
                 Xi = Xi.toConst()
-      Rpq = n30*Xi/C3
+      Rpq = n30*Xi*Lbd30
 
       #Getting delta, Sig and sig
       delta = 3.*K*Phi_eq**2/(m1*m2*Rpq)
