@@ -7,6 +7,7 @@ from itertools import cycle
 import pandas as pd
 from resonantstate.constants import *
 from resonantstate.simulations_resonance_analysis import *
+from resonantstate.quartic import quartic
 
 
 Tp=np.arange(1,20)
@@ -231,131 +232,20 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       Y2    = np.sqrt(2.*Sigma2)*sisig2
       return [X, Y, X2, Y2, delta]
 
-def cubic(a_3, a_2, a_1, a_0):
-      # Returns the real roots of a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 using analytical expressions of Cardan's method
-      if (a_3 == 0.):
-            if (a_2 == 0.):
-                  if (a_1 == 0.):
-                        return []
-                  return [-a_0/a_1]
-            Delta = a_1**2 - 4.*a_2*a_0
-            if (Delta >= 0.):
-                  return [(-a_1 + np.sqrt(Delta))/(2.*a_2), (-a_1 - np.sqrt(Delta))/(2.*a_2)]
-            return []
-      if (a_3 != 1.):
-            return cubic(1., a_2/a_3, a_1/a_3, a_0/a_3)
-      ### Equation is Y^3 + p*Y + q = 0 with Y = X + s ###
-      p = a_1 - a_2**2/3.
-      q = a_0 - a_1*a_2/3. + 2.*a_2**3/27.
-      s = a_2/3.
-      D = q**2/4. + p**3/27.
-      if (D < 0.): # 3 real solutions
-            u3 = -q/2. + cm.sqrt(D)
-            v3 = -q/2. - cm.sqrt(D)
-            [mod_u3, arg_u3] = cm.polar(u3)
-            [mod_v3, arg_v3] = cm.polar(v3)
-            u  = mod_u3**(1./3.)*cm.exp(1j*arg_u3/3.)
-            v  = mod_v3**(1./3.)*cm.exp(1j*arg_v3/3.)
-            j  = cm.exp( 2.*1j*np.pi/3.)
-            jb = cm.exp(-2.*1j*np.pi/3.)
-            S1 = (u + v).real
-            S2 = (j*u + jb*v).real
-            S3 = (jb*u + j*v).real
-            return [S1 - s, S2 - s, S3 - s]
-      else: # 1 real solution
-            u3 = -q/2. + np.sqrt(D)
-            v3 = -q/2. - np.sqrt(D)
-            if (u3 < 0.):
-                  u = -(-u3)**(1./3.)
-            else:
-                  u  = u3**(1./3.)
-            if (v3 < 0.):
-                  v = -(-v3)**(1./3.)
-            else:
-                  v  = v3**(1./3.)
-            return [u + v - s]
-
-def quartic(a_4, a_3, a_2, a_1, a_0):
-      # Returns the real roots of a_4*X^4 + a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 using analytical expressions of Ferrari's method
-      if (a_4 == 0.):
-            return cubic(a_3, a_2, a_1, a_0)
-      if (a_4 != 1.):
-            return quartic(1., a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4)
-      ### Equation is Y^4 + p*Y^2 + q*Y + r = 0 with Y = X + s ###
-      p = a_2 - 3./8.*a_3**2
-      q = a_1 + a_3**3/8. - 0.5*a_2*a_3
-      r = a_0 + a_2*a_3**2/16. - a_1*a_3/4. - 3.*a_3**4/256.
-      s = a_3/4.
-      ### Taking care of bi-quartic case ###
-      if (abs(q) < 1.e-14):
-            Sol = cubic(0., 1., p, r)
-            if (len(Sol) == 0):
-                  return []
-            [S1, S2] = Sol
-            Sol = []
-            # First pair
-            if (S1 >= -1.e-14):
-                  Sol.append( np.sqrt(abs(S1)) - s)
-                  Sol.append(-np.sqrt(abs(S1)) - s)
-            if (S2 >= -1.e-14):
-                  Sol.append( np.sqrt(abs(S2)) - s)
-                  Sol.append(-np.sqrt(abs(S2)) - s)
-            return Sol
-      ### Getting a solution of the resolving cubic ###
-      if (abs(q) < 1.e-6): #Too close from bi-quartic. Must be done differently
-            if (abs(2.*p**2 - 8.*r) > 1.e-10):
-                  if (2.*p**2 - 8.*r < 0.):
-                        return []
-                  sqM = abs(q)/np.sqrt(2.*p**2 - 8.*r)
-            else:
-                  if (abs(8.*p) > 1.e-10):
-                        if (p < 0.):
-                              sqM = np.sqrt(-p)
-                        else:
-                              sqM = abs(q)/np.sqrt(8.*p)
-                  else:
-                        sqM = (q**2/8.)**(1./6.)
-      else:
-            Sol = cubic(1., p, p**2/4. - r, -q**2/8.)
-            Sol.sort()
-            if (Sol[-1] < 0.): #There are no real solutions
-                  return []
-            sqM = np.sqrt(Sol[-1])
-      ### Getting first pair of solutions ###
-      Sol = []
-      D = q/(2.*np.sqrt(2.)*sqM)-(p + sqM**2)/2.
-      if (D >= -1.e-14):
-            S1 = -sqM/np.sqrt(2.) + np.sqrt(abs(D))
-            S2 = -sqM/np.sqrt(2.) - np.sqrt(abs(D))
-            Sol.append(S1 - s)
-            Sol.append(S2 - s)
-      ### Getting second pair of solutions ###
-      D = -q/(2.*np.sqrt(2.)*sqM)-(p + sqM**2)/2.
-      if (D >= -1.e-14):
-            S3 = sqM/np.sqrt(2.) + np.sqrt(abs(D))
-            S4 = sqM/np.sqrt(2.) - np.sqrt(abs(D))
-            Sol.append(S3 - s)
-            Sol.append(S4 - s)
-      return Sol
-
 def X1X2(X, Y, delta):
       # Returns X1 and X2 such that (X1, 0) and (X2, 0) are on the same level line as (X, Y)
       H   = 1.5*(delta + 1.)*(X**2 + Y**2) - 0.25*(X**2 + Y**2)**2 + 2.*X
       Sol = quartic(-0.25, 0., 1.5*(delta + 1.), 2., -H)
       Sol.sort()
       if (len(Sol) == 0):
-            print("Warning: Problem with quartic.")
+            print("Warning: No roots found by quartic in function X1X2")
             return [0., 0.]
       if (len(Sol) == 2):
             return Sol
       #Four solutions. Either [Sol[0], Sol[3]] or [Sol[1], Sol[2]] should be returned
       if (delta < 0.): #Four solutions should be impossible when delta < 0
             print("Warning: Four solutions were found even though delta < 0 in function X1X2")
-      topo = topology_light(delta)
-      if (len(topo) == 1):
-            print("Warning: Could not find xhyp and xint in function X1X2")
-            return [Sol[0], Sol[3]]
-      [xres, xint, xhyp] = topo
+      [xmin, xmax, xres, xint, xhyp] = topology(delta)
       # A very simple criterion proposed by Max Goldberg to determine which pair of solution should be returned 
       if ((X - xint)**2 + Y**2 > (xhyp - xint)**2):
             return [Sol[0], Sol[3]]
@@ -380,7 +270,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
             [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
             x1.append(xx1)
             x2.append(xx2)
-            [xres, xint, xhyp] = topology_light(delta[i])
+            [xmin, xmax, xres, xint, xhyp] = topology(delta[i])
             [lib1,lib2]= X1X2(0, 0, delta[i])
             if (delta[i] < 1.):
                   
@@ -414,43 +304,16 @@ def topology(delta):
       #When delta >= 0; then Xhyp <= Xint <= Xmin <= Xres <= Xmax
       if (delta == 0.):
             return [-1., 3., 2., -1., -1.]
-      Sol = cubic(1., 0., -3.*(delta + 1.), -2.) #Getting Xres, Xint and Xhyp
+      Sol = quartic(0., 1., 0., -3.*(delta + 1.), -2.) #Getting Xres, Xint and Xhyp
       if (len(Sol) == 1):
             return [0., 0., Sol[0], 0., 0.]
       else:
-            [S1, S2, S3] = Sol
-            if (S2**2 < 3.*(delta + 1.) and S2**2 > (delta + 1.)):
-                  xhyp = S2
-                  xint = S3
-            else:
-                  xhyp = S3
-                  xint = S2
-            H  = 1.5*(delta + 1.)*xhyp**2 - 0.25*xhyp**4 + 2.*xhyp
-            Sl = quartic(-0.25, 0., 1.5*(delta + 1.), 2., -H) #Getting Xmin and Xmax
-            Sl.sort()
-            if (len(Sl) < 2):
-                  print("Warning in function topology : The separatrix could not be obtained at delta =", delta)
-                  return [0., 0., S1, xint, xhyp]
-            if (len(Sl) == 2):
-                  return [Sl[0], Sl[1], S1, xint, xhyp]
-            return [Sl[2], Sl[3], S1, xint, xhyp]
-            
-def topology_light(delta):
-      #Same as topology but only returns [Xres, Xint, Xhyp]
-      if (delta == 0.):
-            return [2., -1., -1.]
-      Sol = cubic(1., 0., -3.*(delta + 1.), -2.)
-      if (len(Sol) == 1):
-            return [Sol[0], 0., 0.]
-      else:
-            [S1, S2, S3] = Sol
-            if (S2**2 < 3.*(delta + 1.) and S2**2 > (delta + 1.)):
-                  xhyp = S2
-                  xint = S3
-            else:
-                  xhyp = S3
-                  xint = S2
-            return [S1, xint, xhyp]
+            Sol.sort()
+            [xhyp, xint, xres] = Sol
+            # Xmin and Xmax can be obtained directly as a function of Hhyp, as shown in Petit et al. (2017), Appendix C.1.
+            xmax = - xhyp + 2./np.sqrt(-xhyp)
+            xmin = - xhyp - 2./np.sqrt(-xhyp)
+            return [xmin, xmax, xres, xint, xhyp]
 
 def samples2SFM(sample, pair, p):
       [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
@@ -520,7 +383,7 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
 
 
     for kl in range(delta.size):
-        [fixp,o1,o2]=topology_light(delta[kl])
+        [_1,_2,fixp,o1,o2]=topology(delta[kl])
         Vx=np.array([x1[kl], x2[kl]])
         Idmaxx=abs(Vx).argmax()
         Idxlib=abs(Vx[Idmaxx]-np.array([fixp,o1,o2])).argmin()
@@ -716,7 +579,7 @@ def plot_samples_SFM( ax1, sample, pairs, p_indexes, colors, color_lim=None, lab
 
                   plot_samples_SFM_pair( ax1, sample, pair, p, color, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
                            
-            else:
+      else:
                   plot_samples_SFM_pair( ax1, sample, pairs, p_indexes, colors, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
                   
 
