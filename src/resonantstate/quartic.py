@@ -6,6 +6,13 @@ from mpmath import mp, fp, mpc, mpf, pi
 
 def _cubic(a_3, a_2, a_1, a_0, is_mp):
       # Returns the real roots of a_3*X^3 + a_2*X^2 + a_1*X + a_0 = 0 using analytical expressions of Cardan's method
+      if (is_mp):
+            if (mp.isnan(a_3) or mp.isnan(a_2) or mp.isnan(a_1) or mp.isnan(a_0)):
+                  mp.prec = 53
+                  return [np.nan]
+      else:
+            if (np.isnan(a_3) or np.isnan(a_2) or np.isnan(a_1) or np.isnan(a_0)):
+                  return [np.nan]
       if (a_3 == 0.):
             if (a_2 == 0.):
                   if (a_1 == 0.):
@@ -19,7 +26,10 @@ def _cubic(a_3, a_2, a_1, a_0, is_mp):
                         return [(-a_1 + mpm.sqrt(Delta))/(2.*a_2), (-a_1 - mpm.sqrt(Delta))/(2.*a_2)]
             return []
       if (a_3 != 1.):
-            return _cubic(a_3/a_3, a_2/a_3, a_1/a_3, a_0/a_3, is_mp)
+            if (is_mp):
+                  return _cubic(mpf(1.), a_2/a_3, a_1/a_3, a_0/a_3, is_mp)
+            else:
+                  return _cubic(1., a_2/a_3, a_1/a_3, a_0/a_3, is_mp)
             
       ### Equation is Y^3 + p*Y + q = 0 with Y = X + s ###
       p = a_1 - a_2**2./3.
@@ -112,6 +122,13 @@ def quartic(a_4, a_3, a_2, a_1, a_0, acceptable_error = 1.e-11, dps = 16):
       Some real roots can be missed : This is directly related to the above problem.
             With approximate :math:`a_j`, the quartic can barely miss the x-axis, while it would have touched it or crossed it with precise enough :math:`a_j`
       """
+      if (isinstance(a_0, mpf) or isinstance(a_1, mpf) or isinstance(a_2, mpf) or isinstance(a_3, mpf) or isinstance(a_4, mpf)):
+            if (mp.isnan(a_4) or mp.isnan(a_3) or mp.isnan(a_2) or mp.isnan(a_1) or mp.isnan(a_0)):
+                  mp.prec = 53
+                  return [np.nan]
+      else:
+            if (np.isnan(a_4) or np.isnan(a_3) or np.isnan(a_2) or np.isnan(a_1) or np.isnan(a_0)):
+                  return [np.nan]
       if (dps < 16):
             dps = 16
       if (acceptable_error < 1.e-15):
@@ -132,7 +149,10 @@ def quartic(a_4, a_3, a_2, a_1, a_0, acceptable_error = 1.e-11, dps = 16):
             if not isinstance(a_0, mpf):
                   a_0 = mpf(a_0)
       if (a_4 != 1. and a_4 != 0.):
-            return quartic(a_4/a_4, a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4, acceptable_error = acceptable_error, dps = dps)
+            if (isinstance(a_0, mpf) or isinstance(a_1, mpf) or isinstance(a_2, mpf) or isinstance(a_3, mpf) or isinstance(a_4, mpf)):
+                  return quartic(mpf(1.), a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4, acceptable_error = acceptable_error, dps = dps)
+            else:
+                  return quartic(1., a_3/a_4, a_2/a_4, a_1/a_4, a_0/a_4, acceptable_error = acceptable_error, dps = dps)
       if (a_4 == 0.):
             sol = _cubic(a_3, a_2, a_1, a_0, isinstance(a_0, mpf) or isinstance(a_1, mpf) or isinstance(a_2, mpf) or isinstance(a_3, mpf))
       else:
@@ -167,7 +187,11 @@ def quartic(a_4, a_3, a_2, a_1, a_0, acceptable_error = 1.e-11, dps = 16):
                   return quartic(a_4, a_3, a_2, a_1, a_0, acceptable_error = acceptable_error, dps = 2*dps)
             else:
                   ### Getting a solution of the resolving cubic ###
-                  Sol = _cubic(p/p, p, p**2./4. - r, -q**2./8., isinstance(p, mpf) or isinstance(r, mpf) or isinstance(q, mpf))
+                  is_mp = isinstance(p, mpf) or isinstance(r, mpf) or isinstance(q, mpf)
+                  if (is_mp):
+                        Sol = _cubic(mpf(1.), p, p**2./4. - r, -q**2./8., is_mp)
+                  else:
+                        Sol = _cubic(1., p, p**2./4. - r, -q**2./8., is_mp)
                   Sol.sort()
                   if (Sol[-1] < 0.): #There are no real solutions
                         return []

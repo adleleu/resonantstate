@@ -238,8 +238,10 @@ def X1X2(X, Y, delta):
       Sol = quartic(-0.25, 0., 1.5*(delta + 1.), 2., -H)
       Sol.sort()
       if (len(Sol) == 0):
-            print("Warning: No roots found by quartic in function X1X2")
+            print(f"Warning: No roots found by quartic in function X1X2 with delta={delta}, X={X}, Y={Y} and H={H}")
             return [0., 0.]
+      elif(np.isnan(Sol[0])):
+            return [np.nan, np.nan]
       if (len(Sol) == 2):
             return Sol
       #Four solutions. Either [Sol[0], Sol[3]] or [Sol[1], Sol[2]] should be returned
