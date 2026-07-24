@@ -29,7 +29,7 @@ def get_rebound_sim_coplanar(df_samples,Idp,Id_sample):
 
     #Create the system
     for k in Idp:
-        sim.add(l=df_samples['mass_planet_star_ratio_'+str(k)].values[Id_sample]*pi/180,
+        sim.add(l=df_samples['mean_longitude_deg_'+str(k)].values[Id_sample]*pi/180,
                 P=df_samples['period_days_'+str(k)].values[Id_sample]/365.25,
                 k=df_samples['k_'+str(k)].values[Id_sample],
                 h=df_samples['h_'+str(k)].values[Id_sample],
