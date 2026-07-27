@@ -728,15 +728,15 @@ def Sample2cart(sample, typeOfCoordinates, adcol):
       S : Numpy array of floats.
             The same sample in cartesian coordinates. The columns are now Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample into Cartesian coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = sample2cart_row(row, typeOfCoordinates, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -764,15 +764,15 @@ def Cart2sample(sample, typeOfCoordinates, adcol):
       S : Numpy array of floats.
             The same sample in GRSW format. The columns are now Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample from Cartesian to workshop format")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = cart2sample_row(row, typeOfCoordinates, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -800,15 +800,15 @@ def Sample2aeiMoO(sample, typeOfCoordinates, adcol):
       S : Numpy array of floats.
             The same sample in elliptic elements. The columns are now Id or timestamp, a (au), e, I (rad), M (rad), omega (rad), Omega(rad), m/M*, R/R*, ... , M* (Msun), R* (Rsun)
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample into (a, e, i, M, o, O) elliptic elements")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = sample2aeiMoO_row(row, typeOfCoordinates, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -836,15 +836,15 @@ def Sample2alkhqp(sample, typeOfCoordinates, adcol):
       S : Numpy array of floats.
             The same sample in elliptic elements. The columns are now Id or timestamp, a (au), lbd (rad), k, h, q, p, m/M*, R/R*, ... , M* (Msun), R* (Rsun)
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample into (a, lbd, k, h, q, p) elliptic elements")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = sample2alkhqp_row(row, typeOfCoordinates, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -870,15 +870,15 @@ def Jac2Hel(sample, adcol):
       S : Numpy array of floats.
             The same sample in Heliocentric coordinates (mu = G*(M* + mj))
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample from Jacobi to Heliocentric coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = Jac2Hel_row(row, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -904,15 +904,15 @@ def Hel2Jac(sample, adcol):
       S : Numpy array of floats.
             The same sample in Jacobi coordinates (mu = G*(M* + m1 + m2 + ... + mj))
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample from Heliocentric to Jacobi coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = Hel2Jac_row(row, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -937,15 +937,15 @@ def JacWH2Hel(sample, adcol):
       S : Numpy array of floats.
             The same sample in Heliocentric coordinates (mu = G*(M* + mj))
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample from JacobiWisdomHolman to Heliocentric coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = JacWH2Hel_row(row, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -971,15 +971,15 @@ def Hel2JacWH(sample, adcol):
       S : Numpy array of floats.
             The same sample in JacobiWisdomHolman coordinates (mu = G* M* * (M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}))
       """
-      n = sample.shape[1]
+      n = sample.shape[0]
       output = np.copy(sample)
       print("Converting sample from Heliocentric to JacobiWisdomHolman coordinates")
       print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
-            row    = sample[:,i]
+            row    = sample[i,:]
             Newrow = Hel2JacWH_row(row, adcol)
-            output[:,i] = Newrow
+            output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
                   print("Progress = ", progress, "%")
@@ -991,24 +991,20 @@ def Hel2JacWH(sample, adcol):
 ##########################################################################################################################
 
 
-#path = 'path_towards_sample.csv'
-#sample = np.loadtxt(path, dtype = np.float64, delimiter=',', unpack=True) #A sample in Heliocentric coordinates
-#
-#
 #S1 = Sample2cart(sample, 'Heliocentric', 0)         # Converts the sample into Heliocentric cartesian coordinates
-#
+
 #S2 = Sample2cart(Hel2Jac(sample, 0), 'Jacobi', 0)   # Converts the sample into Jacobi cartesian coordinates
-#
+
 #S3 = Sample2aeiMoO(sample, 'Heliocentric', 0)       # Converts the sample into Heliocentric elliptic elements (a, e, i, M, omega, Omega)
-#
+
 #S4 = Sample2alkhqp(sample, 'Heliocentric', 0)       # Converts the sample into Heliocentric elliptic elements (a, l, k, h, q, p)
-#
+
 #S5 = Sample2aeiMoO(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, e, i, M, omega, Omega)
-#
+
 #S6 = Sample2alkhqp(Hel2Jac(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi elliptic elements (a, l, k, h, q, p)
-#
+
 #S7 = Sample2cart(Hel2JacWH(sample, 0), 'Jacobi', 0) # Converts the sample into Jacobi cartesian coordinates with the Wisdom-Holman convention for mu
-#
+
 
 ## Sanity checks :
 
