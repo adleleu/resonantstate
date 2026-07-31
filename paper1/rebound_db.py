@@ -1,6 +1,42 @@
 import rebound 
 import numpy as np
 from resonantstate.constants import *
+def get_rebound_sim_coplanar(df_samples,Idp,Id_sample):
+    """
+    Get a rebound simulation for one of the samples of the posterior
+
+    Parameters
+    ----------
+    df_samples : pandas dataframe
+        samples of dynamical analysis
+    Idp : list or tuple of int
+        planet indicies
+    Id_sample : int
+        identifiant of the sample to consider
+
+    Returns
+    -------
+    sim: rebound.Simulation
+        Simulation object initialized based on posterior sample
+    """    
+    m00=df_samples['mass_star_m_sun'].values[Id_sample]
+    
+
+    sim = rebound.Simulation()
+    sim.G = 4. * pi * pi
+
+    sim.add(m=m00)
+
+    #Create the system
+    for k in Idp:
+        sim.add(l=df_samples['mean_longitude_deg_'+str(k)].values[Id_sample]*pi/180,
+                P=df_samples['period_days_'+str(k)].values[Id_sample]/365.25,
+                k=df_samples['k_'+str(k)].values[Id_sample],
+                h=df_samples['h_'+str(k)].values[Id_sample],
+                m=df_samples['mass_planet_star_ratio_'+str(k)].values[Id_sample]*m00)
+
+    sim.move_to_com()
+    return sim
 
 def rebound_sim_coplanar(df_samples,Idp,Id_sample,duration,Noutputs=1000):
     """n-body integration of one of the samples of the posterior
@@ -35,25 +71,7 @@ def rebound_sim_coplanar(df_samples,Idp,Id_sample,duration,Noutputs=1000):
 
     """
     nb_planets=len(Idp)
-
-    m00=df_samples['mass_star_m_sun'].values[Id_sample]
-    
-
-    sim = rebound.Simulation()
-    sim.G = 4. * pi * pi
-
-    sim.add(m=m00)
-
-    #Create the system
-    for k in Idp:
-        sim.add(l=df_samples['mass_planet_star_ratio_'+str(k)].values[Id_sample]*pi/180,
-                P=df_samples['period_days_'+str(k)].values[Id_sample]/365.25,
-                k=df_samples['k_'+str(k)].values[Id_sample],
-                h=df_samples['h_'+str(k)].values[Id_sample],
-                m=df_samples['mass_planet_star_ratio_'+str(k)].values[Id_sample]*m00)
-
-    sim.move_to_com()
-
+    sim = get_rebound_sim_coplanar(df_samples,Idp,Id_sample)
     times = np.linspace(0.,duration, Noutputs)
     la = np.zeros((nb_planets,Noutputs))
     e = np.zeros((nb_planets,Noutputs))
