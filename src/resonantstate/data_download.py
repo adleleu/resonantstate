@@ -161,13 +161,13 @@ def download_observations_samples(dataframe, local_path=None, download_destinati
             file_metadata = Path(metadata_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
             metadata = json.loads(file_metadata.read_text())
 
-            if readme_url is not None:
+            if (readme_url is not None) and (readme_url != 'None'):
                 file_readme = Path(readme_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
                 readme = file_readme.read_text()
             else:
                 readme = None
             
-            if additional_info_url is not None:   
+            if (additional_info_url is not None ) and (additional_info_url != 'None'):   
                 file_additional_info = Path(additional_info_url.replace("https://dace.unige.ch/downloads/resonant_state", local_path))
                 additional_infos = json.loads(file_additional_info.read_text()) 
             else:
@@ -184,7 +184,7 @@ def download_observations_samples(dataframe, local_path=None, download_destinati
                 raise Exception(f"URL {metadata_url} responded with status code: {file_metadata.status_code}")
             metadata = json.loads(file_metadata.text)
 
-            if readme_url is not None:
+            if (readme_url is not None  ) and (readme_url != 'None'):
                 file_readme = requests.get(readme_url, verify=False)
                 if not file_readme.ok: 
                     raise Exception(f"URL {readme_url} responded with status code: {file_readme.status_code}")
@@ -192,7 +192,7 @@ def download_observations_samples(dataframe, local_path=None, download_destinati
             else:
                 readme = None
             
-            if additional_info_url is not None:   
+            if (additional_info_url is not None  ) and (additional_info_url != 'None'):   
                 file_additional_info = requests.get(additional_info_url, verify=False)
                 if not file_additional_info.ok: 
                     raise Exception(f"URL {additional_info_url} responded with status code: {file_additional_info.status_code}")
