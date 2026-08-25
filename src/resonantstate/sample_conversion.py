@@ -707,7 +707,7 @@ def Hel2JacWH_row(row, adcol):
 ##########################################################################################################################
 
 
-def Sample2cart(sample, typeOfCoordinates, adcol):
+def Sample2cart(sample, typeOfCoordinates, adcol, verbose=False):
       r"""
       Converts to cartesian coordinates a sample in GRSW format.
       
@@ -730,8 +730,9 @@ def Sample2cart(sample, typeOfCoordinates, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample into Cartesian coordinates")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample into Cartesian coordinates")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -739,11 +740,12 @@ def Sample2cart(sample, typeOfCoordinates, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
 
 
-def Cart2sample(sample, typeOfCoordinates, adcol):
+def Cart2sample(sample, typeOfCoordinates, adcol, verbose=False):
       r"""
       Converts to GRSW format a sample in cartesian coordinates.
       
@@ -766,8 +768,9 @@ def Cart2sample(sample, typeOfCoordinates, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample from Cartesian to workshop format")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample from Cartesian to workshop format")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -775,11 +778,12 @@ def Cart2sample(sample, typeOfCoordinates, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
 
 
-def Sample2aeiMoO(sample, typeOfCoordinates, adcol):
+def Sample2aeiMoO(sample, typeOfCoordinates, adcol, verbose=False):
       r"""
       Converts to elliptic elements a sample in GRSW format.
       
@@ -802,8 +806,9 @@ def Sample2aeiMoO(sample, typeOfCoordinates, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample into (a, e, i, M, o, O) elliptic elements")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample into (a, e, i, M, o, O) elliptic elements")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -811,11 +816,12 @@ def Sample2aeiMoO(sample, typeOfCoordinates, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
 
 
-def Sample2alkhqp(sample, typeOfCoordinates, adcol):
+def Sample2alkhqp(sample, typeOfCoordinates, adcol, verbose=False):
       r"""
       Converts to rectangular elliptic elements a sample in GRSW format.
       
@@ -838,8 +844,9 @@ def Sample2alkhqp(sample, typeOfCoordinates, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample into (a, lbd, k, h, q, p) elliptic elements")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample into (a, lbd, k, h, q, p) elliptic elements")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -847,11 +854,12 @@ def Sample2alkhqp(sample, typeOfCoordinates, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
       
       
-def Jac2Hel(sample, adcol):
+def Jac2Hel(sample, adcol, verbose=False):
       r"""
       Converts from Jacobi to Heliocentric a sample in GRSW format.
       
@@ -872,8 +880,9 @@ def Jac2Hel(sample, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample from Jacobi to Heliocentric coordinates")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample from Jacobi to Heliocentric coordinates")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -881,11 +890,12 @@ def Jac2Hel(sample, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
       
       
-def Hel2Jac(sample, adcol):
+def Hel2Jac(sample, adcol, verbose=False):
       r"""
       Converts from Heliocentric to Jacobi a sample in GRSW format.
       
@@ -906,8 +916,9 @@ def Hel2Jac(sample, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample from Heliocentric to Jacobi coordinates")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample from Heliocentric to Jacobi coordinates")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -915,10 +926,11 @@ def Hel2Jac(sample, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
       
-def JacWH2Hel(sample, adcol):
+def JacWH2Hel(sample, adcol, verbose=False):
       r"""
       Converts from Jacobi (Wisdom Holman convention) to Heliocentric a sample in GRSW format.
       
@@ -939,8 +951,9 @@ def JacWH2Hel(sample, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample from JacobiWisdomHolman to Heliocentric coordinates")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample from JacobiWisdomHolman to Heliocentric coordinates")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -948,11 +961,12 @@ def JacWH2Hel(sample, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
 
       
-def Hel2JacWH(sample, adcol):
+def Hel2JacWH(sample, adcol, verbose=False):
       r"""
       Converts from Heliocentric to Jacobi (Wisdom Holman convention) a sample in GRSW format.
       
@@ -973,8 +987,9 @@ def Hel2JacWH(sample, adcol):
       """
       n = sample.shape[0]
       output = np.copy(sample)
-      print("Converting sample from Heliocentric to JacobiWisdomHolman coordinates")
-      print("Progress = ", 0., "%")
+      if verbose:
+            print("Converting sample from Heliocentric to JacobiWisdomHolman coordinates")
+            print("Progress = ", 0., "%")
       K = n // 100
       for i in range(n):
             row    = sample[i,:]
@@ -982,7 +997,8 @@ def Hel2JacWH(sample, adcol):
             output[i,:] = Newrow
             if ((i+1)%K == 0):
                   progress = 100.*(i + 1)/n
-                  print("Progress = ", progress, "%")
+                  if verbose:
+                        print("Progress = ", progress, "%")
       return output
       
       
