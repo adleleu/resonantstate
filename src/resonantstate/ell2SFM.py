@@ -742,12 +742,15 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
     
     """
 
-    P1=np.mean(samples['period_days_'+str(pair[0])].values)
-    P2=np.mean(samples['period_days_'+str(pair[1])].values)
 
     if isinstance(samples, pd.DataFrame):
+            P1=np.mean(samples['period_days_'+str(pair[0])].values)
+            P2=np.mean(samples['period_days_'+str(pair[1])].values)
             samples=np.vstack([samples[col] for col in samples.columns])
-    
+    else:
+            P1=np.mean(samples[2+pair[0]*8,:])
+            P2=np.mean(samples[2+pair[1]*8,:])
+
 
     if p==None:
         dist,p,sym=dist_Dpp1p(P2/P1)
