@@ -110,7 +110,7 @@ def samples2ell_twoplanets(sample, pair):
 
       return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
 
-def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):    
+def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2):    
       r"""
       Converts from elliptic elements to the coordinates :math:`\left(X, Y, X_2, Y_2, \delta\right)` of the Second Fondamental Model of resonance (SFM).
       :math:`\left(X, Y\right)` corresponds to the unique degree of freedom of the SFM and :math:`\left(X_2, Y_2\right)` to the first integral. :math:`\delta` is the unique parameter of the SFM
@@ -118,6 +118,8 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       
       Author : Jeremy Couturier. https://jeremycouturier.com
       
+      Update 02/10/2026 By A. Leleu to refect the changes in the paper (removed the normalisation by Gamma, and chose \Delta\gamma=0, rename the variables)
+
       Parameters
       ----------
       p: int
@@ -134,9 +136,9 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
             The mass :math:`m_1` of the inner planet in units of the stellar mass.
       m2: float or 1-dimensional numpy array of floats
             The mass :math:`m_2` of the outer planet in units of the stellar mass.
-      T1: float or 1-dimensional numpy array of floats
+      P1: float or 1-dimensional numpy array of floats
             The period :math:`2\pi/n_1` of the inner planet in any units. Such that :math:`\mathcal{G}\left(m_0+m_1\right)=n_1^2a_1^3`.
-      T2: float or 1-dimensional numpy array of floats
+      P2: float or 1-dimensional numpy array of floats
             The period :math:`2\pi/n_2` of the outer planet in the same units as T1. Such that :math:`\mathcal{G}\left(m_0+m_2\right)=n_2^2a_2^3`.
       lbd1: float or 1-dimensional numpy array of floats
             The mean longitude :math:`\lambda_1` of the inner planet, in radians.
@@ -152,20 +154,15 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       if (p > 20 or p < 1):
             raise Exception('The index p of the resonance must be between 1 and 20 included')
 
-      # Period of inner planet is normalized to 1
-      T2    = T2/T1
-      T1    = T1/T1
 
       # Getting semi-major axes and Lambda
-      G     = 4.*np.pi**2
+      cG     = 4.*np.pi**2
       beta1 = m1/(1. + m1)
       beta2 = m2/(1. + m2)
-      mu1   = G*(1. + m1)
-      mu2   = G*(1. + m2) 
-      n1    = 2.*np.pi/T1
-      n2    = 2.*np.pi/T2
-      n10   = 2.*np.pi
-      n20   = p*n10/(p + 1)
+      mu1   = cG*(1. + m1)
+      mu2   = cG*(1. + m2) 
+      n1    = 2.*np.pi/P1
+      n2    = 2.*np.pi/P2
       a1    = (mu1/n1**2)**(1./3.)
       a2    = (mu2/n2**2)**(1./3.)
       Lbd1  = beta1*np.sqrt(mu1*a1)
@@ -173,48 +170,43 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       D1    = Lbd1*(1. - np.sqrt(1. - e1**2))
       D2    = Lbd2*(1. - np.sqrt(1. - e2**2))
 
-      #Defining the exact resonance
-      a10   = (mu1/n10**2)**(1./3.)
-      a20   = (mu2/n20**2)**(1./3.)
-      Lbd10 = beta1*np.sqrt(mu1*a10)
-      Lbd20 = beta2*np.sqrt(mu2*a20)
+      #we construct the reference mean motions such that they are at exact commensurability, and Gamma0=Gamma
+      Lbd10=((p+1)*Lbd1+p*Lbd2)/((p+1)+p*beta2/beta1*((p+1)/p)**(1/3)*(mu2/mu1)**(2/3) )
+      Lbd20=((p+1)*Lbd1+p*Lbd2-(p+1)*Lbd10)/p
+      n10=beta1**3*mu1**2/Lbd10**3
+      n20=beta2**3*mu2**2/Lbd20**3
 
-      # Getting G and Gamma and normalizing
-      G     = Lbd1 + Lbd2 - D1 - D2
+      # Getting DG 
       DG    = Lbd1 - Lbd10 + Lbd2 - Lbd20 - D1 - D2
-      Gamma = (p + 1)*Lbd1 + p*Lbd2
-      DGamma= Gamma - ((p + 1)*Lbd10 + p*Lbd20)
-      g     = G/Gamma
-      Dg    = DG/Gamma
-      Dgamma= DGamma/Gamma
-      d1    = D1/Gamma
-      d2    = D2/Gamma
-      C1    = Gamma/Lbd10
-      C2    = Gamma/Lbd20
+      C1    = 1/Lbd10
+      C2    = 1/Lbd20
 
       #Getting alpha, beta, gamma, delta, R and S
       f1    = f1s[p - 1]
       f2    = f2s[p - 1]
-      R     = (f1**2*C1*d1 + f2**2*C2*d2 + 2.*f1*f2*np.sqrt(C1*d1*C2*d2)*np.cos(vp1 - vp2))/(f1**2*C1 + f2**2*C2)
-      S     = (f1**2*C1*d2 + f2**2*C2*d1 - 2.*f1*f2*np.sqrt(C1*d1*C2*d2)*np.cos(vp1 - vp2))/(f1**2*C1 + f2**2*C2)
-      #alpha = -3.*n10*p*((g + S)*(p*C1 + (p + 1)*C2) - (C1 + C2)) #Old expression. Equal to the new one although written differently
-      alpha = -3.*n10*p*((Dg + S)*(p*C1 + (p + 1)*C2) - (C1 + C2)*Dgamma)
+      Rp     = (f1**2*C1*D1 + f2**2*C2*D2 + 2.*f1*f2*np.sqrt(C1*D1*C2*D2)*np.cos(vp1 - vp2))/(f1**2*C1 + f2**2*C2)
+      Sp     = (f1**2*C1*D2 + f2**2*C2*D1 - 2.*f1*f2*np.sqrt(C1*D1*C2*D2)*np.cos(vp1 - vp2))/(f1**2*C1 + f2**2*C2)
+
+      
       beta  = 1.5*n10*p*(p*C1 + (p + 1)*C2)
+      alpha = -2.*beta*(DG + Sp)
       gamma = m1*n20/C2*np.sqrt(f1**2*C1 + f2**2*C2)
       delta = alpha*(4./(27.*beta*gamma**2))**(1./3.) - 1.
 
+
+
       #Getting X and Y
       K     = (2.*beta/gamma)**(-2./3.)
-      omega = beta*(2.*beta/gamma)**(-4./3.)
-      Sigma = R/K
-      Sigma2= S/K
+      
+      R = Rp/K
+      S = Sp/K
       xi    = -p*lbd1 + (p + 1)*lbd2
       sig1  = xi - vp1
       sig2  = xi - vp2
-      u1    = np.sqrt(2.*d1)*np.cos(sig1)
-      u2    = np.sqrt(2.*d2)*np.cos(sig2)
-      v1    = np.sqrt(2.*d1)*np.sin(sig1)
-      v2    = np.sqrt(2.*d2)*np.sin(sig2)
+      u1    = np.sqrt(2.*D1)*np.cos(sig1)
+      u2    = np.sqrt(2.*D2)*np.cos(sig2)
+      v1    = np.sqrt(2.*D1)*np.sin(sig1)
+      v2    = np.sqrt(2.*D2)*np.sin(sig2)
       z     = f2*np.sqrt(C2)/(f1*np.sqrt(C1))
       cophi = 1./np.sqrt(1. + z**2)
       siphi = z /np.sqrt(1. + z**2)
@@ -222,14 +214,14 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, T1, T2, lbd1, lbd2):
       y1    = cophi*v1 + siphi*v2
       x2    = cophi*u2 - siphi*u1
       y2    = cophi*v2 - siphi*v1
-      cossig= x1/np.sqrt(2.*R)
-      sinsig= y1/np.sqrt(2.*R)
-      cosig2= x2/np.sqrt(2.*S)
-      sisig2= y2/np.sqrt(2.*S)
-      X     = np.sqrt(2.*Sigma)*cossig
-      Y     = np.sqrt(2.*Sigma)*sinsig
-      X2    = np.sqrt(2.*Sigma2)*cosig2
-      Y2    = np.sqrt(2.*Sigma2)*sisig2
+      cosr= x1/np.sqrt(2.*Rp)
+      sinr= y1/np.sqrt(2.*Rp)
+      coss= x2/np.sqrt(2.*Sp)
+      siss= y2/np.sqrt(2.*Sp)
+      X     = np.sqrt(2.*R)*cosr
+      Y     = np.sqrt(2.*R)*sinr
+      X2    = np.sqrt(2.*S)*coss
+      Y2    = np.sqrt(2.*S)*siss
       return [X, Y, X2, Y2, delta]
 
 def X1X2(X, Y, delta):
@@ -255,13 +247,13 @@ def X1X2(X, Y, delta):
             return [Sol[1], Sol[2]]
 
 def SFM2useful(X, Y, X2, Y2, delta):
-      # Returns [sig, Sig, sig2, Sig2, x1, x2] where X+iY = sqrt(2*Sig)*e^(i*sig) and X2+iY2 = sqrt(2*Sig2)*e^(i*sig2)
+      # Returns [r, R, s, S, x1, x2] where X+iY = sqrt(2*R)*e^(i*r) and X2+iY2 = sqrt(2*S)*e^(i*s)
       # x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
       
-      Sig  = (X**2  + Y**2) /2.
-      Sig2 = (X2**2 + Y2**2)/2.
-      sig  = np.arctan2(Y,  X)
-      sig2 = np.arctan2(Y2, X2)
+      R  = (X**2  + Y**2) /2.
+      S = (X2**2 + Y2**2)/2.
+      r  = np.arctan2(Y,  X)
+      s = np.arctan2(Y2, X2)
       
       x1 = []
       x2 = []
@@ -297,7 +289,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
       x1 = np.array(x1)
       x2 = np.array(x2)
       IR = np.array(IR)
-      return [sig, Sig, sig2, Sig2, x1, x2, IR]
+      return [r, R, s, S, x1, x2, IR]
 
 def topology(delta):
       #Returns [Xmin, Xmax, Xres, Xint, Xhyp] from analytical expressions instead of reading from file
