@@ -12,62 +12,6 @@ from resonantstate.quartic import quartic
 
 Tp=np.arange(1,20)
 
-'''
-def _dist_Dpp1p(Pr):
-
-
-    if Pr>2.5 or Pr<1.1:
-        return np.inf,-1,False
-    
-    else :
-        dist_H= -2*(np.abs(f1s[Tp-1])/3/Tp**(1/2))**(-2/3)*(1-(Pr*Tp/(Tp+1))**(1/3))
-        Id_closest=np.abs(dist_H).argmin()
-
-        dist_H_best,p_best=dist_H[Id_closest],Tp[Id_closest]
-
-        if dist_H_best>0:
-            Pr_test=(2-(p_best/(1+p_best)*Pr)**(1/3))**3*(p_best+1)/p_best
-            dist_H_test= -2*(np.abs(f1s[Tp-1])/3/Tp**(1/2))**(-2/3)*(1-(Pr_test*Tp/(Tp+1))**(1/3))
-            Id_closest_test=np.abs(dist_H_test).argmin()
-            
-            if Tp[Id_closest_test]==p_best:
-                sym=True
-            else:
-                sym=False
-        else:
-            sym=True
-
-        
-        return dist_H[Id_closest],Tp[Id_closest],sym
-
-def dist_Dpp1p(Pr):
-    """deal with different entry shape for Pr
-
-    Parameters
-    ----------
-    Pr : float or array
-        period ratios
-
-    Returns
-    -------
-    dist : float
-
-    p : integer
-
-    sym: boolean
-        
-    """
-
-    if isinstance(Pr,np.ndarray):
-        if len(Pr.shape)==1:
-            dist_H,Tp,sym=np.zeros(Pr.size),np.zeros(Pr.size),np.zeros(Pr.size,dtype=bool)
-            for k,pr in enumerate(Pr):
-                dist_H[k],Tp[k],sym[k]=_dist_Dpp1p(pr)
-            return dist_H,Tp,sym
-    else:
-        return  _dist_Dpp1p(Pr)
-'''
-
 
 def _dist_Dpp1p(Pr):
     Tp=np.arange(1,21)
@@ -543,7 +487,7 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
 
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\delta$", labelpad = 3)
-      ax1.set_ylabel(ylabel=r"$x_r$",    labelpad = 4, rotation = 0)
+      ax1.set_ylabel(ylabel=r"$\xi_r$",    labelpad = 4, rotation = 0)
       delt = np.linspace(delta_lim[0], delta_lim[1], 1024)
       Xmin = np.zeros(1024)
       Xmax = np.zeros(1024)
@@ -617,7 +561,7 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
 
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\Delta_{MMR}$", labelpad = 3)
-      ax1.set_ylabel(ylabel=r"$e_r$",          labelpad = 4, rotation = 0)
+      ax1.set_ylabel(ylabel=r"$\xi_r$",          labelpad = 4, rotation = 0)
       #delt = np.linspace(delta_lim[0]-X2max, delta_lim[1]+X2max, 512)
       delt = np.arange(-bound, bound, .01)
       Xmin = np.zeros(delt.size)
