@@ -1,6 +1,6 @@
 # ResonantState database
 
-This package contains basic functions that helps navigate the resonant state database, please check the notebooks https://github.com/adleleu/resonantstate_nb to see how the package can be used.
+This package contains basic functions that helps navigate the resonant state database, please check the notebooks in the papers folders to see how the package can be used.
 
 The resonant state database is split into two : 
 
