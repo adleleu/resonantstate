@@ -1,4 +1,4 @@
-# ResonantState database [draft]
+# ResonantState database
 
 This package contains basic functions that helps navigate the resonant state database, please check the notebooks https://github.com/adleleu/resonantstate_nb to see how the package can be used.
 
