@@ -11,6 +11,8 @@ from resonantstate.quartic import quartic
 
 
 Tp=np.arange(1,20)
+
+'''
 def _dist_Dpp1p(Pr):
 
 
@@ -64,6 +66,66 @@ def dist_Dpp1p(Pr):
             return dist_H,Tp,sym
     else:
         return  _dist_Dpp1p(Pr)
+'''
+
+
+def _dist_Dpp1p(Pr):
+    Tp=np.arange(1,21)
+
+    if Pr>2.5 or Pr<1.1:
+        return np.inf,-1,False
+    
+    else :
+        pspp1=Tp/(Tp+1)
+        Kp=-2*(np.abs(f1s[Tp-1])/3/Tp**(1/2))**(-2/3)
+        dist_H= (1-(Pr*Tp/(Tp+1))**(1/3))*Kp*(np.sqrt(pspp1**(2/3)+pspp1**(5/3)*(f2s/f1s)**2+pspp1**(4/3)+pspp1*(f2s/f1s)**2)/2)**(-2/3)
+        Id_closest=np.abs(dist_H).argmin()
+
+        dist_H_best,p_best=dist_H[Id_closest],Tp[Id_closest]
+
+        if dist_H_best>0:
+            Pr_test=(2-(p_best/(1+p_best)*Pr)**(1/3))**3*(p_best+1)/p_best
+            dist_H_test= (1-(Pr_test*Tp/(Tp+1))**(1/3))*Kp*(np.sqrt(pspp1**(2/3)+pspp1**(5/3)*(f2s/f1s)**2+pspp1**(4/3)+pspp1*(f2s/f1s)**2)/2)**(-2/3)#-2*(np.abs(f1s[Tp-1])/3/Tp**(1/2))**(-2/3)*(1-(Pr_test*Tp/(Tp+1))**(1/3))
+            Id_closest_test=np.abs(dist_H_test).argmin()
+            
+            if Tp[Id_closest_test]==p_best:
+                sym=True
+            else:
+                sym=False
+        else:
+            sym=True
+
+        
+        return dist_H[Id_closest],Tp[Id_closest],sym
+
+
+def dist_Dpp1p(Pr):
+    """deal with different entry shape for Pr
+
+    Parameters
+    ----------
+    Pr : float or array
+        period ratios
+
+    Returns
+    -------
+    dist : float
+
+    p : integer
+
+    sym: boolean
+        
+    """
+
+    if isinstance(Pr,np.ndarray):
+        if len(Pr.shape)==1:
+            dist_H,Tp,sym=np.zeros(Pr.size),np.zeros(Pr.size),np.zeros(Pr.size,dtype=bool)
+            for k,pr in enumerate(Pr):
+                dist_H[k],Tp[k],sym[k]=_dist_Dpp1p(pr)
+            return dist_H,Tp,sym
+    else:
+        return  _dist_Dpp1p(Pr)
+
     
 def samples2ell_twoplanets(sample, pair):
       I    = pair[0]
@@ -91,16 +153,16 @@ def samples2ell_twoplanets(sample, pair):
             m1   = sample.iloc[:, 7 + 8*I].values
             m2   = sample.iloc[:, 7 + 8*J].values
       else:
-            lbd1 = sample[1 + 8*I,:]
-            lbd2 = sample[1 + 8*J,:]
-            P1   = sample[2 + 8*I,:]
-            P2   = sample[2 + 8*J,:]
-            k1   = sample[3 + 8*I,:]
-            k2   = sample[3 + 8*J,:]
-            h1   = sample[4 + 8*I,:]
-            h2   = sample[4 + 8*J,:]
-            m1   = sample[7 + 8*I,:]
-            m2   = sample[7 + 8*J,:]
+            lbd1 = sample[:,1 + 8*I]
+            lbd2 = sample[:,1 + 8*J]
+            P1   = sample[:,2 + 8*I]
+            P2   = sample[:,2 + 8*J]
+            k1   = sample[:,3 + 8*I]
+            k2   = sample[:,3 + 8*J]
+            h1   = sample[:,4 + 8*I]
+            h2   = sample[:,4 + 8*J]
+            m1   = sample[:,7 + 8*I]
+            m2   = sample[:,7 + 8*J]
       e1   = np.sqrt(k1**2 + h1**2)
       e2   = np.sqrt(k2**2 + h2**2)
       vp1  = np.arctan2(h1, k1)
@@ -110,7 +172,7 @@ def samples2ell_twoplanets(sample, pair):
 
       return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
 
-def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2):    
+def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):    
       r"""
       Converts from elliptic elements to the coordinates :math:`\left(X, Y, X_2, Y_2, \delta\right)` of the Second Fondamental Model of resonance (SFM).
       :math:`\left(X, Y\right)` corresponds to the unique degree of freedom of the SFM and :math:`\left(X_2, Y_2\right)` to the first integral. :math:`\delta` is the unique parameter of the SFM
@@ -176,6 +238,7 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2):
       n10=beta1**3*mu1**2/Lbd10**3
       n20=beta2**3*mu2**2/Lbd20**3
 
+
       # Getting DG 
       DG    = Lbd1 - Lbd10 + Lbd2 - Lbd20 - D1 - D2
       C1    = 1/Lbd10
@@ -200,16 +263,24 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2):
       
       R = Rp/K
       S = Sp/K
-      xi    = -p*lbd1 + (p + 1)*lbd2
-      sig1  = xi - vp1
-      sig2  = xi - vp2
+      phi2    = -p*lbd1 + (p + 1)*lbd2
+      sig1  = phi2 - vp1
+      sig2  = phi2 - vp2
       u1    = np.sqrt(2.*D1)*np.cos(sig1)
       u2    = np.sqrt(2.*D2)*np.cos(sig2)
       v1    = np.sqrt(2.*D1)*np.sin(sig1)
       v2    = np.sqrt(2.*D2)*np.sin(sig2)
-      z     = f2*np.sqrt(C2)/(f1*np.sqrt(C1))
-      cophi = 1./np.sqrt(1. + z**2)
-      siphi = z /np.sqrt(1. + z**2)
+      
+      
+      alpha1 = -f1/np.sqrt(Lbd10)
+      alpha2 = -f2/np.sqrt(Lbd20)
+      cophi = alpha1/np.sqrt(alpha1**2+alpha2**2)
+      siphi = alpha2/np.sqrt(alpha1**2+alpha2**2)
+
+      #z     = f2*np.sqrt(C2)/(f1*np.sqrt(C1))
+      #cophi = 1./np.sqrt(1. + z**2)
+      #siphi = z /np.sqrt(1. + z**2)
+
       x1    = cophi*u1 + siphi*u2
       y1    = cophi*v1 + siphi*v2
       x2    = cophi*u2 - siphi*u1
@@ -217,12 +288,61 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2):
       cosr= x1/np.sqrt(2.*Rp)
       sinr= y1/np.sqrt(2.*Rp)
       coss= x2/np.sqrt(2.*Sp)
-      siss= y2/np.sqrt(2.*Sp)
+      sins= y2/np.sqrt(2.*Sp)
       X     = np.sqrt(2.*R)*cosr
       Y     = np.sqrt(2.*R)*sinr
       X2    = np.sqrt(2.*S)*coss
-      Y2    = np.sqrt(2.*S)*siss
-      return [X, Y, X2, Y2, delta]
+      Y2    = np.sqrt(2.*S)*sins
+
+      if return_all:
+            return {'X':X, 
+                    'Y':Y,
+                    'X2':X2,
+                    'Y2':Y2, 
+                    'delta':delta, 
+                    'Lbd1':Lbd1,
+                    'Lbd2':Lbd2, 
+                    'Rp':Rp,
+                    'Sp':Sp,
+                    'cosr':cosr, 
+                    'sinr':sinr,         
+                    'coss':coss, 
+                    'sins':sins,    
+                    'R':R,
+                    'S':S,   
+                    'cophi':cophi,
+                    'siphi':siphi,        
+                    }
+      else:
+            return [X, Y, X2, Y2, delta]
+
+
+
+def samples2erjesj(samples, pair, p):
+
+    
+    dic=samples2SFM(samples, pair, p,return_all=True)
+
+
+    phi2=-p*samples[:,1+8*pair[0]]*pi/180+(p+1)*samples[:,1+8*pair[1]]*pi/180
+
+    r=np.arctan2(dic['sinr'],dic['cosr'])
+    s=np.arctan2(dic['sins'],dic['coss'])
+
+    kr1=np.sqrt(1/dic['Lbd1'])*dic['cophi']*np.sqrt(2*dic['Rp'])*np.cos(phi2-r)
+    hr1=np.sqrt(1/dic['Lbd1'])*dic['cophi']*np.sqrt(2*dic['Rp'])*np.sin(phi2-r)
+
+    ks1=-np.sqrt(1/dic['Lbd1'])*dic['siphi']*np.sqrt(2*dic['Sp'])*np.cos(phi2-s)
+    hs1=-np.sqrt(1/dic['Lbd1'])*dic['siphi']*np.sqrt(2*dic['Sp'])*np.sin(phi2-s)
+
+    kr2=np.sqrt(1/dic['Lbd2'])*dic['siphi']*np.sqrt(2*dic['Rp'])*np.cos(phi2-r)
+    hr2=np.sqrt(1/dic['Lbd2'])*dic['siphi']*np.sqrt(2*dic['Rp'])*np.sin(phi2-r)
+
+    ks2=np.sqrt(1/dic['Lbd2'])*dic['cophi']*np.sqrt(2*dic['Sp'])*np.cos(phi2-s)
+    hs2=np.sqrt(1/dic['Lbd2'])*dic['cophi']*np.sqrt(2*dic['Sp'])*np.sin(phi2-s)
+    
+    return kr1,hr1,kr2,hr2,ks1,hs1,ks2,hs2
+
 
 def X1X2(X, Y, delta):
       # Returns X1 and X2 such that (X1, 0) and (X2, 0) are on the same level line as (X, Y)
@@ -266,7 +386,7 @@ def SFM2useful(X, Y, X2, Y2, delta):
             x2.append(xx2)
             [xmin, xmax, xres, xint, xhyp] = topology(delta[i])
             [lib1,lib2]= X1X2(0, 0, delta[i])
-            if (delta[i] < 1.):
+            if (delta[i] < 0.):
                   
                   if  max(xx1,xx2)<max(lib1,lib2):    
                         IR.append(2) #external libration
@@ -309,10 +429,9 @@ def topology(delta):
             xmin = - xhyp - 2./np.sqrt(-xhyp)
             return [xmin, xmax, xres, xint, xhyp]
 
-def samples2SFM(sample, pair, p):
+def samples2SFM(sample, pair, p,return_all=False):
       [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
-      [X, Y, X2, Y2, delta] = ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2)
-      return [X, Y, X2, Y2, delta]
+      return ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2,return_all=return_all)
 
 def samples2usefull(sample, pair, p):
       [X, Y, X2, Y2, Ds] = samples2SFM(sample, pair, p)
@@ -361,17 +480,17 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
     if isinstance(samples, pd.DataFrame):
             P1=np.mean(samples['period_days_'+str(pair[0])].values)
             P2=np.mean(samples['period_days_'+str(pair[1])].values)
-            samples=np.vstack([samples[col] for col in samples.columns])
+            samples=samples.to_numpy()#np.vstack([samples[col] for col in samples.columns])
     else:
-            P1=np.mean(samples[2+pair[0]*8,:])
-            P2=np.mean(samples[2+pair[1]*8,:])
+            P1=np.mean(samples[:,2+pair[0]*8])
+            P2=np.mean(samples[:,2+pair[1]*8])
 
 
     if p==None:
         dist,p,sym=dist_Dpp1p(P2/P1)
     
-    [X, Y, X2, Y2, delta]=samples2SFM( samples[:,::sampling], pair, p)
-    [sig, Sig, sig2, Sig2, x1, x2, IR] = samples2usefull( samples[:,::sampling], pair,p)
+    [X, Y, X2, Y2, delta]=samples2SFM( samples[::sampling,:], pair, p)
+    [sig, Sig, sig2, Sig2, x1, x2, IR] = samples2usefull( samples[::sampling,:], pair,p)
     
     es=np.sqrt(2*Sig2)
 
@@ -469,7 +588,7 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,legend=True):
+def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,legend=True,zorder=1,resonance_trapped=False):
 
       ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
 
@@ -506,6 +625,8 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
       Xres = np.zeros(delt.size)
       Xint = np.zeros(delt.size)
       Xhyp = np.zeros(delt.size)
+      if resonance_trapped:
+            Xrestrapped = np.ones(delt.size)*np.nan
       count = 0
       for count,delta in enumerate(delt):
             [xmin, xmax, xres, xint, xhyp] = topology(delta)
@@ -514,34 +635,54 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
             Xres[count] = xres
             Xint[count] = xint
             Xhyp[count] = xhyp
+            if resonance_trapped:
+                  if delta >=-2 and delta<0:
+                        Xrestrapped[count] = xres+1
+                        if count< Xrestrapped.size:
+                              Xrestrapped[count+1] = xres
 
+      if resonance_trapped:
+            Id_b=np.searchsorted(delt,-2)
+            Id_e=np.searchsorted(delt,0)
+
+            delt_restrap=delt[Id_b:Id_e]
+            X_restrap=Xres[Id_b:Id_e]+1
+            X_restrap=np.append(np.linspace(X_restrap[0]-1,X_restrap[0],20),X_restrap)
+            delt_restrap=np.append(np.ones(20)*-2,delt_restrap)
+  
+                              
+                  
       if dark:        
             
             if legend:
-                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'secondary')
-                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'pink',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'hyperbolic')
-                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'white', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'primary')
-                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'separatrix')
+                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha, label = 'secondary')
+                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'pink',   linewidth = linewidth, zorder=zorder, linestyle = ':', alpha = alpha, label = 'hyperbolic')
+                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'white', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha, label = 'primary')
+                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'pink',   linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha, label = 'separatrix')
             else:
-                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha)
-                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'pink',   linewidth = linewidth, linestyle = ':', alpha = alpha)
-                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'white', linewidth = linewidth, linestyle = '-', alpha = alpha)
-                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha)
-            ax1.plot(Xmax[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmax[delt >= 0.], color = 'pink',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'pink',   linewidth = linewidth, zorder=zorder, linestyle = ':', alpha = alpha)
+                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'white', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'pink',   linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
+            ax1.plot(Xmax[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmax[delt >= 0.], color = 'pink',   linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
             #ax1.fill_between(delt[delt >= 0.], Xmin[delt >= 0.], Xmax[delt >= 0.], color = 'pink', alpha = alpha_fill)
       else:
             
             if legend:
-                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'secondary')
-                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha, label = 'hyperbolic')
-                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'primary')
-                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha, label = 'separatrix')
+                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha, label = 'secondary')
+                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = ':', alpha = alpha, label = 'hyperbolic')
+                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'black', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha, label = 'primary')
+                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha, label = 'separatrix')
+                  if resonance_trapped:
+                        ax1.plot(X_restrap**2-3*(delt_restrap + 1.),X_restrap, color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = '--', alpha = alpha, label = 'resonance-\ntrapped')
             else:
-                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, linestyle = '-', alpha = alpha)
-                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'red',   linewidth = linewidth, linestyle = ':', alpha = alpha)
-                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'black', linewidth = linewidth, linestyle = '-', alpha = alpha)
-                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha)    
-            ax1.plot(Xmax[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmax[delt >= 0.], color = 'red',   linewidth = linewidth, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xint[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xint[delt >= 0.], color = 'grey', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xhyp[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xhyp[delt >= 0.], color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = ':', alpha = alpha)
+                  ax1.plot(Xres**2-3*(delt + 1.),             Xres,             color = 'black', linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
+                  ax1.plot(Xmin[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmin[delt >= 0.], color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)   
+                  if resonance_trapped:
+                        ax1.plot(X_restrap**2-3*(delt_restrap + 1.),X_restrap, color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = '--', alpha = alpha) 
+            ax1.plot(Xmax[delt >= 0.]**2-3*(delt[delt >= 0.] + 1.), Xmax[delt >= 0.], color = 'red',   linewidth = linewidth, zorder=zorder, linestyle = '-', alpha = alpha)
             #ax1.fill_between(delt[delt >= 0.], Xmin[delt >= 0.], Xmax[delt >= 0.], color = 'red', alpha = alpha_fill)
 
       if grid:
