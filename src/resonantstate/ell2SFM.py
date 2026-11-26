@@ -14,6 +14,24 @@ Tp=np.arange(1,20)
 
 
 def _dist_Dpp1p(Pr):
+    r"""
+      Compute the distance to the closest first-order resonance, and verify if it lands in the symetrical domain around that resonance
+
+      Parameters
+      ----------
+      Pr : float or array
+      period ratios
+
+      Returns
+      -------
+      dist : float
+
+      p : integer
+
+      sym: boolean
+
+    """
+    
     Tp=np.arange(1,21)
 
     if Pr>2.5 or Pr<1.1:
@@ -44,7 +62,8 @@ def _dist_Dpp1p(Pr):
 
 
 def dist_Dpp1p(Pr):
-    """deal with different entry shape for Pr
+    r"""
+    Compute the distance to the closest first-order resonance, and verify if it lands in the symetrical domain around that resonance
 
     Parameters
     ----------
@@ -72,6 +91,20 @@ def dist_Dpp1p(Pr):
 
     
 def samples2ell_twoplanets(sample, pair):
+      r"""convert the sample into numpy array of orbital elements and masses
+
+      Parameters
+      ----------
+      sample : np.array or pandaframe
+          samples of dynamical analysis of observed system or evolution of simulated system
+      pair : tuple of ints
+          (i,j) indices of the pair to consider
+
+      Returns
+      -------
+      np.arrays of floats
+          e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2
+      """
       I    = pair[0]
       J    = pair[1]
       if isinstance(sample, pd.DataFrame) and isinstance(I, str) and isinstance(J, str):
@@ -120,7 +153,7 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):
       r"""
       Converts from elliptic elements to the coordinates :math:`\left(X, Y, X_2, Y_2, \delta\right)` of the Second Fondamental Model of resonance (SFM).
       :math:`\left(X, Y\right)` corresponds to the unique degree of freedom of the SFM and :math:`\left(X_2, Y_2\right)` to the first integral. :math:`\delta` is the unique parameter of the SFM
-      The SFM is described byt the Hamiltonian :math:`\mathcal{H}(\Sigma,\sigma)=3\delta\Sigma-\Sigma^2+2\sqrt{2\Sigma}\cos\sigma` where :math:`X+iY=\sqrt{2\Sigma}e^{i\sigma}`.
+      The SFM is described byt the Hamiltonian :math:`\mathcal{H}(\Sigma,\sigma)=3(\delta+1)\Sigma-\Sigma^2+2\sqrt{2\Sigma}\cos\sigma` where :math:`X+iY=\sqrt{2\Sigma}e^{i\sigma}`.
       
       Author : Jeremy Couturier. https://jeremycouturier.com
       
@@ -145,16 +178,18 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):
       P1: float or 1-dimensional numpy array of floats
             The period :math:`2\pi/n_1` of the inner planet in any units. Such that :math:`\mathcal{G}\left(m_0+m_1\right)=n_1^2a_1^3`.
       P2: float or 1-dimensional numpy array of floats
-            The period :math:`2\pi/n_2` of the outer planet in the same units as T1. Such that :math:`\mathcal{G}\left(m_0+m_2\right)=n_2^2a_2^3`.
+            The period :math:`2\pi/n_2` of the outer planet in the same units as P1. Such that :math:`\mathcal{G}\left(m_0+m_2\right)=n_2^2a_2^3`.
       lbd1: float or 1-dimensional numpy array of floats
             The mean longitude :math:`\lambda_1` of the inner planet, in radians.
       lbd2: float or 1-dimensional numpy array of floats
             The mean longitude :math:`\lambda_2` of the outer planet, in radians.
+      return_all: bool
+            if return_all==False, the function returns :math:`\left[X, Y, X_2, Y_2, \delta\right]`, if return_all==True it return a dictionary with additional variables instead.
             
       Returns
       -------
       l : List
-            The list :math:`\left[X, Y, X_2, Y_2, \delta\right]` of elements of the Second Fondamental Model of resonance.
+            The list :math:`\left[X, Y, X_2, Y_2, \delta\right]` of elements of the Second Fondamental Model of Resonance.
       """
 
       if (p > 20 or p < 1):
@@ -221,9 +256,6 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):
       cophi = alpha1/np.sqrt(alpha1**2+alpha2**2)
       siphi = alpha2/np.sqrt(alpha1**2+alpha2**2)
 
-      #z     = f2*np.sqrt(C2)/(f1*np.sqrt(C1))
-      #cophi = 1./np.sqrt(1. + z**2)
-      #siphi = z /np.sqrt(1. + z**2)
 
       x1    = cophi*u1 + siphi*u2
       y1    = cophi*v1 + siphi*v2
@@ -263,7 +295,23 @@ def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):
 
 
 def samples2erjesj(samples, pair, p):
+    r"""compute the :math:`k=e\cos(\varpi)` and :math:`h=e\sin(\varpi)` components of the resonant and secular eccentricities of a pair of planets
 
+      Parameters
+      ----------
+      sample : np.array or pandaframe
+                samples of dynamical analysis of observed system or evolution of simulated system
+      pair : tuple of ints
+          (i,j) indices of the pair to consider
+      p : int
+          p+1:p resonance
+
+      Returns
+      -------
+      list of np arrays of floats
+          kr1,hr1,kr2,hr2,ks1,hs1,ks2,hs2
+    """
+      
     
     dic=samples2SFM(samples, pair, p,return_all=True)
 
@@ -289,7 +337,23 @@ def samples2erjesj(samples, pair, p):
 
 
 def X1X2(X, Y, delta):
-      # Returns X1 and X2 such that (X1, 0) and (X2, 0) are on the same level line as (X, Y)
+      r"""Returns :math:`X_1` and :math:`X_2` such that :math:`(X_1, 0)` and :math:`(X2, 0)` are on the same level line as :math:`(X, Y)` for a given value of :math:`\delta` in the SMFR
+
+      Parameters
+      ----------
+      X : float
+          :math:`\sqrt{2R}\cos r`
+      Y : float
+          :math:`\sqrt{2R}\sin r`
+      delta : float
+          :math:`\delta` parameter of the SFMR
+
+      Returns
+      -------
+      _type_
+          :math:`X_1` (float), :math:`X_2` (float)
+      """
+      # 
       H   = 1.5*(delta + 1.)*(X**2 + Y**2) - 0.25*(X**2 + Y**2)**2 + 2.*X
       Sol = quartic(-0.25, 0., 1.5*(delta + 1.), 2., -H)
       Sol.sort()
@@ -311,8 +375,28 @@ def X1X2(X, Y, delta):
             return [Sol[1], Sol[2]]
 
 def SFM2useful(X, Y, X2, Y2, delta):
-      # Returns [r, R, s, S, x1, x2] where X+iY = sqrt(2*R)*e^(i*r) and X2+iY2 = sqrt(2*S)*e^(i*s)
-      # x1 and x2 are such that (x1, 0) and (x2, 0) are on the same level line as (X, Y)
+      r""" Returns [r, R, s, S, x1, x2] where :math:`X+iY = \sqrt{2R}e^{ir}` and :math:`X_2+iY_2 = \sqrt{2S}e^{is}`
+      :math:`x_1` and :math:`x_2` are such that :math:`(x1, 0)` and :math:`(x2, 0)` are on the same level line as :math:`(X, Y)`
+
+      Parameters
+      ----------
+      X : np.array
+          Cartesian coordinate :math:`\sqrt{2R}\cos r`
+      Y : np.array
+          Cartesian coordinate :math:`\sqrt{2R}\sin r`
+      X2 : np.array
+          Cartesian coordinate :math:`\sqrt{2S}\cos s`
+      Y2 : np.array
+          Cartesian coordinate :math:`\sqrt{2S}\sin s`
+      delta : np.array
+          paramter of the SFMR
+
+      Returns
+      -------
+      list of np.arrays
+          [r, R, s, S, x1, x2]
+      """
+
       
       R  = (X**2  + Y**2) /2.
       S = (X2**2 + Y2**2)/2.
@@ -356,10 +440,23 @@ def SFM2useful(X, Y, X2, Y2, delta):
       return [r, R, s, S, x1, x2, IR]
 
 def topology(delta):
-      #Returns [Xmin, Xmax, Xres, Xint, Xhyp] from analytical expressions instead of reading from file
-      #Xmin and Xmax are the lower and upper separatrices respectively, Xres is the resonance center, Xint is the center of the internal circulation and Xhyp is the hyperbolic fixed point.
-      #If delta < 0, returns [0, 0, Xres, 0, 0]
-      #When delta >= 0; then Xhyp <= Xint <= Xmin <= Xres <= Xmax
+      r"""Returns :math:`[Xmin, Xmax, Xres, Xint, Xhyp]` where :math:`Xmin, Xmax` are the position of the separatrix, the :math:`Xres` the position of the primary fixed point, 
+      :math:`Xint` the position of the secondary fixed point, and :math:`Xhyp` the position of the hyperbolic fixed point, all in the :math:`sin r=0` plane. 
+      If :math:`\delta < 0`, returns :math:`[0, 0, Xres, 0, 0]`
+      When :math:`\delta >= 0`; then :math:`Xhyp <= Xint <= Xmin <= Xres <= Xmax`
+
+      Parameters
+      ----------
+      delta : float
+          paramter of the SFMR
+
+      Returns
+      -------
+      list of floats
+          [xmin, xmax, xres, xint, xhyp]
+      """
+      
+
       if (delta == 0.):
             return [-1., 3., 2., -1., -1.]
       Sol = quartic(0., 1., 0., -3.*(delta + 1.), -2.) #Getting Xres, Xint and Xhyp
@@ -374,16 +471,51 @@ def topology(delta):
             return [xmin, xmax, xres, xint, xhyp]
 
 def samples2SFM(sample, pair, p,return_all=False):
+      """_summary_
+
+      Parameters
+      ----------
+      sample : np.array or pandaframe
+          samples of dynamical analysis of observed system or evolution of simulated system
+      pair : tuple of ints
+          (i,j) indices of the pair to consider
+      p : int
+          indice of the p+1:p resonance
+      return_all : bool, optional
+          if return_all==False, the function returns :math:`\left[X, Y, X_2, Y_2, \delta\right]`, if return_all==True it return a dictionary with additional variables instead.
+
+      Returns
+      -------
+      l : List
+            The list :math:`\left[X, Y, X_2, Y_2, \delta\right]` of elements of the Second Fondamental Model of Resonance.
+      """
       [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
       return ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2,return_all=return_all)
 
 def samples2usefull(sample, pair, p):
-      [X, Y, X2, Y2, Ds] = samples2SFM(sample, pair, p)
-      [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, Ds)
+      r""" Returns [r, R, s, S, x1, x2] where :math:`X+iY = \sqrt{2R}e^{ir}` and :math:`X_2+iY_2 = \sqrt{2S}e^{is}`
+      :math:`x_1` and :math:`x_2` are such that :math:`(x1, 0)` and :math:`(x2, 0)` are on the same level line as :math:`(X, Y)`
+
+      Parameters
+      ----------
+      sample : np.array or pandaframe
+      samples of dynamical analysis of observed system or evolution of simulated system
+      pair : tuple of ints
+      (i,j) indices of the pair to consider
+      p : int
+      indice of the p+1:p resonance
+
+      Returns
+      -------
+      list of np.arrays
+            [r, R, s, S, x1, x2]
+      """
+      [X, Y, X2, Y2, delta] = samples2SFM(sample, pair, p)
+      [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, delta)
       return [sig, Sig, sig2, Sig2, x1, x2, IR]
 
 def get_SFM_quantities(samples,pair,p=None,sampling=1):
-    """call functions of the package to extract the quantities used in the first paper : delta, DMMR, er, Der, es, IR, p
+    r"""call functions of the package to extract the quantities used in the first paper : delta, DMMR, er, Der, es, IR, p
 
     Parameters
     ----------
@@ -401,13 +533,13 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
     delta : np.array of floats of the lengh of the thinned samples
         delta parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)
     DMMR : np.array of floats of the lengh of the thinned samples
-        er^2-3*delta
+        $\\xi_r^2-3(\delta+1)$
     er : np.array of floats of the lengh of the thinned samples
-        rer parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities
+        $\\xi_r$ parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities
     Der : np.array of floats of the lengh of the thinned samples
-        Der parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) 
+        $\Delta \\xi_r$ parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) 
     es : np.array of floats of the lengh of the thinned samples
-        secular eccentricities (see GRSW paper 1 - Leleu et al 2026) 
+        $\\xi_s$ secular eccentricities (see GRSW paper 1 - Leleu et al 2026) 
     IR : np.array of floats of the lengh of the thinned samples
         position of the sample in the second fundamental model:
             2 : upper libration
@@ -462,8 +594,30 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
 #Plotting
 
 def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,alpha_fill=0.1,legend=True):
+      r"""Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model of Resonance  
 
-      ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
+      Parameters
+      ----------
+      ax1 : ax
+          ax of the figure
+      delta_lim : tuple of floats, optional
+          ($\delta_{min},\delta_{max}$) boundaries of the figure $\delta$, by default None
+      X_lim :  tuple of floats, optional
+          ($\\xi_r_{min},\xi_r_{max}$) boundaries of the figure $\\xi_r$, by default None
+      linewidth : int, optional
+          _description_, by default 4
+      alpha : int, optional
+          _description_, by default 1
+      grid : bool, optional
+          _description_, by default False
+      dark : bool, optional
+          _description_, by default False
+      alpha_fill : float, optional
+          _description_, by default 0.1
+      legend : bool, optional
+          _description_, by default True
+      """
+      
 
       if delta_lim==None:
             ax1.autoscale(axis='x')
@@ -487,7 +641,7 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
 
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\delta$", labelpad = 3)
-      ax1.set_ylabel(ylabel=r"$\xi_r$",    labelpad = 4, rotation = 0)
+      ax1.set_ylabel(ylabel=r"$\\xi_r$",    labelpad = 4, rotation = 0)
       delt = np.linspace(delta_lim[0], delta_lim[1], 1024)
       Xmin = np.zeros(1024)
       Xmax = np.zeros(1024)
@@ -533,8 +687,29 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
 
 
 def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, grid=False,dark=False,legend=True,zorder=1,resonance_trapped=False):
+      r"""Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model of Resonance  
 
-      ### Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model on the axis ax1 ###
+      Parameters
+      ----------
+      ax1 : ax
+          ax of the figure
+      DMMR_lim : tuple of floats, optional
+          ($\Delta_{MMR,min},\Delta_{MMR,max}$) boundaries of the figure for the x axis $\Delta_{MMR}$, by default None
+      X_lim :  tuple of floats, optional
+          ($\\xi_r_{min},\xi_r_{max}$) boundaries of the figure for the y axis $\\xi_r$, by default None
+      linewidth : int, optional
+          _description_, by default 4
+      alpha : int, optional
+          _description_, by default 1
+      grid : bool, optional
+          _description_, by default False
+      dark : bool, optional
+          _description_, by default False
+      alpha_fill : float, optional
+          _description_, by default 0.1
+      legend : bool, optional
+          _description_, by default True
+      """
 
       if DMMR_lim==None:
             ax1.autoscale(axis='x')
@@ -561,7 +736,7 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
 
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\Delta_{MMR}$", labelpad = 3)
-      ax1.set_ylabel(ylabel=r"$\xi_r$",          labelpad = 4, rotation = 0)
+      ax1.set_ylabel(ylabel=r"$\\xi_r$",          labelpad = 4, rotation = 0)
       #delt = np.linspace(delta_lim[0]-X2max, delta_lim[1]+X2max, 512)
       delt = np.arange(-bound, bound, .01)
       Xmin = np.zeros(delt.size)
