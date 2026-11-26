@@ -1,0 +1,7 @@
+ell2SFM
+=======
+
+.. automodule:: ell2SFM
+   :members:
+   :undoc-members:
+   :show-inheritance:
