@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resonantstate"
-version = "0.0.9"
+version = "0.1.0"
 authors = [
   {name = "Adrien Leleu", email = "adrien.leleu@unige.ch"},
   {name = "Yannick Eyholzer", email = "yannick.eyholzer@unige.ch"},
@@ -25,7 +25,8 @@ dependencies = [
   "numpy",
   "ipykernel",
   "pyarrow",
-  "astropy"
+  "astropy",
+  "ttvfast"
 ]
 
 [project.urls]
