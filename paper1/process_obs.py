@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from resonantstate.data_download  import get_metadata_observations, download_observations_samples
 #from resonantstate.analyse_samples import *
-from resonantstate.ell2SFM import *
+from resonantstate.SFMR import *
 from tqdm import tqdm
 
 
