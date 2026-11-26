@@ -265,13 +265,9 @@ When <span class="math notranslate nohighlight">\(\delta &gt;= 0\)</span>; then 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sample</strong> (<em>np.array</em><em> or </em><em>pandaframe</em>)</p></li>
-<li><p><strong>system</strong> (<em>samples</em><em> of </em><em>dynamical analysis</em><em> of </em><em>observed system</em><em> or </em><em>evolution</em><em> of </em><em>simulated</em>)</p></li>
-<li><p><strong>pair</strong> (<em>tuple</em><em> of </em><em>ints</em>)</p></li>
-<li><p><strong>(</strong><strong>i</strong></p></li>
-<li><p><strong>consider</strong> (<em>j</em><em>) </em><em>indices</em><em> of </em><em>the pair to</em>)</p></li>
-<li><p><strong>p</strong> (<em>int</em>)</p></li>
-<li><p><strong>p+1</strong> (<em>indice</em><em> of </em><em>the</em>)</p></li>
+<li><p><strong>sample</strong> (<em>np.array</em><em> or </em><em>pandaframe</em>) – samples of dynamical analysis of observed system or evolution of simulated system</p></li>
+<li><p><strong>pair</strong> (<em>tuple</em><em> of </em><em>ints</em>) – <span class="math notranslate nohighlight">\((i,j)\)</span> indices of the pair to consider</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – indice of the <span class="math notranslate nohighlight">\(p+1:p\)</span> resonance</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -302,10 +298,10 @@ RT = True if the pair is in the resonance-trapped domain, False otherwise</p>
 <dd class="field-even"><p><ul>
 <li><p><em>Dictionary with the following keys</em></p></li>
 <li><p><strong>delta</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\delta\)</span> parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)</p></li>
-<li><p><strong>DMMR</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\\xi_r^2-3(\delta+1)\)</span></p></li>
-<li><p><strong>er</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\\xi_r\)</span> parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities</p></li>
-<li><p><strong>Der</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\Delta \\xi_r\)</span> parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026)</p></li>
-<li><p><strong>es</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\\xi_s\)</span> secular eccentricities (see GRSW paper 1 - Leleu et al 2026)</p></li>
+<li><p><strong>DMMR</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\xi_r^2-3(\delta+1)\)</span></p></li>
+<li><p><strong>er</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\xi_r\)</span> parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called rescaled resonant eccentricities</p></li>
+<li><p><strong>Der</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\Delta \xi_r\)</span> parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026)</p></li>
+<li><p><strong>es</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\xi_s\)</span> rescaled secular eccentricities (see GRSW paper 1 - Leleu et al 2026)</p></li>
 <li><p><strong>RS</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) –</p>
 <dl class="simple">
 <dt>position of the sample in the second fundamental model:</dt><dd><p>2 : upper libration
@@ -316,6 +312,7 @@ RT = True if the pair is in the resonance-trapped domain, False otherwise</p>
 </dd>
 </dl>
 </li>
+<li><p><strong>RS</strong> (<em>np.array of bool of the lengh of the thinned samples</em>) – is the pair in the resonance-trapped area</p></li>
 <li><p><strong>p</strong> (<em>int</em>) – pair attributed to the p+1:p MMR</p></li>
 </ul>
 </p>

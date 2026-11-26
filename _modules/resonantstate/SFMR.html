@@ -92,7 +92,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Pr : float or array</span>
-<span class="sd">    period ratios    </span>
+<span class="sd">      period ratios    </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dist : float    </span>
@@ -602,11 +602,11 @@
 <span class="sd">      Parameters</span>
 <span class="sd">      ----------</span>
 <span class="sd">      sample : np.array or pandaframe</span>
-<span class="sd">      samples of dynamical analysis of observed system or evolution of simulated system</span>
+<span class="sd">            samples of dynamical analysis of observed system or evolution of simulated system</span>
 <span class="sd">      pair : tuple of ints</span>
-<span class="sd">      (i,j) indices of the pair to consider</span>
+<span class="sd">            :math:`(i,j)` indices of the pair to consider</span>
 <span class="sd">      p : int</span>
-<span class="sd">      indice of the p+1:p resonance</span>
+<span class="sd">            indice of the :math:`p+1:p` resonance</span>
 
 <span class="sd">      Returns</span>
 <span class="sd">      -------</span>
@@ -647,13 +647,13 @@
 <span class="sd">    delta : np.array of floats of the lengh of the thinned samples</span>
 <span class="sd">        :math:`\delta` parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)</span>
 <span class="sd">    DMMR : np.array of floats of the lengh of the thinned samples</span>
-<span class="sd">        :math:`\\xi_r^2-3(\delta+1)`</span>
+<span class="sd">        :math:`\xi_r^2-3(\delta+1)`</span>
 <span class="sd">    er : np.array of floats of the lengh of the thinned samples</span>
-<span class="sd">        :math:`\\xi_r` parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities</span>
+<span class="sd">        :math:`\xi_r` parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called rescaled resonant eccentricities</span>
 <span class="sd">    Der : np.array of floats of the lengh of the thinned samples</span>
-<span class="sd">        :math:`\Delta \\xi_r` parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) </span>
+<span class="sd">        :math:`\Delta \xi_r` parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) </span>
 <span class="sd">    es : np.array of floats of the lengh of the thinned samples</span>
-<span class="sd">        :math:`\\xi_s` secular eccentricities (see GRSW paper 1 - Leleu et al 2026) </span>
+<span class="sd">        :math:`\xi_s` rescaled secular eccentricities (see GRSW paper 1 - Leleu et al 2026) </span>
 <span class="sd">    RS : np.array of floats of the lengh of the thinned samples</span>
 <span class="sd">        position of the sample in the second fundamental model:</span>
 <span class="sd">            2 : upper libration</span>
@@ -661,8 +661,11 @@
 <span class="sd">            0 : upper circulation</span>
 <span class="sd">            -1 : lower circulation</span>
 <span class="sd">            -2 : lower libration</span>
+<span class="sd">    RS : np.array of bool of the lengh of the thinned samples</span>
+<span class="sd">        is the pair in the resonance-trapped area</span>
 <span class="sd">    p : int</span>
 <span class="sd">        pair attributed to the p+1:p MMR</span>
+
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
