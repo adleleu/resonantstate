@@ -1,5 +1,7 @@
 # ResonantState database
 
+**Please cite the authors of each analysis or simulation that you use in your papers, the bibtex for each entry will be in the dictionary when you download the data. Citing the papers that present the databases is appreciated as well.**
+
 This package contains basic functions that helps navigate the resonant state database, please check the notebooks in the papers folders to see how the package can be used.
 
 The resonant state database is split into two : 
