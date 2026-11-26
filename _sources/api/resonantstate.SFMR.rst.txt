@@ -1,0 +1,7 @@
+resonantstate.SFMR module
+=========================
+
+.. automodule:: resonantstate.SFMR
+   :members:
+   :show-inheritance:
+   :undoc-members:

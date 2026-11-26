@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.data_download module &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="resonantstate.ell_to_3P0R module" href="resonantstate.ell_to_3P0R.html" />
+    <link rel="prev" title="resonantstate.constants module" href="resonantstate.constants.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">resonantstate</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="resonantstate.html">resonantstate package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="resonantstate.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.SFMR.html">resonantstate.SFMR module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.constants.html">resonantstate.constants module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">resonantstate.data_download module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.ell_to_3P0R.html">resonantstate.ell_to_3P0R module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.quartic.html">resonantstate.quartic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.sample_conversion.html">resonantstate.sample_conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.simulations_resonance_analysis.html">resonantstate.simulations_resonance_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.table_entries_catalogs.html">resonantstate.table_entries_catalogs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.ttv.html">resonantstate.ttv module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">resonantstate</a></li>
+          <li class="breadcrumb-item"><a href="resonantstate.html">resonantstate package</a></li>
+      <li class="breadcrumb-item active">resonantstate.data_download module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/resonantstate.data_download.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-resonantstate.data_download">
+<span id="resonantstate-data-download-module"></span><h1>resonantstate.data_download module<a class="headerlink" href="#module-resonantstate.data_download" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.get_metadata_observations">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">get_metadata_observations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#get_metadata_observations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.get_metadata_observations" title="Link to this definition"></a></dt>
+<dd><p>This method retrieves the metadata table for the observations and returns it in a pandas dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The observations metadata table in a pandas dataframe</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_path</strong> (<em>Path</em><em> or </em><em>str</em><em> or </em><em>None</em>) – use a local version of the database if local_path is given, query DACE if not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.download_observations_samples">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">download_observations_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_destination</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#download_observations_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.download_observations_samples" title="Link to this definition"></a></dt>
+<dd><p>This method retrieves the samples for the systems in the given dataframe, and returns a dictionnary that contains informations about the samples and the samples themselves.</p>
+<p>If a download destination is given, it saves the samples and the coresponding metadata in the given directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> (<em>pd.DataFrame</em>) – The dataframe containing the metadata of the planets samples that we want to download</p></li>
+<li><p><strong>local_path</strong> (<em>Path</em><em> or </em><em>str</em><em> or </em><em>None</em>) – use a local version of the database if local_path is given, query DACE if not.</p></li>
+<li><p><strong>download_destination</strong> (<em>str</em><em> or </em><em>None</em>) – If given, save each sample and metadata in the given directory</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A list of dictionnaries with the samples informations and the samples themselves
+keys of the dictionnary are:</p>
+<ul class="simple">
+<li><p>samples_name:     the name of the samples (str)</p></li>
+<li><p>planets_list:     the list of planets in the sample (list of str)</p></li>
+<li><p>samples:          the samples themselves (pandas.DataFrame)</p></li>
+<li><p>readme:           the readme of the samples (str|None)</p></li>
+<li><p>additional_infos: the additional infos of the samples (str|None)</p></li>
+<li><p>author_name:      the name of the author of the samples (str)</p></li>
+<li><p>star_name:        the name of the star of the sampled system (str)</p></li>
+<li><p>analysis_id:      the analysis id of the samples (str)</p></li>
+<li><p>contact_email:    the email of the contact person for the sample (str)</p></li>
+<li><p>default:          the default value of the samples (str)</p></li>
+<li><p>robustness:       the robustness of the samples (str)</p></li>
+<li><p>initial_condition_date_bjd: the initial condition date of the samples (str)</p></li>
+<li><p>nb_planets:       the number of planets in the sample (int)</p></li>
+<li><p>gaia_id:          the gaia id of the sample (str)</p></li>
+<li><p>mass_priors:      the mass priors of the sample (str)</p></li>
+<li><p>eccentricity_priors:  the eccentricity priors of the sample (str)</p></li>
+<li><p>transit_definition:   the transit definition of the sample (str|None)</p></li>
+<li><p>methods:          the methods used to generate the sample (str)</p></li>
+<li><p>instruments:      the instruments used to generate the sample (str)</p></li>
+<li><p>bibtex:           the bibtex reference of the sample (str)</p></li>
+<li><p>code:             the code used to generate the sample (str)</p></li>
+<li><p>other_remarks:    the other remarks of the sample (str)</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.get_metadata_simulations">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">get_metadata_simulations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#get_metadata_simulations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.get_metadata_simulations" title="Link to this definition"></a></dt>
+<dd><p>This method retrieves the summary metadata table for the simulations and return it in a pandas dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The simulations metadata table in a pandas dataframe</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_path</strong> (<em>Path</em><em> or </em><em>str</em><em> or </em><em>None</em>) – use a local version of the database if local_path is given, query DACE if not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.download_simulations_run_table">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">download_simulations_run_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#download_simulations_run_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.download_simulations_run_table" title="Link to this definition"></a></dt>
+<dd><p>This method retrieves the runs tables from the selected line of the summary metadata datafame, and returns another dataframe with more details about the chosen run. For now, only allows to retrieve a single run table at a time.
+:param dataframe: The dataframe containing the metadata of the simulation run that we want to download
+:type dataframe: pd.DataFrame
+:param local_path: use a local version of the database if local_path is given, query DACE if not.
+:type local_path: Path or str or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dataframe with the detailed metadata of the run</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.download_simulations">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">download_simulations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_destination</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#download_simulations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.download_simulations" title="Link to this definition"></a></dt>
+<dd><p>This method retrieves the simulations present in the given dataframe, and returns a list of dictionnary that contains information about the evolutions and the evolutions themselves. If a download destination is given, it saves the evolutions in the given directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> (<em>pd.DataFrame</em>) – The dataframe containing the metadata of the simulations that we want to download.</p></li>
+<li><p><strong>local_path</strong> (<em>Path</em><em> or </em><em>str</em><em> or </em><em>None</em>) – use a local version of the database if local_path is given, query DACE if not.</p></li>
+<li><p><strong>download_destination</strong> (<em>str</em><em> or </em><em>None</em>) – If given, save the simulations in the given directory with their corresponding metadatas.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A list of dictionnaries with the simulations informations and the simulations themselves
+keys in of dictionnary are:</p>
+<ul class="simple">
+<li><p>simulation_name:  the name of the simulation (str)</p></li>
+<li><p>additional_infos: the additional infos of the simulation (dict)</p></li>
+<li><p>simulation:       the simulation itself (pandas.DataFrame)</p></li>
+<li><p>readme:           the readme of the simulation (str|None)</p></li>
+<li><p>contact_email:    the email of the contact person for the simulation (str)</p></li>
+<li><p>author_name:      the name of the author of the simulation (str)</p></li>
+<li><p>planets_list:     the list of planets in the simulation (list of str)</p></li>
+<li><p>star_name:        the name of the star of the simulation (str)</p></li>
+<li><p>run_id:          the run id of the simulation (str)</p></li>
+<li><p>simulation_id:    the simulation id of the simulation (str)</p></li>
+<li><p>run_name:         the run name of the simulation (str)</p></li>
+<li><p>simulation_type:  the type of the simulation (str)</p></li>
+<li><p>physics_implemented: the physics implemented in the simulation (str)</p></li>
+<li><p>nb_planets:       the number of planets in the simulation (int)</p></li>
+<li><p>code_used:        the code used for the simulation (str)</p></li>
+<li><p>bibtex:           the bibtex reference of the simulation (str)</p></li>
+<li><p>other_remarks:    the other remarks of the simulation (str)</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.fetch_bibtex">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">fetch_bibtex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bibcode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#fetch_bibtex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.fetch_bibtex" title="Link to this definition"></a></dt>
+<dd><p>fetch the citation export from ADS for a given bibcode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bibcode</strong> (<em>str</em>) – bibcode of the data used</p></li>
+<li><p><strong>api_token</strong> (<em>str</em>) – api token, This can be found on your ADS account under : <a class="reference external" href="https://ui.adsabs.harvard.edu/user/settings/token">https://ui.adsabs.harvard.edu/user/settings/token</a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ADS citation export</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – _description_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.data_download.create_bibfile">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.data_download.</span></span><span class="sig-name descname"><span class="pre">create_bibfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Tbibtext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/data_download.html#create_bibfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.data_download.create_bibfile" title="Link to this definition"></a></dt>
+<dd><p>create a .bib file to export citations in latex</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Tbibtext</strong> (<em>list</em><em> of </em><em>str</em>) – list or array of Bibcodes or list of dictionaries of loaded analysis</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – path where to create the .bib file</p></li>
+<li><p><strong>api_token</strong> (<em>str</em>) – api token, This can be found on your ADS account under : <a class="reference external" href="https://ui.adsabs.harvard.edu/user/settings/token">https://ui.adsabs.harvard.edu/user/settings/token</a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="resonantstate.constants.html" class="btn btn-neutral float-left" title="resonantstate.constants module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="resonantstate.ell_to_3P0R.html" class="btn btn-neutral float-right" title="resonantstate.ell_to_3P0R module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

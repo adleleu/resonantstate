@@ -1,0 +1,7 @@
+resonantstate.ell\_to\_3P0R module
+==================================
+
+.. automodule:: resonantstate.ell_to_3P0R
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.ttv &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">resonantstate</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">resonantstate.ttv</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for resonantstate.ttv</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">ttvfast</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">resonantstate.constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+
+<div class="viewcode-block" id="forward_modeling">
+<a class="viewcode-back" href="../../api/resonantstate.ttv.html#resonantstate.ttv.forward_modeling">[docs]</a>
+<span class="k">def</span> <span class="nf">forward_modeling</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span><span class="n">nb_planets</span><span class="p">,</span><span class="n">t_ini</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span><span class="n">input_flag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">rv_times</span><span class="o">=</span><span class="p">[]):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    input_flag: input coordinate system (0, 1 or 2)</span>
+
+<span class="sd">    The `input_flag` argument corresponds to:</span>
+<span class="sd">        0 = Jacobi</span>
+<span class="sd">        1 = astrocentric elements</span>
+<span class="sd">        2 = astrocentric cartesian</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">planets</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_planets</span><span class="p">):</span>
+        <span class="n">Omega</span><span class="o">=</span><span class="n">sample</span><span class="p">[</span><span class="mi">6</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">]</span>
+        <span class="n">long_peri</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">4</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">],</span><span class="n">sample</span><span class="p">[</span><span class="mi">3</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">])</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span>
+        <span class="n">mean_anomaly</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">]</span><span class="o">-</span><span class="n">long_peri</span><span class="p">,</span><span class="mi">360</span><span class="p">)</span>
+        <span class="n">eccentricity</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">3</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">sample</span><span class="p">[</span><span class="mi">4</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> 
+
+        <span class="n">planets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ttvfast</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Planet</span><span class="p">(</span>
+                        <span class="n">mass</span><span class="o">=</span><span class="n">sample</span><span class="p">[</span><span class="mi">7</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">]</span><span class="o">*</span><span class="n">sample</span><span class="p">[</span><span class="mi">8</span><span class="o">*</span><span class="n">nb_planets</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># M_sun</span>
+                        <span class="n">period</span><span class="o">=</span><span class="n">sample</span><span class="p">[</span><span class="mi">2</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">],</span>     <span class="c1"># days</span>
+                        <span class="n">eccentricity</span><span class="o">=</span><span class="n">eccentricity</span><span class="p">,</span>
+                        <span class="n">inclination</span><span class="o">=</span><span class="n">sample</span><span class="p">[</span><span class="mi">5</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">],</span>         <span class="c1"># degrees</span>
+                        <span class="n">longnode</span><span class="o">=</span><span class="n">Omega</span><span class="p">,</span>           <span class="c1"># degrees</span>
+                        <span class="n">argument</span><span class="o">=</span><span class="n">long_peri</span><span class="o">-</span><span class="n">Omega</span><span class="p">,</span>            <span class="c1"># degrees</span>
+                        <span class="n">mean_anomaly</span><span class="o">=</span><span class="n">mean_anomaly</span><span class="p">,</span>      <span class="c1"># degrees</span>
+                        <span class="p">)</span>
+                <span class="p">)</span>
+
+   
+    <span class="n">stellar_mass</span><span class="o">=</span><span class="n">sample</span><span class="p">[</span><span class="mi">8</span><span class="o">*</span><span class="n">nb_planets</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv_times</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">ttvfast</span><span class="o">.</span><span class="n">ttvfast</span><span class="p">(</span><span class="n">planets</span><span class="p">,</span><span class="n">stellar_mass</span><span class="p">,</span><span class="n">t_ini</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span><span class="n">input_flag</span><span class="o">=</span><span class="n">input_flag</span><span class="p">,</span><span class="n">rv_times</span><span class="o">=</span><span class="n">rv_times</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">ttvfast</span><span class="o">.</span><span class="n">ttvfast</span><span class="p">(</span><span class="n">planets</span><span class="p">,</span><span class="n">stellar_mass</span><span class="p">,</span><span class="n">t_ini</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span><span class="n">input_flag</span><span class="o">=</span><span class="n">input_flag</span><span class="p">)</span>
+
+    <span class="n">resu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">])</span>
+    
+    <span class="n">Id_rel</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">resu</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">&gt;-</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Id_planetes</span><span class="o">=</span><span class="n">resu</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">Id_rel</span><span class="p">]</span>
+    <span class="n">tt</span><span class="o">=</span><span class="n">resu</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">Id_rel</span><span class="p">]</span>
+
+    <span class="n">transits</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_planets</span><span class="p">):</span>
+        <span class="n">transits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="n">Id_planetes</span><span class="o">==</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv_times</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">transits</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;rv&#39;</span><span class="p">])</span><span class="o">*</span><span class="n">AUpdaytomps</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">transits</span></div>
+
+
+
+<div class="viewcode-block" id="fit_lin">
+<a class="viewcode-back" href="../../api/resonantstate.ttv.html#resonantstate.ttv.fit_lin">[docs]</a>
+<span class="k">def</span> <span class="nf">fit_lin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">T_vect</span><span class="p">,</span><span class="n">sig_y</span><span class="p">):</span>
+    <span class="c1">#linear fit of y by the vectors,  sig_y is the error on y</span>
+    <span class="n">nb_col</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">T_vect</span><span class="p">)</span>
+    <span class="n">nb_line</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">Mt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_col</span><span class="p">,</span><span class="n">nb_line</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">T_vect</span><span class="p">)):</span>
+        <span class="n">Mt</span><span class="p">[</span><span class="n">k</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">T_vect</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">M</span><span class="o">=</span> <span class="n">Mt</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">W</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">sig_y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">Mresh</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_line</span><span class="p">,</span><span class="n">nb_col</span><span class="p">))</span>
+    <span class="n">WM</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span><span class="n">Mresh</span><span class="p">)</span>
+    <span class="n">MtWM</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Mt</span><span class="p">,</span><span class="n">WM</span><span class="p">)</span>
+    <span class="n">MtWMm1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">MtWM</span><span class="p">)</span>
+    <span class="n">Wy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">MtWy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Mt</span><span class="p">,</span><span class="n">Wy</span><span class="p">)</span>
+    <span class="n">theta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">MtWMm1</span><span class="p">,</span><span class="n">MtWy</span><span class="p">)</span>
+    <span class="n">signal</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">sum_weight</span><span class="o">=</span><span class="nb">sum</span><span class="p">((</span><span class="n">signal</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">sig_y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="n">sum_weight</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">signal</span></div>
+
+
+
+<div class="viewcode-block" id="fit_trend">
+<a class="viewcode-back" href="../../api/resonantstate.ttv.html#resonantstate.ttv.fit_trend">[docs]</a>
+<span class="k">def</span> <span class="nf">fit_trend</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span><span class="n">TTV</span><span class="p">,</span><span class="n">VW</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">fit_lin</span><span class="p">(</span><span class="n">TTV</span><span class="p">,[</span><span class="mf">1.0</span><span class="o">+</span><span class="n">epoch</span><span class="o">*</span><span class="mi">0</span><span class="p">,</span><span class="n">epoch</span><span class="p">],</span><span class="n">VW</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_TTV_detrend">
+<a class="viewcode-back" href="../../api/resonantstate.ttv.html#resonantstate.ttv.get_TTV_detrend">[docs]</a>
+<span class="k">def</span> <span class="nf">get_TTV_detrend</span><span class="p">(</span><span class="n">Vt0</span><span class="p">,</span><span class="n">per</span><span class="p">):</span>
+    <span class="n">TTV</span><span class="o">=</span><span class="p">(</span><span class="n">Vt0</span><span class="p">)</span><span class="o">%</span><span class="n">per</span>
+    <span class="n">TTV</span><span class="o">=</span><span class="n">TTV</span><span class="o">-</span><span class="n">TTV</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">TTV</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="p">(</span><span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="n">per</span><span class="o">/</span><span class="mi">2</span><span class="p">)):</span>
+            <span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">=</span><span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">per</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="p">(</span><span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">-</span><span class="n">per</span><span class="o">/</span><span class="mi">2</span><span class="p">)):</span>
+            <span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">=</span><span class="n">TTV</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="n">per</span>
+    <span class="n">sum_weight</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">signal</span><span class="o">=</span><span class="n">fit_trend</span><span class="p">(</span><span class="n">Vt0</span><span class="p">,</span><span class="n">TTV</span><span class="p">,</span><span class="n">TTV</span><span class="o">*</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">48</span><span class="p">)</span>
+    <span class="n">TTV</span><span class="o">=</span><span class="n">TTV</span><span class="o">-</span><span class="n">signal</span>
+    <span class="k">return</span> <span class="n">TTV</span></div>
+
+
+
+
+<div class="viewcode-block" id="TTV_amplitudes">
+<a class="viewcode-back" href="../../api/resonantstate.ttv.html#resonantstate.ttv.TTV_amplitudes">[docs]</a>
+<span class="k">def</span> <span class="nf">TTV_amplitudes</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span><span class="n">nb_planets</span><span class="p">,</span><span class="n">t_ini</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span><span class="n">input_flag</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">transits</span><span class="o">=</span><span class="n">forward_modeling</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span><span class="n">nb_planets</span><span class="p">,</span><span class="n">t_ini</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span><span class="n">input_flag</span><span class="o">=</span><span class="n">input_flag</span><span class="p">)</span>
+    <span class="n">amplitudes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_planets</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_planets</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">transits</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">TTV</span><span class="o">=</span><span class="n">get_TTV_detrend</span><span class="p">(</span><span class="n">transits</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="n">sample</span><span class="p">[</span><span class="mi">2</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="mi">8</span><span class="p">])</span>
+            <span class="n">amplitudes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="n">TTV</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">-</span><span class="n">TTV</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">amplitudes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">amplitudes</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

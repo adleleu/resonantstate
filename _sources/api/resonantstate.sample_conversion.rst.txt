@@ -1,0 +1,7 @@
+resonantstate.sample\_conversion module
+=======================================
+
+.. automodule:: resonantstate.sample_conversion
+   :members:
+   :show-inheritance:
+   :undoc-members:

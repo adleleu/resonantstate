@@ -1,0 +1,7 @@
+resonantstate.simulations\_resonance\_analysis module
+=====================================================
+
+.. automodule:: resonantstate.simulations_resonance_analysis
+   :members:
+   :show-inheritance:
+   :undoc-members:

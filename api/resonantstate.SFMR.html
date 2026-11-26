@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.SFMR module &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="resonantstate.constants module" href="resonantstate.constants.html" />
+    <link rel="prev" title="resonantstate package" href="resonantstate.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">resonantstate</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="resonantstate.html">resonantstate package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="resonantstate.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">resonantstate.SFMR module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.constants.html">resonantstate.constants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.data_download.html">resonantstate.data_download module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.ell_to_3P0R.html">resonantstate.ell_to_3P0R module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.quartic.html">resonantstate.quartic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.sample_conversion.html">resonantstate.sample_conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.simulations_resonance_analysis.html">resonantstate.simulations_resonance_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.table_entries_catalogs.html">resonantstate.table_entries_catalogs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.ttv.html">resonantstate.ttv module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">resonantstate</a></li>
+          <li class="breadcrumb-item"><a href="resonantstate.html">resonantstate package</a></li>
+      <li class="breadcrumb-item active">resonantstate.SFMR module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/resonantstate.SFMR.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-resonantstate.SFMR">
+<span id="resonantstate-sfmr-module"></span><h1>resonantstate.SFMR module<a class="headerlink" href="#module-resonantstate.SFMR" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.dist_Dpp1p">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">dist_Dpp1p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Pr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#dist_Dpp1p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.dist_Dpp1p" title="Link to this definition"></a></dt>
+<dd><p>Compute the distance to the closest first-order resonance, and verify if it lands in the symetrical domain around that resonance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Pr</strong> (<em>float</em><em> or </em><em>array</em>) – period ratios</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>dist</strong> (<em>float</em>)</p></li>
+<li><p><strong>p</strong> (<em>integer</em>)</p></li>
+<li><p><strong>sym</strong> (<em>boolean</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.ell2SFMR">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">ell2SFMR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lbd1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lbd2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#ell2SFMR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.ell2SFMR" title="Link to this definition"></a></dt>
+<dd><p>Converts from elliptic elements to the coordinates <span class="math notranslate nohighlight">\(\left(X, Y, X_2, Y_2, \delta\right)\)</span> of the Second Fondamental Model of resonance (SFM).
+<span class="math notranslate nohighlight">\(\left(X, Y\right)\)</span> corresponds to the unique degree of freedom of the SFM and <span class="math notranslate nohighlight">\(\left(X_2, Y_2\right)\)</span> to the first integral. <span class="math notranslate nohighlight">\(\delta\)</span> is the unique parameter of the SFM
+The SFM is described byt the Hamiltonian <span class="math notranslate nohighlight">\(\mathcal{H}(\Sigma,\sigma)=3(\delta+1)\Sigma-\Sigma^2+2\sqrt{2\Sigma}\cos\sigma\)</span> where <span class="math notranslate nohighlight">\(X+iY=\sqrt{2\Sigma}e^{i\sigma}\)</span>.</p>
+<p>Author : Jeremy Couturier. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<p>Update 02/10/2026 By A. Leleu to refect the changes in the paper (removed the normalisation by Gamma, and chose Deltagamma=0, rename the variables)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>int</em>) – Integer such that the two planets are in resonance <span class="math notranslate nohighlight">\(p\)</span> : <span class="math notranslate nohighlight">\(p+1\)</span>.</p></li>
+<li><p><strong>e1</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The eccentricity <span class="math notranslate nohighlight">\(e_1\)</span> of the inner planet.</p></li>
+<li><p><strong>e2</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The eccentricity <span class="math notranslate nohighlight">\(e_2\)</span> of the outer planet.</p></li>
+<li><p><strong>vp1</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The longitude of periapsis <span class="math notranslate nohighlight">\(\varpi_1\)</span> of the inner planet, in radians.</p></li>
+<li><p><strong>vp2</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The longitude of periapsis <span class="math notranslate nohighlight">\(\varpi_2\)</span> of the outer planet, in radians.</p></li>
+<li><p><strong>m1</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The mass <span class="math notranslate nohighlight">\(m_1\)</span> of the inner planet in units of the stellar mass.</p></li>
+<li><p><strong>m2</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The mass <span class="math notranslate nohighlight">\(m_2\)</span> of the outer planet in units of the stellar mass.</p></li>
+<li><p><strong>P1</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The period <span class="math notranslate nohighlight">\(2\pi/n_1\)</span> of the inner planet in any units. Such that <span class="math notranslate nohighlight">\(\mathcal{G}\left(m_0+m_1\right)=n_1^2a_1^3\)</span>.</p></li>
+<li><p><strong>P2</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The period <span class="math notranslate nohighlight">\(2\pi/n_2\)</span> of the outer planet in the same units as P1. Such that <span class="math notranslate nohighlight">\(\mathcal{G}\left(m_0+m_2\right)=n_2^2a_2^3\)</span>.</p></li>
+<li><p><strong>lbd1</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The mean longitude <span class="math notranslate nohighlight">\(\lambda_1\)</span> of the inner planet, in radians.</p></li>
+<li><p><strong>lbd2</strong> (<em>float</em><em> or </em><em>1-dimensional numpy array</em><em> of </em><em>floats</em>) – The mean longitude <span class="math notranslate nohighlight">\(\lambda_2\)</span> of the outer planet, in radians.</p></li>
+<li><p><strong>return_all</strong> (<em>bool</em>) – if return_all==False, the function returns <span class="math notranslate nohighlight">\(\left[X, Y, X_2, Y_2, \delta\right]\)</span>, if return_all==True it return a dictionary with additional variables instead.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>l</strong> – The list <span class="math notranslate nohighlight">\(\left[X, Y, X_2, Y_2, \delta\right]\)</span> of elements of the Second Fondamental Model of Resonance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.samples2erjesj">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">samples2erjesj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#samples2erjesj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.samples2erjesj" title="Link to this definition"></a></dt>
+<dd><p>compute the <span class="math notranslate nohighlight">\(k=e\cos(\varpi)\)</span> and <span class="math notranslate nohighlight">\(h=e\sin(\varpi)\)</span> components of the resonant and secular eccentricities of a pair of planets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>np.array</em><em> or </em><em>pandaframe</em>) – samples of dynamical analysis of observed system or evolution of simulated system</p></li>
+<li><p><strong>pair</strong> (<em>tuple</em><em> of </em><em>ints</em>) – (i,j) indices of the pair to consider</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – p+1:p resonance</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>kr1,hr1,kr2,hr2,ks1,hs1,ks2,hs2</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of np arrays of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.X1X2">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">X1X2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#X1X2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.X1X2" title="Link to this definition"></a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\(X_1\)</span> and <span class="math notranslate nohighlight">\(X_2\)</span> such that <span class="math notranslate nohighlight">\((X_1, 0)\)</span> and <span class="math notranslate nohighlight">\((X2, 0)\)</span> are on the same level line as <span class="math notranslate nohighlight">\((X, Y)\)</span> for a given value of <span class="math notranslate nohighlight">\(\delta\)</span> in the SMFR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>float</em>) – <span class="math notranslate nohighlight">\(\sqrt{2R}\cos r\)</span></p></li>
+<li><p><strong>Y</strong> (<em>float</em>) – <span class="math notranslate nohighlight">\(\sqrt{2R}\sin r\)</span></p></li>
+<li><p><strong>delta</strong> (<em>float</em>) – <span class="math notranslate nohighlight">\(\delta\)</span> parameter of the SFMR</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(X_1\)</span> (float), <span class="math notranslate nohighlight">\(X_2\)</span> (float)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.SFMR2useful">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">SFMR2useful</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#SFMR2useful"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.SFMR2useful" title="Link to this definition"></a></dt>
+<dd><p>Returns [r, R, s, S, x1, x2] where <span class="math notranslate nohighlight">\(X+iY = \sqrt{2R}e^{ir}\)</span> and <span class="math notranslate nohighlight">\(X_2+iY_2 = \sqrt{2S}e^{is}\)</span>
+<span class="math notranslate nohighlight">\(x_1\)</span> and <span class="math notranslate nohighlight">\(x_2\)</span> are such that <span class="math notranslate nohighlight">\((x1, 0)\)</span> and <span class="math notranslate nohighlight">\((x2, 0)\)</span> are on the same level line as <span class="math notranslate nohighlight">\((X, Y)\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em>) – Cartesian coordinate <span class="math notranslate nohighlight">\(\sqrt{2R}\cos r\)</span></p></li>
+<li><p><strong>Y</strong> (<em>np.array</em>) – Cartesian coordinate <span class="math notranslate nohighlight">\(\sqrt{2R}\sin r\)</span></p></li>
+<li><p><strong>X2</strong> (<em>np.array</em>) – Cartesian coordinate <span class="math notranslate nohighlight">\(\sqrt{2S}\cos s\)</span></p></li>
+<li><p><strong>Y2</strong> (<em>np.array</em>) – Cartesian coordinate <span class="math notranslate nohighlight">\(\sqrt{2S}\sin s\)</span></p></li>
+<li><p><strong>delta</strong> (<em>np.array</em>) – paramter of the SFMR</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>[r, R, s, S, x1, x2, RS, RT]
+RS = 1 if formally resonant, 2 for upper circulation, 0 for upper libration, -1 for lower circulation and -2 for lower libration
+RT = True if the pair is in the resonance-trapped domain, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of np.arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.topology">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">topology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#topology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.topology" title="Link to this definition"></a></dt>
+<dd><p>Returns <span class="math notranslate nohighlight">\([Xmin, Xmax, Xres, Xint, Xhyp]\)</span> where <span class="math notranslate nohighlight">\(Xmin, Xmax\)</span> are the position of the separatrix, the <span class="math notranslate nohighlight">\(Xres\)</span> the position of the primary fixed point,
+<span class="math notranslate nohighlight">\(Xint\)</span> the position of the secondary fixed point, and <span class="math notranslate nohighlight">\(Xhyp\)</span> the position of the hyperbolic fixed point, all in the <span class="math notranslate nohighlight">\(sin r=0\)</span> plane.
+If <span class="math notranslate nohighlight">\(\delta &lt; 0\)</span>, returns <span class="math notranslate nohighlight">\([0, 0, Xres, 0, 0]\)</span>
+When <span class="math notranslate nohighlight">\(\delta &gt;= 0\)</span>; then <span class="math notranslate nohighlight">\(Xhyp &lt;= Xint &lt;= Xmin &lt;= Xres &lt;= Xmax\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>delta</strong> (<em>float</em>) – paramter of the SFMR</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>[xmin, xmax, xres, xint, xhyp]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.samples2SFMR">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">samples2SFMR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#samples2SFMR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.samples2SFMR" title="Link to this definition"></a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>np.array</em><em> or </em><em>pandaframe</em>) – samples of dynamical analysis of observed system or evolution of simulated system</p></li>
+<li><p><strong>pair</strong> (<em>tuple</em><em> of </em><em>ints</em>) – (i,j) indices of the pair to consider</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – indice of the p+1:p resonance</p></li>
+<li><p><strong>return_all</strong> (<em>bool</em><em>, </em><em>optional</em>) – if return_all==False, the function returns <span class="math notranslate nohighlight">\(\left[X, Y, X_2, Y_2, \delta\right]\)</span>, if return_all==True it return a dictionary with additional variables instead.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>l</strong> – The list <span class="math notranslate nohighlight">\(\left[X, Y, X_2, Y_2, \delta\right]\)</span> of elements of the Second Fondamental Model of Resonance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.samples2usefull">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">samples2usefull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#samples2usefull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.samples2usefull" title="Link to this definition"></a></dt>
+<dd><p>Returns [r, R, s, S, x1, x2] where <span class="math notranslate nohighlight">\(X+iY = \sqrt{2R}e^{ir}\)</span> and <span class="math notranslate nohighlight">\(X_2+iY_2 = \sqrt{2S}e^{is}\)</span>
+<span class="math notranslate nohighlight">\(x_1\)</span> and <span class="math notranslate nohighlight">\(x_2\)</span> are such that <span class="math notranslate nohighlight">\((x1, 0)\)</span> and <span class="math notranslate nohighlight">\((x2, 0)\)</span> are on the same level line as <span class="math notranslate nohighlight">\((X, Y)\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>np.array</em><em> or </em><em>pandaframe</em>)</p></li>
+<li><p><strong>system</strong> (<em>samples</em><em> of </em><em>dynamical analysis</em><em> of </em><em>observed system</em><em> or </em><em>evolution</em><em> of </em><em>simulated</em>)</p></li>
+<li><p><strong>pair</strong> (<em>tuple</em><em> of </em><em>ints</em>)</p></li>
+<li><p><strong>(</strong><strong>i</strong></p></li>
+<li><p><strong>consider</strong> (<em>j</em><em>) </em><em>indices</em><em> of </em><em>the pair to</em>)</p></li>
+<li><p><strong>p</strong> (<em>int</em>)</p></li>
+<li><p><strong>p+1</strong> (<em>indice</em><em> of </em><em>the</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>[r, R, s, S, x1, x2, RS, RT]
+RS = 1 if formally resonant, 2 for upper circulation, 0 for upper libration, -1 for lower circulation and -2 for lower libration
+RT = True if the pair is in the resonance-trapped domain, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of np.arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.get_SFMR_quantities">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">get_SFMR_quantities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#get_SFMR_quantities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.get_SFMR_quantities" title="Link to this definition"></a></dt>
+<dd><p>call functions of the package to extract the quantities used in the first paper : delta, DMMR, er, Der, es, RS, RT, p</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>samples</strong> (<em>pandas dataframe</em>) – posterior of a dynamical analysis</p></li>
+<li><p><strong>pair</strong> (<em>tuple</em><em> of </em><em>ints</em>) – identifiant of the pair to consider</p></li>
+<li><p><strong>p</strong> (<em>int</em><em>, </em><em>optional</em>) – p+1:p first order MMR to consider</p></li>
+<li><p><strong>sampling</strong> (<em>int</em><em>, </em><em>optional</em>) – thinning of the samples</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul>
+<li><p><em>Dictionary with the following keys</em></p></li>
+<li><p><strong>delta</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\delta\)</span> parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)</p></li>
+<li><p><strong>DMMR</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\\xi_r^2-3(\delta+1)\)</span></p></li>
+<li><p><strong>er</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\\xi_r\)</span> parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities</p></li>
+<li><p><strong>Der</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\Delta \\xi_r\)</span> parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026)</p></li>
+<li><p><strong>es</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) – <span class="math notranslate nohighlight">\(\\xi_s\)</span> secular eccentricities (see GRSW paper 1 - Leleu et al 2026)</p></li>
+<li><p><strong>RS</strong> (<em>np.array of floats of the lengh of the thinned samples</em>) –</p>
+<dl class="simple">
+<dt>position of the sample in the second fundamental model:</dt><dd><p>2 : upper libration
+1 : formally resonant
+0 : upper circulation
+-1 : lower circulation
+-2 : lower libration</p>
+</dd>
+</dl>
+</li>
+<li><p><strong>p</strong> (<em>int</em>) – pair attributed to the p+1:p MMR</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.plot_topology">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">plot_topology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#plot_topology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.plot_topology" title="Link to this definition"></a></dt>
+<dd><p>Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model of Resonance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax1</strong> (<em>ax</em>) – ax of the figure</p></li>
+<li><p><strong>delta_lim</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>optional</em>) – (:math: <cite>delta_{min},delta_{max}</cite>) boundaries of the figure :math: <cite>delta</cite>, by default None</p></li>
+<li><p><strong>X_lim</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>optional</em>) – (:math: <cite>\xi_r_{min},xi_r_{max}</cite>) boundaries of the figure :math: <cite>\xi_r</cite>, by default None</p></li>
+<li><p><strong>linewidth</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 4</p></li>
+<li><p><strong>alpha</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 1</p></li>
+<li><p><strong>grid</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, by default False</p></li>
+<li><p><strong>dark</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, by default False</p></li>
+<li><p><strong>alpha_fill</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_, by default 0.1</p></li>
+<li><p><strong>legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, by default True</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.plot_topology_DMMR">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">plot_topology_DMMR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DMMR_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonance_trapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#plot_topology_DMMR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.plot_topology_DMMR" title="Link to this definition"></a></dt>
+<dd><p>Plots the topology of the phase space (separatrices and fixed points) of the Second Fundamental Model of Resonance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax1</strong> (<em>ax</em>) – ax of the figure</p></li>
+<li><p><strong>DMMR_lim</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>optional</em>) – (<span class="math notranslate nohighlight">\(\Delta_{MMR,min},\Delta_{MMR,max}\)</span>) boundaries of the figure for the x axis <span class="math notranslate nohighlight">\(\Delta_{MMR}\)</span>, by default None</p></li>
+<li><p><strong>X_lim</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>optional</em>) – (<span class="math notranslate nohighlight">\(\xi_{r,min},\xi_{r,max}\)</span>) boundaries of the figure for the y axis <span class="math notranslate nohighlight">\(\xi_r\)</span>, by default None</p></li>
+<li><p><strong>linewidth</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 4</p></li>
+<li><p><strong>alpha</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 1</p></li>
+<li><p><strong>grid</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, by default False</p></li>
+<li><p><strong>dark</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, by default False</p></li>
+<li><p><strong>alpha_fill</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_, by default 0.1</p></li>
+<li><p><strong>legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, by default True</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.plot_samples_SFMR_pair">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">plot_samples_SFMR_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markersize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'o'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_DMMR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#plot_samples_SFMR_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.plot_samples_SFMR_pair" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.SFMR.plot_samples_SFMR">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.SFMR.</span></span><span class="sig-name descname"><span class="pre">plot_samples_SFMR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_indexes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markersize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'o'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_DMMR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/SFMR.html#plot_samples_SFMR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.SFMR.plot_samples_SFMR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="resonantstate.html" class="btn btn-neutral float-left" title="resonantstate package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="resonantstate.constants.html" class="btn btn-neutral float-right" title="resonantstate.constants module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

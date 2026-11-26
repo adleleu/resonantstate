@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.table_entries_catalogs &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">resonantstate</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">resonantstate.table_entries_catalogs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for resonantstate.table_entries_catalogs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="n">MISSING_VALUE</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">DEFAULT_VALUE</span> <span class="o">=</span> <span class="s2">&quot;DEFAULT_VALUE&quot;</span>
+
+<div class="viewcode-block" id="URLS">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.URLS">[docs]</a>
+<span class="k">class</span> <span class="nc">URLS</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">OBSERVATIONS_METADATA_TABLE</span>         <span class="o">=</span> <span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state/observations/tables/metadata_table.parquet&quot;</span>
+    <span class="n">SIMULATIONS_METADATA_TABLE</span>          <span class="o">=</span> <span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state/simulations/tables/metadata_table.parquet&quot;</span></div>
+
+    
+
+<div class="viewcode-block" id="ObservationsSamplesDictionnary">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.ObservationsSamplesDictionnary">[docs]</a>
+<span class="k">class</span> <span class="nc">ObservationsSamplesDictionnary</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SAMPLE_NAME</span>         <span class="o">=</span> <span class="s2">&quot;samples_name&quot;</span>  
+    <span class="n">SAMPLES</span>             <span class="o">=</span> <span class="s2">&quot;samples&quot;</span>
+    <span class="n">ADDITIONAL_INFO</span>     <span class="o">=</span> <span class="s2">&quot;additional_info&quot;</span>
+    <span class="n">README</span>              <span class="o">=</span> <span class="s2">&quot;readme&quot;</span>
+    <span class="n">PLANETS_LIST</span>        <span class="o">=</span> <span class="s2">&quot;planets_list&quot;</span>
+    <span class="n">CONTACT_EMAIL</span>       <span class="o">=</span> <span class="s2">&quot;contact_email&quot;</span></div>
+
+   
+
+<div class="viewcode-block" id="SimulationsDictionnary">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.SimulationsDictionnary">[docs]</a>
+<span class="k">class</span> <span class="nc">SimulationsDictionnary</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SIMULATION_NAME</span>     <span class="o">=</span> <span class="s2">&quot;simulation_name&quot;</span>  
+    <span class="n">SIMULATION</span>          <span class="o">=</span> <span class="s2">&quot;simulation&quot;</span>
+    <span class="n">ADDITIONAL_INFO</span>     <span class="o">=</span> <span class="s2">&quot;additional_info&quot;</span>
+    <span class="n">README</span>              <span class="o">=</span> <span class="s2">&quot;readme&quot;</span>
+    <span class="n">PLANETS_LIST</span>        <span class="o">=</span> <span class="s2">&quot;planets_list&quot;</span>
+    <span class="n">CONTACT_EMAIL</span>       <span class="o">=</span> <span class="s2">&quot;contact_email&quot;</span></div>
+
+
+    
+    
+ 
+
+<span class="c1"># Name of the column for the metadata table created from the author metadata file</span>
+<div class="viewcode-block" id="MetaDataTableEntriesObservations">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.MetaDataTableEntriesObservations">[docs]</a>
+<span class="k">class</span> <span class="nc">MetaDataTableEntriesObservations</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    
+    <span class="c1">############################### common for both activities ##############</span>
+    <span class="n">PLANET_NAME</span>                     <span class="o">=</span> <span class="s2">&quot;planet_name&quot;</span>                         <span class="c1"># TOI-178 c</span>
+    <span class="n">STAR_NAME</span>                       <span class="o">=</span> <span class="s2">&quot;star_name&quot;</span>                           <span class="c1"># TOI-178</span>
+    <span class="n">ANALYSIS_ID</span>                     <span class="o">=</span> <span class="s2">&quot;analysis_id&quot;</span>                         <span class="c1"># 0,1,2,..</span>
+    <span class="n">CONTACT_EMAIL</span>                   <span class="o">=</span> <span class="s2">&quot;contact_email&quot;</span>                       <span class="c1"># adrien.leleu@unige.ch</span>
+    <span class="n">AUTHOR_NAME</span>                     <span class="o">=</span> <span class="s2">&quot;author_name&quot;</span>                         
+    <span class="n">DEFAULT</span>                         <span class="o">=</span> <span class="s2">&quot;default&quot;</span>                             <span class="c1"># 0 or 1 (int)</span>
+    <span class="n">ROBUSTNESS</span>                      <span class="o">=</span> <span class="s2">&quot;robustness&quot;</span>                          <span class="c1"># between -1, 0 and 1</span>
+    <span class="n">PERIOD_DAYS</span>                     <span class="o">=</span> <span class="s2">&quot;period_days&quot;</span>                         <span class="c1"># in days (float)</span>
+    <span class="n">RADIUS_PLANET_R_EARTH</span>           <span class="o">=</span> <span class="s2">&quot;radius_planet_r_earth&quot;</span>               <span class="c1"># in Earth radius (float)</span>
+    <span class="n">MASS_PLANET_M_EARTH</span>             <span class="o">=</span> <span class="s2">&quot;mass_planet_m_earth&quot;</span>                 <span class="c1"># in Earth mass (float)</span>
+    
+    <span class="n">MASS_STAR_M_SUN</span>                 <span class="o">=</span> <span class="s2">&quot;mass_star_m_sun&quot;</span>                     <span class="c1"># in solar mass (float)</span>
+    <span class="n">RADIUS_STAR_R_SUN</span>               <span class="o">=</span> <span class="s2">&quot;radius_star_r_sun&quot;</span>                   <span class="c1"># in solar radius (float)</span>
+    
+    <span class="n">PLANET_STAR_MASS_RATIO</span>          <span class="o">=</span> <span class="s2">&quot;planet_star_mass_ratio&quot;</span>             <span class="c1"># float</span>
+    <span class="n">PLANET_STAR_RADIUS_RATIO</span>        <span class="o">=</span> <span class="s2">&quot;planet_star_radius_ratio&quot;</span>           <span class="c1"># float</span>
+    <span class="n">SEMI_MAJOR_AXIS_AU</span>              <span class="o">=</span> <span class="s2">&quot;semi_major_axis_au&quot;</span>                  <span class="c1"># in AU (float)</span>
+    <span class="n">MEAN_LONGITUDE_DEG</span>              <span class="o">=</span> <span class="s2">&quot;mean_longitude_deg&quot;</span>                  <span class="c1"># in deg (float)</span>
+    <span class="n">ECCENTRICITY</span>                    <span class="o">=</span> <span class="s2">&quot;eccentricity&quot;</span>                        <span class="c1"># (float)</span>
+    <span class="n">LONGITUDE_OF_PERIASTRON_DEG</span>     <span class="o">=</span> <span class="s2">&quot;longitude_of_periastron_deg&quot;</span>         <span class="c1"># in deg (float )</span>
+    <span class="n">INCLINATION_DEG</span>                 <span class="o">=</span> <span class="s2">&quot;inclination_deg&quot;</span>                     <span class="c1"># in deg (float)</span>
+    <span class="n">LONGITUDE_OF_ASCENDING_NODE_DEG</span> <span class="o">=</span> <span class="s2">&quot;longitude_of_ascending_node_deg&quot;</span>     <span class="c1"># in deg (float)</span>
+    <span class="n">INITIAL_CONDITION_DATE_BJD</span>      <span class="o">=</span> <span class="s2">&quot;initial_condition_date_BJD&quot;</span>          <span class="c1"># 283223.2838382 (float)</span>
+    <span class="n">NB_PLANETS</span>                      <span class="o">=</span> <span class="s2">&quot;nb_planets&quot;</span>                          <span class="c1"># int</span>
+    <span class="n">GAIA_ID</span>                         <span class="o">=</span> <span class="s2">&quot;gaia_id&quot;</span>                             <span class="c1"># str </span>
+    
+    <span class="n">MASS_PRIORS</span>                     <span class="o">=</span> <span class="s2">&quot;mass_prior&quot;</span>                          <span class="c1"># uniform, log-uniform (str)</span>
+    <span class="n">ECCENTRICITY_PRIORS</span>             <span class="o">=</span> <span class="s2">&quot;eccentricity_prior&quot;</span>                  <span class="c1"># same</span>
+    
+    <span class="n">TRANSIT_DEFINITION</span>              <span class="o">=</span> <span class="s2">&quot;transit_definition&quot;</span>                   <span class="c1"># &quot;TESS&quot;, &quot;NGTS&quot;, &quot;CHEOPS&quot; (str)</span>
+    <span class="n">METHODS</span>                         <span class="o">=</span> <span class="s2">&quot;methods&quot;</span>                             <span class="c1"># [&quot;rv&quot;, &quot;transit&quot;] (list of str)</span>
+    <span class="n">INSTRUMENTS</span>                     <span class="o">=</span> <span class="s2">&quot;instruments&quot;</span>                         <span class="c1"># [&quot;Tess&quot;, &quot;NGTS, &quot;CHEOPS&quot;, &quot;ESPRESSO&quot;] (list of str)</span>
+    <span class="n">BIBTEX</span>                          <span class="o">=</span> <span class="s2">&quot;bibtex&quot;</span>                              <span class="c1"># bibtex 2024A&amp;a...6888A.211L</span>
+    <span class="n">CODE_USED</span>                       <span class="o">=</span> <span class="s2">&quot;code_used&quot;</span>                           <span class="c1"># like bibtex</span>
+    <span class="n">OTHER_REMARKS</span>                   <span class="o">=</span> <span class="s2">&quot;other_remarks&quot;</span>                       <span class="c1"># str</span>
+    
+    <span class="n">METADATA_FILE</span>                   <span class="o">=</span> <span class="s2">&quot;metadata_file&quot;</span>                       <span class="c1"># metadata file path (str)</span>
+    <span class="n">CONFIG_FILE</span>                     <span class="o">=</span> <span class="s2">&quot;additional_info&quot;</span>                     <span class="c1"># additional info file path (str)</span>
+    <span class="n">README_FILE</span>                     <span class="o">=</span> <span class="s2">&quot;readme_file&quot;</span>                         <span class="c1"># readme file path (str)</span>
+    <span class="n">URL_OF_SAMPLES</span>                  <span class="o">=</span> <span class="s2">&quot;url_of_samples&quot;</span>                      <span class="c1"># str</span></div>
+
+
+
+<div class="viewcode-block" id="MetaDataTableEntriesSimulations">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.MetaDataTableEntriesSimulations">[docs]</a>
+<span class="k">class</span> <span class="nc">MetaDataTableEntriesSimulations</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    
+    <span class="c1">############################### common for both activities ##############</span>
+    <span class="n">SIMULATION_TYPE</span>                 <span class="o">=</span> <span class="s2">&quot;simulation_type&quot;</span>
+    <span class="n">RUN_ID</span>                          <span class="o">=</span> <span class="s2">&quot;run_id&quot;</span>                              <span class="c1"># 0,1,2,..</span>
+    <span class="n">RUN_NAME</span>                        <span class="o">=</span> <span class="s2">&quot;run_name&quot;</span>                             <span class="c1"># str</span>
+    <span class="n">SIMULATION_ID</span>                   <span class="o">=</span> <span class="s2">&quot;simulation_id&quot;</span>
+    <span class="n">CONTACT_EMAIL</span>                   <span class="o">=</span> <span class="s2">&quot;contact_email&quot;</span>                       <span class="c1"># adrien.leleu@unige.ch</span>
+    <span class="n">AUTHOR_NAME</span>                     <span class="o">=</span> <span class="s2">&quot;author_name&quot;</span>                         
+
+    <span class="n">PLANET_NAME</span>                     <span class="o">=</span> <span class="s2">&quot;planet_name&quot;</span>                         <span class="c1"># TOI-178 c</span>
+    <span class="n">PERIOD_DAYS</span>                     <span class="o">=</span> <span class="s2">&quot;period_days&quot;</span>                         <span class="c1"># in days (float)</span>
+    <span class="n">RADIUS_PLANET_R_EARTH</span>           <span class="o">=</span> <span class="s2">&quot;radius_planet_r_earth&quot;</span>               <span class="c1"># in Earth radius (float)</span>
+    <span class="n">MASS_PLANET_M_EARTH</span>             <span class="o">=</span> <span class="s2">&quot;mass_planet_m_earth&quot;</span>                 <span class="c1"># in Earth mass (float)</span>
+    
+    <span class="n">MASS_STAR_M_SUN</span>                 <span class="o">=</span> <span class="s2">&quot;mass_star_m_sun&quot;</span>                     <span class="c1"># in solar mass (float)</span>
+    <span class="n">RADIUS_STAR_R_SUN</span>               <span class="o">=</span> <span class="s2">&quot;radius_star_r_sun&quot;</span>                   <span class="c1"># in solar radius (float)</span>
+    
+    <span class="n">PLANET_STAR_MASS_RATIO</span>          <span class="o">=</span> <span class="s2">&quot;planet_star_mass_ratio&quot;</span>             <span class="c1"># float</span>
+    <span class="n">PLANET_STAR_RADIUS_RATIO</span>        <span class="o">=</span> <span class="s2">&quot;planet_star_radius_ratio&quot;</span>           <span class="c1"># float</span>
+   
+    <span class="n">SEMI_MAJOR_AXIS_AU</span>              <span class="o">=</span> <span class="s2">&quot;semi_major_axis_au&quot;</span>                  <span class="c1"># in AU (float)</span>
+    <span class="n">MEAN_LONGITUDE_DEG</span>              <span class="o">=</span> <span class="s2">&quot;mean_longitude_deg&quot;</span>                  <span class="c1"># in deg (float)</span>
+    <span class="n">ECCENTRICITY</span>                    <span class="o">=</span> <span class="s2">&quot;eccentricity&quot;</span>                        <span class="c1"># (float)</span>
+    <span class="n">LONGITUDE_OF_PERIASTRON_DEG</span>     <span class="o">=</span> <span class="s2">&quot;longitude_of_periastron_deg&quot;</span>         <span class="c1"># in deg (float )</span>
+    <span class="n">INCLINATION_DEG</span>                 <span class="o">=</span> <span class="s2">&quot;inclination_deg&quot;</span>                     <span class="c1"># in deg (float)</span>
+    <span class="n">LONGITUDE_OF_ASCENDING_NODE_DEG</span> <span class="o">=</span> <span class="s2">&quot;longitude_of_ascending_node_deg&quot;</span>     <span class="c1"># in deg (float)</span>
+
+    <span class="n">NB_PLANETS</span>                      <span class="o">=</span> <span class="s2">&quot;nb_planets&quot;</span>                          <span class="c1"># int</span>
+    
+    <span class="n">STAR_NAME</span>                       <span class="o">=</span> <span class="s2">&quot;star_name&quot;</span>                           <span class="c1"># TOI-178</span>
+    <span class="n">PHYSICS_IMPLEMENTED</span>             <span class="o">=</span> <span class="s2">&quot;physics_implemented&quot;</span>                 <span class="c1"># str</span>
+    
+    <span class="n">BIBTEX</span>                          <span class="o">=</span> <span class="s2">&quot;bibtex&quot;</span>                              <span class="c1"># bibtex 2024A&amp;a...6888A.211L</span>
+    <span class="n">CODE_USED</span>                       <span class="o">=</span> <span class="s2">&quot;code_used&quot;</span>                           <span class="c1"># like bibtex</span>
+    <span class="n">OTHER_REMARKS</span>                   <span class="o">=</span> <span class="s2">&quot;other_remarks&quot;</span>                       <span class="c1"># str</span>
+    
+    <span class="n">METADATA_FILE</span>                   <span class="o">=</span> <span class="s2">&quot;metadata_file&quot;</span>                       <span class="c1"># metadata file path (str)</span>
+    <span class="n">CONFIG_FILE</span>                     <span class="o">=</span> <span class="s2">&quot;additional_info&quot;</span>                     <span class="c1"># additional info file path (str)</span>
+    <span class="n">README_FILE</span>                     <span class="o">=</span> <span class="s2">&quot;readme_file&quot;</span>                         <span class="c1"># readme file path (str)</span>
+
+    
+    <span class="n">URL_OF_SIMULATION</span>               <span class="o">=</span> <span class="s2">&quot;url_of_simulation&quot;</span>                   <span class="c1"># str</span></div>
+
+    
+    
+    
+<div class="viewcode-block" id="MetaDataTableEntriesSimulationsSummary">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.MetaDataTableEntriesSimulationsSummary">[docs]</a>
+<span class="k">class</span> <span class="nc">MetaDataTableEntriesSimulationsSummary</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+
+    <span class="n">RUN_ID</span>                          <span class="o">=</span> <span class="s2">&quot;run_id&quot;</span>                         <span class="c1"># 0,1,2,..</span>
+    <span class="n">RUN_NAME</span>                        <span class="o">=</span> <span class="s2">&quot;run_name&quot;</span>                             <span class="c1"># str</span>
+    <span class="n">SIMULATION_ID</span>                   <span class="o">=</span> <span class="s2">&quot;simulation_id&quot;</span>
+
+    <span class="n">CONTACT_EMAIL</span>                   <span class="o">=</span> <span class="s2">&quot;contact_email&quot;</span>                       <span class="c1"># adrien.leleu@unige.ch</span>
+    
+    <span class="n">SIMULATION_TYPE</span>                 <span class="o">=</span> <span class="s2">&quot;simulation_type&quot;</span>
+    
+    <span class="n">BIBTEX</span>                          <span class="o">=</span> <span class="s2">&quot;bibtex&quot;</span>                              <span class="c1"># bibtex 2024A&amp;a...6888A.211L</span>
+    <span class="n">CODE_USED</span>                       <span class="o">=</span> <span class="s2">&quot;code_used&quot;</span>                           <span class="c1"># like bibtex</span>
+    
+    <span class="n">NUMBER_OF_RUNS</span>                  <span class="o">=</span> <span class="s2">&quot;number_of_runs&quot;</span>                       <span class="c1"># int</span>
+    <span class="n">MAXIMUM_NUMBER_OF_PLANETS</span>       <span class="o">=</span> <span class="s2">&quot;maximum_number_of_planets&quot;</span>             <span class="c1"># int</span>
+    <span class="n">URL_OF_TABLE</span>                    <span class="o">=</span> <span class="s2">&quot;url_of_table&quot;</span>                       <span class="c1"># str</span></div>
+
+    
+
+
+<span class="c1"># Name of the column for the metadata table recieved by the authors</span>
+<div class="viewcode-block" id="AuthorsMetaDataTableEntries">
+<a class="viewcode-back" href="../../api/resonantstate.table_entries_catalogs.html#resonantstate.table_entries_catalogs.AuthorsMetaDataTableEntries">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthorsMetaDataTableEntries</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    
+    <span class="c1">############################### common for both activities ##############</span>
+    <span class="n">CONTACT_EMAIL</span>                   <span class="o">=</span> <span class="s2">&quot;contact_email&quot;</span>
+    <span class="n">AUTHOR_NAME</span>                     <span class="o">=</span> <span class="s2">&quot;author_name&quot;</span>
+    <span class="n">BIBTEX</span>                          <span class="o">=</span> <span class="s2">&quot;bibtex&quot;</span>
+    <span class="n">CODE_USED</span>                       <span class="o">=</span> <span class="s2">&quot;code_used&quot;</span>
+    <span class="n">STAR_NAME</span>                       <span class="o">=</span> <span class="s2">&quot;star_name&quot;</span>
+    <span class="n">PLANETS_LIST</span>                    <span class="o">=</span> <span class="s2">&quot;planets_list&quot;</span>
+    <span class="n">OTHER_REMARKS</span>                   <span class="o">=</span> <span class="s2">&quot;other_remarks&quot;</span>
+    
+    <span class="c1">############################### only in activity A ######################</span>
+    <span class="n">GAIA_ID</span>                         <span class="o">=</span> <span class="s2">&quot;gaia_id&quot;</span>                             <span class="c1"># str</span>
+    <span class="n">INSTRUMENTS</span>                     <span class="o">=</span> <span class="s2">&quot;instruments&quot;</span>
+    <span class="n">METHODS</span>                         <span class="o">=</span> <span class="s2">&quot;methods&quot;</span>
+    <span class="n">ANALYSIS_ID</span>                     <span class="o">=</span> <span class="s2">&quot;analysis_id&quot;</span>
+    <span class="n">ECCENTRICITY_PRIORS</span>             <span class="o">=</span> <span class="s2">&quot;eccentricity_prior&quot;</span>
+    <span class="n">MASS_PRIORS</span>                     <span class="o">=</span> <span class="s2">&quot;mass_prior&quot;</span>
+    <span class="n">ROBUSTNESS</span>                      <span class="o">=</span> <span class="s2">&quot;robustness&quot;</span>
+    <span class="n">INITIAL_CONDITION_DATE_BJD</span>      <span class="o">=</span> <span class="s2">&quot;initial_condition_date_BJD&quot;</span>
+    <span class="n">DEFAULT</span>                         <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+    
+    
+    <span class="c1">############################### only in activity B ######################</span>
+    <span class="n">RUN_ID</span>                          <span class="o">=</span> <span class="s2">&quot;run_id&quot;</span>
+    <span class="n">SIMULATION_ID</span>                   <span class="o">=</span> <span class="s2">&quot;system_id&quot;</span>
+    <span class="n">SIMULATION_TYPE</span>                 <span class="o">=</span> <span class="s2">&quot;simulation_type&quot;</span>
+    <span class="n">PHYSICS_IMPLEMENTED</span>             <span class="o">=</span> <span class="s2">&quot;physics_implemented&quot;</span></div>
+
+    
+    
+    
+
+        
+
+    
+    
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

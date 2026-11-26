@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.sample_conversion module &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="resonantstate.simulations_resonance_analysis module" href="resonantstate.simulations_resonance_analysis.html" />
+    <link rel="prev" title="resonantstate.quartic module" href="resonantstate.quartic.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">resonantstate</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="resonantstate.html">resonantstate package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="resonantstate.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.SFMR.html">resonantstate.SFMR module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.constants.html">resonantstate.constants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.data_download.html">resonantstate.data_download module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.ell_to_3P0R.html">resonantstate.ell_to_3P0R module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.quartic.html">resonantstate.quartic module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">resonantstate.sample_conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.simulations_resonance_analysis.html">resonantstate.simulations_resonance_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.table_entries_catalogs.html">resonantstate.table_entries_catalogs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resonantstate.ttv.html">resonantstate.ttv module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">resonantstate</a></li>
+          <li class="breadcrumb-item"><a href="resonantstate.html">resonantstate package</a></li>
+      <li class="breadcrumb-item active">resonantstate.sample_conversion module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/resonantstate.sample_conversion.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-resonantstate.sample_conversion">
+<span id="resonantstate-sample-conversion-module"></span><h1>resonantstate.sample_conversion module<a class="headerlink" href="#module-resonantstate.sample_conversion" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.ell2cart_eccentric">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">ell2cart_eccentric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeiEoO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#ell2cart_eccentric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.ell2cart_eccentric" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.cart2ell">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">cart2ell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">XYZvXvYvZ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#cart2ell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.cart2ell" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.l2F">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">l2F</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#l2F"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.l2F" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.lPkhiO_to_aeiMoO">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">lPkhiO_to_aeiMoO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lPkhiO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daysInUOT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#lPkhiO_to_aeiMoO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.lPkhiO_to_aeiMoO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.aeiMoO_to_alkhqp">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">aeiMoO_to_alkhqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeiMoO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daysInUOT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#aeiMoO_to_alkhqp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.aeiMoO_to_alkhqp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.lPkhiO_to_cart">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">lPkhiO_to_cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lPkhiO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daysInUOT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#lPkhiO_to_cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.lPkhiO_to_cart" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.sample2cart_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">sample2cart_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#sample2cart_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.sample2cart_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.sample2aeiMoO_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">sample2aeiMoO_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#sample2aeiMoO_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.sample2aeiMoO_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.sample2alkhqp_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">sample2alkhqp_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#sample2alkhqp_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.sample2alkhqp_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.cart2sample_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">cart2sample_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#cart2sample_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.cart2sample_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Jac2Hel_rowCart">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Jac2Hel_rowCart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Jac2Hel_rowCart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Jac2Hel_rowCart" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Hel2Jac_rowCart">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Hel2Jac_rowCart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Hel2Jac_rowCart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Hel2Jac_rowCart" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Jac2Hel_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Jac2Hel_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Jac2Hel_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Jac2Hel_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Hel2Jac_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Hel2Jac_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Hel2Jac_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Hel2Jac_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.JacWH2Hel_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">JacWH2Hel_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#JacWH2Hel_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.JacWH2Hel_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Hel2JacWH_row">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Hel2JacWH_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Hel2JacWH_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Hel2JacWH_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Sample2cart">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Sample2cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Sample2cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Sample2cart" title="Link to this definition"></a></dt>
+<dd><p>Converts to cartesian coordinates a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in the format of the Geneva Resonant State Workshop (GRSW). Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>typeOfCoordinates</strong> (<em>String</em>) – Either ‘Jacobi’, ‘JacobiWisdomHolman’ or ‘Heliocentric’. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.
+‘Jacobi’ differs from ‘JacobiWisdomHolman’ in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991.</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in cartesian coordinates. The columns are now Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, … , M* (Msun), R* (Rsun)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Cart2sample">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Cart2sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Cart2sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Cart2sample" title="Link to this definition"></a></dt>
+<dd><p>Converts to GRSW format a sample in cartesian coordinates.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in the format Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, … , M* (Msun), R* (Rsun).</p></li>
+<li><p><strong>typeOfCoordinates</strong> (<em>String</em>) – Either ‘Jacobi’, ‘JacobiWisdomHolman’ or ‘Heliocentric’. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.
+‘Jacobi’ differs from ‘JacobiWisdomHolman’ in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991.</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in GRSW format. The columns are now Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Sample2aeiMoO">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Sample2aeiMoO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Sample2aeiMoO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Sample2aeiMoO" title="Link to this definition"></a></dt>
+<dd><p>Converts to elliptic elements a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in the format of the Geneva Resonant State Workshop (GRSW). Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>typeOfCoordinates</strong> (<em>String</em>) – Either ‘Jacobi’, ‘JacobiWisdomHolman’ or ‘Heliocentric’. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.
+‘Jacobi’ differs from ‘JacobiWisdomHolman’ in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991.</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in elliptic elements. The columns are now Id or timestamp, a (au), e, I (rad), M (rad), omega (rad), Omega(rad), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Sample2alkhqp">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Sample2alkhqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typeOfCoordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Sample2alkhqp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Sample2alkhqp" title="Link to this definition"></a></dt>
+<dd><p>Converts to rectangular elliptic elements a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in the format of the Geneva Resonant State Workshop (GRSW). Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>typeOfCoordinates</strong> (<em>String</em>) – Either ‘Jacobi’, ‘JacobiWisdomHolman’ or ‘Heliocentric’. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.
+‘Jacobi’ differs from ‘JacobiWisdomHolman’ in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991.</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in elliptic elements. The columns are now Id or timestamp, a (au), lbd (rad), k, h, q, p, m/M*, R/R*, … , M* (Msun), R* (Rsun)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Jac2Hel">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Jac2Hel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Jac2Hel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Jac2Hel" title="Link to this definition"></a></dt>
+<dd><p>Converts from Jacobi to Heliocentric a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in Jacobi (mu = G*(M* + m1 + m2 + … + mj)) in the format of the Geneva Resonant State Workshop (GRSW).
+Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in Heliocentric coordinates (mu = G*(M* + mj))</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Hel2Jac">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Hel2Jac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Hel2Jac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Hel2Jac" title="Link to this definition"></a></dt>
+<dd><p>Converts from Heliocentric to Jacobi a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in Heliocentric (mu = G*(M* + mj)) in the format of the Geneva Resonant State Workshop (GRSW).
+Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in Jacobi coordinates (mu = G*(M* + m1 + m2 + … + mj))</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.JacWH2Hel">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">JacWH2Hel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#JacWH2Hel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.JacWH2Hel" title="Link to this definition"></a></dt>
+<dd><p>Converts from Jacobi (Wisdom Holman convention) to Heliocentric a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in JacobiWisdomHolman (mu = G* M* * (M* + m1 + … + mj)/(M* + m1 + … + m_{j-1})) in the format of the Geneva Resonant State Workshop (GRSW).
+Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in Heliocentric coordinates (mu = G*(M* + mj))</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="resonantstate.sample_conversion.Hel2JacWH">
+<span class="sig-prename descclassname"><span class="pre">resonantstate.sample_conversion.</span></span><span class="sig-name descname"><span class="pre">Hel2JacWH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adcol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/resonantstate/sample_conversion.html#Hel2JacWH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resonantstate.sample_conversion.Hel2JacWH" title="Link to this definition"></a></dt>
+<dd><p>Converts from Heliocentric to Jacobi (Wisdom Holman convention) a sample in GRSW format.</p>
+<p>Author : Jérémy COUTURIER. <a class="reference external" href="https://jeremycouturier.com">https://jeremycouturier.com</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample</strong> (<em>Numpy array</em><em> of </em><em>floats.</em>) – A sample in Heliocentric (mu = G*(M* + mj)) in the format of the Geneva Resonant State Workshop (GRSW).
+Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, … , M* (Msun), R* (Rsun)</p></li>
+<li><p><strong>adcol</strong> (<em>Integer</em>) – Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>S</strong> – The same sample in JacobiWisdomHolman coordinates (mu = G* M* * (M* + m1 + … + mj)/(M* + m1 + … + m_{j-1}))</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="resonantstate.quartic.html" class="btn btn-neutral float-left" title="resonantstate.quartic module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="resonantstate.simulations_resonance_analysis.html" class="btn btn-neutral float-right" title="resonantstate.simulations_resonance_analysis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

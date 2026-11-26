@@ -1,0 +1,7 @@
+resonantstate.table\_entries\_catalogs module
+=============================================
+
+.. automodule:: resonantstate.table_entries_catalogs
+   :members:
+   :show-inheritance:
+   :undoc-members:

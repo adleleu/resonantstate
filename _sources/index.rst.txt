@@ -1,22 +1,16 @@
 .. resonantstate documentation master file, created by
-   sphinx-quickstart on Fri Dec 19 15:43:12 2025.
+   sphinx-quickstart on Thu Nov 26 16:54:15 2026.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 resonantstate documentation
 ===========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+Access to the resonantstate databases and projection of observed and simulated systems on analytical models.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 4
+   :caption: API reference
 
-.. toctree::
-   :maxdepth: 2
+   api/modules
 
-   data_download
-   ell2SFM

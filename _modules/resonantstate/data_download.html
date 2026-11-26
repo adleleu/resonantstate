@@ -1,0 +1,757 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.data_download &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">resonantstate</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">resonantstate.data_download</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for resonantstate.data_download</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">MetaDataTableEntriesObservations</span> <span class="k">as</span> <span class="n">mteObs</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">MetaDataTableEntriesSimulations</span> <span class="k">as</span> <span class="n">mteSim</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">MetaDataTableEntriesSimulationsSummary</span> <span class="k">as</span> <span class="n">mteSimSum</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">AuthorsMetaDataTableEntries</span> <span class="k">as</span> <span class="n">mteAuthors</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">ObservationsSamplesDictionnary</span> <span class="k">as</span> <span class="n">obsDict</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">SimulationsDictionnary</span> <span class="k">as</span> <span class="n">simDict</span>
+<span class="kn">from</span> <span class="nn">resonantstate.table_entries_catalogs</span> <span class="kn">import</span> <span class="n">URLS</span> <span class="k">as</span> <span class="n">urls</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+          
+<span class="c1"># Disable warnings due to the use of the requests library with unverified HTTPS requests</span>
+<span class="kn">import</span> <span class="nn">urllib3</span>
+<span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">(</span><span class="n">urllib3</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InsecureRequestWarning</span><span class="p">)</span> 
+
+
+<span class="c1"># #######################################################################################################</span>
+<span class="c1"># OBSERVATIONS FUNCTION #################################################################################</span>
+<span class="c1"># #######################################################################################################</span>
+
+<div class="viewcode-block" id="get_metadata_observations">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.get_metadata_observations">[docs]</a>
+<span class="k">def</span> <span class="nf">get_metadata_observations</span><span class="p">(</span><span class="n">local_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method retrieves the metadata table for the observations and returns it in a pandas dataframe</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        The observations metadata table in a pandas dataframe</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    local_path : Path or str or None</span>
+<span class="sd">        use a local version of the database if local_path is given, query DACE if not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">local_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+        <span class="n">obs_table</span> <span class="o">=</span> <span class="n">local_path</span> <span class="o">/</span> <span class="s2">&quot;observations&quot;</span> <span class="o">/</span> <span class="s2">&quot;tables&quot;</span> <span class="o">/</span> <span class="s2">&quot;metadata_table.parquet&quot;</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">obs_table</span><span class="p">)</span> <span class="c1"># translate the content of the parquet file into a pandas dataframe</span>
+    
+
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">urls</span><span class="o">.</span><span class="n">OBSERVATIONS_METADATA_TABLE</span><span class="o">.</span><span class="n">value</span>
+        <span class="c1"># we query the table from DACE and make sure the status code is sucessful (http 200 OK = sucessful http request)</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> <span class="c1"># check if the request was successful</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">content</span><span class="p">))</span> <span class="c1"># translate the content of the parquet file into a pandas dataframe</span>
+
+
+    <span class="k">return</span> <span class="n">dataframe</span></div>
+
+
+
+<div class="viewcode-block" id="download_observations_samples">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.download_observations_samples">[docs]</a>
+<span class="k">def</span> <span class="nf">download_observations_samples</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">local_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_destination</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method retrieves the samples for the systems in the given dataframe, and returns a dictionnary that contains informations about the samples and the samples themselves. </span>
+<span class="sd">    </span>
+<span class="sd">    If a download destination is given, it saves the samples and the coresponding metadata in the given directory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataframe : pd.DataFrame</span>
+<span class="sd">        The dataframe containing the metadata of the planets samples that we want to download</span>
+<span class="sd">    local_path : Path or str or None</span>
+<span class="sd">        use a local version of the database if local_path is given, query DACE if not.</span>
+<span class="sd">    download_destination : str or None</span>
+<span class="sd">        If given, save each sample and metadata in the given directory </span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[Dict]</span>
+<span class="sd">        A list of dictionnaries with the samples informations and the samples themselves</span>
+<span class="sd">        keys of the dictionnary are:</span>
+<span class="sd">        </span>
+<span class="sd">        - samples_name:     the name of the samples (str)</span>
+<span class="sd">        - planets_list:     the list of planets in the sample (list of str)</span>
+<span class="sd">        - samples:          the samples themselves (pandas.DataFrame) </span>
+<span class="sd">        - readme:           the readme of the samples (str|None)</span>
+<span class="sd">        - additional_infos: the additional infos of the samples (str|None)</span>
+<span class="sd">        - author_name:      the name of the author of the samples (str)</span>
+<span class="sd">        - star_name:        the name of the star of the sampled system (str)</span>
+<span class="sd">        - analysis_id:      the analysis id of the samples (str)</span>
+<span class="sd">        - contact_email:    the email of the contact person for the sample (str)</span>
+<span class="sd">        - default:          the default value of the samples (str)</span>
+<span class="sd">        - robustness:       the robustness of the samples (str)</span>
+<span class="sd">        - initial_condition_date_bjd: the initial condition date of the samples (str)</span>
+<span class="sd">        - nb_planets:       the number of planets in the sample (int)</span>
+<span class="sd">        - gaia_id:          the gaia id of the sample (str)</span>
+<span class="sd">        - mass_priors:      the mass priors of the sample (str)</span>
+<span class="sd">        - eccentricity_priors:  the eccentricity priors of the sample (str)</span>
+<span class="sd">        - transit_definition:   the transit definition of the sample (str|None)</span>
+<span class="sd">        - methods:          the methods used to generate the sample (str)</span>
+<span class="sd">        - instruments:      the instruments used to generate the sample (str)</span>
+<span class="sd">        - bibtex:           the bibtex reference of the sample (str)</span>
+<span class="sd">        - code:             the code used to generate the sample (str)</span>
+<span class="sd">        - other_remarks:    the other remarks of the sample (str)</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># common mistake when manipulating pandas dataframe and does not work with the package so it has its own check</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dataframe should be a pandas DataFrame, not a pandas Series&quot;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dataframe should be a pandas DataFrame&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># if the download destination is given, we create the directory if it does not exist</span>
+    <span class="k">if</span> <span class="n">download_destination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">download_destination</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">download_destination</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">download_destination</span><span class="p">)</span>
+        <span class="n">download_destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="c1"># we create a list of unique urls for the samples and the metadata</span>
+    <span class="n">unique_samples_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">metadata_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">readme_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">additional_infos_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">planet_metadatas</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">index_row</span><span class="p">,</span> <span class="n">planet_metadata</span> <span class="o">=</span> <span class="n">row</span>
+        
+        <span class="n">url_of_sample</span>           <span class="o">=</span> <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">URL_OF_SAMPLES</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="n">url_of_metadata</span>         <span class="o">=</span> <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">METADATA_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="n">url_of_readme</span>           <span class="o">=</span> <span class="n">planet_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteObs</span><span class="o">.</span><span class="n">README_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="c1"># may be None</span>
+        <span class="k">if</span> <span class="n">url_of_readme</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">url_of_readme</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">url_of_additional_info</span>  <span class="o">=</span> <span class="n">planet_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteObs</span><span class="o">.</span><span class="n">CONFIG_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="c1"># may be None</span>
+        <span class="k">if</span> <span class="n">url_of_additional_info</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">url_of_additional_info</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">url_of_sample</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_samples_urls</span><span class="p">:</span>
+            
+            <span class="n">unique_samples_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_sample</span><span class="p">)</span>
+            <span class="n">metadata_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_metadata</span><span class="p">)</span>
+            <span class="n">readme_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_readme</span><span class="p">)</span>
+            <span class="n">additional_infos_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_additional_info</span><span class="p">)</span>
+            <span class="n">planet_metadatas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">planet_metadata</span><span class="p">)</span>
+           
+    
+    <span class="c1"># iterate over the unique urls and download the samples and metadata and add the information dictionnary to the list</span>
+    <span class="n">return_samples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">url_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_samples_urls</span><span class="p">)):</span>
+        <span class="n">sample_url</span>          <span class="o">=</span> <span class="n">unique_samples_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">metadata_url</span>        <span class="o">=</span> <span class="n">metadata_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">readme_url</span>          <span class="o">=</span> <span class="n">readme_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">additional_info_url</span> <span class="o">=</span> <span class="n">additional_infos_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        
+        <span class="n">planet_metadata</span> <span class="o">=</span> <span class="n">planet_metadatas</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+                <span class="n">local_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+            
+
+            <span class="n">sample_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sample_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+            <span class="n">dataframe_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">sample_file</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()))</span>
+
+            <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">metadata_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_metadata</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">readme_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">readme_url</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>
+                <span class="n">file_readme</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">readme_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="n">file_readme</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">additional_info_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">additional_info_url</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>   
+                <span class="n">file_additional_info</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">additional_info_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_additional_info</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_sample</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_sample</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> 
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">sample_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_sample</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">dataframe_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file_sample</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+            
+            <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metadata_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_metadata</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> 
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">metadata_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_metadata</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_metadata</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">readme_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">readme_url</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>
+                <span class="n">file_readme</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">readme_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file_readme</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> 
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">readme_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_readme</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="n">file_readme</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">additional_info_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">additional_info_url</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>   
+                <span class="n">file_additional_info</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">additional_info_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file_additional_info</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> 
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">additional_info_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_additional_info</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_additional_info</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">ANALYSIS_ID</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="c1"># name definitions from the table_entries_catalogs.py file</span>
+        <span class="n">samples_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">obsDict</span><span class="o">.</span><span class="n">SAMPLE_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                  <span class="n">name</span><span class="p">,</span>
+            <span class="n">obsDict</span><span class="o">.</span><span class="n">PLANETS_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">metadata</span><span class="p">[</span><span class="n">mteAuthors</span><span class="o">.</span><span class="n">PLANETS_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+           
+            <span class="n">obsDict</span><span class="o">.</span><span class="n">SAMPLES</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                      <span class="n">dataframe_sample</span><span class="p">,</span>
+            <span class="n">obsDict</span><span class="o">.</span><span class="n">README</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                       <span class="n">readme</span><span class="p">,</span>
+            <span class="n">obsDict</span><span class="o">.</span><span class="n">ADDITIONAL_INFO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>              <span class="n">additional_infos</span><span class="p">,</span>
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">AUTHOR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">planet_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteObs</span><span class="o">.</span><span class="n">AUTHOR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                     <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>                     
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">ANALYSIS_ID</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">ANALYSIS_ID</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">obsDict</span><span class="o">.</span><span class="n">CONTACT_EMAIL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">CONTACT_EMAIL</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">DEFAULT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                       <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">DEFAULT</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">ROBUSTNESS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                    <span class="n">metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">ROBUSTNESS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">INITIAL_CONDITION_DATE_BJD</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>    <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">INITIAL_CONDITION_DATE_BJD</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">NB_PLANETS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                    <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">NB_PLANETS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">GAIA_ID</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                       <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">GAIA_ID</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">MASS_PRIORS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">MASS_PRIORS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">ECCENTRICITY_PRIORS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>           <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">ECCENTRICITY_PRIORS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">TRANSIT_DEFINITION</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>            <span class="n">planet_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteObs</span><span class="o">.</span><span class="n">TRANSIT_DEFINITION</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">METHODS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                       <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">METHODS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">INSTRUMENTS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">INSTRUMENTS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">BIBTEX</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                        <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">BIBTEX</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">CODE_USED</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                     <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">CODE_USED</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+            <span class="n">mteObs</span><span class="o">.</span><span class="n">OTHER_REMARKS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteObs</span><span class="o">.</span><span class="n">OTHER_REMARKS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+        <span class="p">}</span>
+        
+        <span class="n">return_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">samples_dict</span><span class="p">)</span>
+    
+        <span class="c1"># save the files if the download destination is given</span>
+        <span class="k">if</span> <span class="n">download_destination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sample_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.parquet&quot;</span>
+            <span class="n">metadata_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_metadata.json&quot;</span>
+            <span class="n">readme_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_readme.txt&quot;</span>
+            <span class="n">dataframe</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">sample_file_name</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">readme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">readme_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">readme</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">additional_infos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">additional_infos_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_additional_infos.json&quot;</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">additional_infos_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">additional_infos</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">return_samples</span></div>
+
+
+
+
+
+<span class="c1"># #######################################################################################################</span>
+<span class="c1"># SIMULATIONS FUNCTION ##################################################################################</span>
+<span class="c1"># #######################################################################################################</span>
+
+<div class="viewcode-block" id="get_metadata_simulations">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.get_metadata_simulations">[docs]</a>
+<span class="k">def</span> <span class="nf">get_metadata_simulations</span><span class="p">(</span><span class="n">local_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method retrieves the summary metadata table for the simulations and return it in a pandas dataframe</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        The simulations metadata table in a pandas dataframe</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    local_path : Path or str or None</span>
+<span class="sd">        use a local version of the database if local_path is given, query DACE if not.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    
+    
+    <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">local_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+        <span class="n">obs_table</span> <span class="o">=</span> <span class="n">local_path</span> <span class="o">/</span> <span class="s2">&quot;simulations&quot;</span> <span class="o">/</span> <span class="s2">&quot;tables&quot;</span> <span class="o">/</span> <span class="s2">&quot;metadata_table.parquet&quot;</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">obs_table</span><span class="p">)</span> <span class="c1"># translate the content of the parquet file into a pandas dataframe</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">urls</span><span class="o">.</span><span class="n">SIMULATIONS_METADATA_TABLE</span><span class="o">.</span><span class="n">value</span>  
+        <span class="c1"># we query the table from DACE and make sure the status code is sucessful (OK = sucessful http request)</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> <span class="c1"># check if the request was successful</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">content</span><span class="p">))</span> <span class="c1"># translate the content of the parquet file into a pandas dataframe</span>
+        
+    <span class="k">return</span> <span class="n">dataframe</span>  </div>
+
+
+
+
+<div class="viewcode-block" id="download_simulations_run_table">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.download_simulations_run_table">[docs]</a>
+<span class="k">def</span> <span class="nf">download_simulations_run_table</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span><span class="n">local_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method retrieves the runs tables from the selected line of the summary metadata datafame, and returns another dataframe with more details about the chosen run. For now, only allows to retrieve a single run table at a time.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataframe : pd.DataFrame</span>
+<span class="sd">        The dataframe containing the metadata of the simulation run that we want to download</span>
+<span class="sd">    local_path : Path or str or None</span>
+<span class="sd">        use a local version of the database if local_path is given, query DACE if not.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        A dataframe with the detailed metadata of the run</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dataframe should be a pandas DataFrame, not a pandas Series&quot;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dataframe should be a pandas DataFrame&quot;</span><span class="p">)</span>
+    
+    
+    <span class="k">if</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The dataframe should only contain one line (header non included). Given shape: </span><span class="si">{</span><span class="n">dataframe</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="n">url_of_table</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">mteSimSum</span><span class="o">.</span><span class="n">URL_OF_TABLE</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">local_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+
+        <span class="n">url_of_table</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">url_of_table</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">url_of_table</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()))</span> <span class="c1"># read the parquet file from the given path</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        
+        <span class="n">file</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url_of_table</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span> 
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">url_of_table</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">dataframe</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="download_simulations">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.download_simulations">[docs]</a>
+<span class="k">def</span> <span class="nf">download_simulations</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span><span class="n">local_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_destination</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method retrieves the simulations present in the given dataframe, and returns a list of dictionnary that contains information about the evolutions and the evolutions themselves. If a download destination is given, it saves the evolutions in the given directory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataframe : pd.DataFrame</span>
+<span class="sd">        The dataframe containing the metadata of the simulations that we want to download.</span>
+<span class="sd">    local_path : Path or str or None</span>
+<span class="sd">        use a local version of the database if local_path is given, query DACE if not.</span>
+<span class="sd">    download_destination : str or None</span>
+<span class="sd">        If given, save the simulations in the given directory with their corresponding metadatas.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[Dict]</span>
+<span class="sd">        A list of dictionnaries with the simulations informations and the simulations themselves</span>
+<span class="sd">        keys in of dictionnary are:</span>
+<span class="sd">        </span>
+<span class="sd">        - simulation_name:  the name of the simulation (str)</span>
+<span class="sd">        - additional_infos: the additional infos of the simulation (dict)</span>
+<span class="sd">        - simulation:       the simulation itself (pandas.DataFrame) </span>
+<span class="sd">        - readme:           the readme of the simulation (str|None)</span>
+<span class="sd">        - contact_email:    the email of the contact person for the simulation (str)</span>
+<span class="sd">        - author_name:      the name of the author of the simulation (str)</span>
+<span class="sd">        - planets_list:     the list of planets in the simulation (list of str)</span>
+<span class="sd">        - star_name:        the name of the star of the simulation (str)</span>
+<span class="sd">        - run_id:          the run id of the simulation (str)</span>
+<span class="sd">        - simulation_id:    the simulation id of the simulation (str)</span>
+<span class="sd">        - run_name:         the run name of the simulation (str)</span>
+<span class="sd">        - simulation_type:  the type of the simulation (str)</span>
+<span class="sd">        - physics_implemented: the physics implemented in the simulation (str)</span>
+<span class="sd">        - nb_planets:       the number of planets in the simulation (int)</span>
+<span class="sd">        - code_used:        the code used for the simulation (str)</span>
+<span class="sd">        - bibtex:           the bibtex reference of the simulation (str)</span>
+<span class="sd">        - other_remarks:    the other remarks of the simulation (str)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># common mistake when manipulating pandas dataframe and does not work with the package so it has its own check</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dataframe should be a pandas DataFrame, not a pandas Series&quot;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dataframe should be a pandas DataFrame&quot;</span><span class="p">)</span>
+    
+    
+    <span class="k">if</span> <span class="n">download_destination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">download_destination</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">download_destination</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">download_destination</span><span class="p">)</span>
+        <span class="n">download_destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    
+    <span class="n">unique_simulations_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">metadata_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">additional_infos_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">readme_files_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">planet_metadatas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">index_row</span><span class="p">,</span> <span class="n">metadata_line</span> <span class="o">=</span> <span class="n">row</span>
+        
+        <span class="n">url_of_sample</span>           <span class="o">=</span> <span class="n">metadata_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteSim</span><span class="o">.</span><span class="n">URL_OF_SIMULATION</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">url_of_metadata</span>         <span class="o">=</span> <span class="n">metadata_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteSim</span><span class="o">.</span><span class="n">METADATA_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">url_of_additional_info</span>  <span class="o">=</span> <span class="n">metadata_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteSim</span><span class="o">.</span><span class="n">CONFIG_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> 
+        <span class="n">url_of_readme</span>           <span class="o">=</span> <span class="n">metadata_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteSim</span><span class="o">.</span><span class="n">README_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="c1"># may be None</span>
+        <span class="k">if</span> <span class="n">url_of_additional_info</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">url_of_additional_info</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">url_of_readme</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">url_of_readme</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">pass</span> <span class="c1"># no condition on the readme as it may not be present</span>
+        <span class="k">if</span> <span class="n">url_of_sample</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">url_of_sample</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing URL_OF_SIMULATION in the metadata line: </span><span class="si">{</span><span class="n">metadata_line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url_of_metadata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">url_of_metadata</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing METADATA_FILE in the metadata line: </span><span class="si">{</span><span class="n">metadata_line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url_of_sample</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_simulations_urls</span><span class="p">:</span>
+            <span class="n">unique_simulations_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_sample</span><span class="p">)</span>
+            <span class="n">metadata_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_metadata</span><span class="p">)</span>
+            <span class="n">additional_infos_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_additional_info</span><span class="p">)</span>
+            <span class="n">readme_files_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_of_readme</span><span class="p">)</span>
+            <span class="n">planet_metadatas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata_line</span><span class="p">)</span>
+
+    
+    <span class="n">return_samples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">url_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_simulations_urls</span><span class="p">)):</span>
+        <span class="n">sample_url</span> <span class="o">=</span> <span class="n">unique_simulations_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">metadata_url</span> <span class="o">=</span> <span class="n">metadata_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">aditional_info_url</span> <span class="o">=</span> <span class="n">additional_infos_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">readme_file_rul</span> <span class="o">=</span> <span class="n">readme_files_urls</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+        <span class="n">planet_metadata</span> <span class="o">=</span> <span class="n">planet_metadatas</span><span class="p">[</span><span class="n">url_index</span><span class="p">]</span>
+
+
+
+        <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+                <span class="n">local_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+
+            <span class="n">sample_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sample_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+            <span class="n">dataframe_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">sample_file</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()))</span>
+            
+            
+            <span class="n">metadata_url</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">metadata_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">metadata_url</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+            
+            
+            <span class="k">if</span> <span class="n">aditional_info_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">file_additional_info</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">aditional_info_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_additional_info</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="k">if</span> <span class="n">readme_file_rul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">file_readme</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">readme_file_rul</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dace.unige.ch/downloads/resonant_state&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">))</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="n">file_readme</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_sample</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_sample</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">sample_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_sample</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">dataframe_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file_sample</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+            
+            <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metadata_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_metadata</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">metadata_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_metadata</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_metadata</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">aditional_info_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">file_additional_info</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aditional_info_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file_additional_info</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">aditional_info_url</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_additional_info</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file_additional_info</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">additional_infos</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="k">if</span> <span class="n">readme_file_rul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">file_readme</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">readme_file_rul</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file_readme</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">readme_file_rul</span><span class="si">}</span><span class="s2"> responded with status code: </span><span class="si">{</span><span class="n">file_readme</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="n">file_readme</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">readme</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">#print(&#39;metadata.keys()&#39;,planet_metadata.keys())</span>
+        <span class="k">if</span> <span class="s1">&#39;simulation_type&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;population_synthesis_</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run_ID&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;System_ID&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">samples_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">SIMULATION_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>              <span class="n">name</span><span class="p">,</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">ADDITIONAL_INFO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>              <span class="n">additional_infos</span><span class="p">,</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">SIMULATION</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">dataframe_sample</span><span class="p">,</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">README</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                       <span class="n">readme</span><span class="p">,</span>
+                
+                <span class="n">simDict</span><span class="o">.</span><span class="n">CONTACT_EMAIL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">CONTACT_EMAIL</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">AUTHOR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">planet_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteSim</span><span class="o">.</span><span class="n">AUTHOR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="kc">None</span><span class="p">),</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">PLANETS_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;planet_list&#39;</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                     <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_ID</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                        <span class="n">planet_metadata</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_ID</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">planet_metadata</span><span class="p">[</span><span class="s1">&#39;simulation_id&#39;</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                      <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_TYPE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>               <span class="s1">&#39;population_synthesis&#39;</span><span class="p">,</span><span class="c1">#planet_metadata[&#39;population_synthesis&#39;],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">PHYSICS_IMPLEMENTED</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>           <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">PHYSICS_IMPLEMENTED</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">NB_PLANETS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                    <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">NB_PLANETS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">CODE_USED</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                     <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">CODE_USED</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">BIBTEX</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                        <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">BIBTEX</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">OTHER_REMARKS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">OTHER_REMARKS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                
+                
+            <span class="p">}</span>
+
+
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_TYPE</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_ID</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_ID</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="n">samples_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">SIMULATION_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>              <span class="n">name</span><span class="p">,</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">ADDITIONAL_INFO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>              <span class="n">additional_infos</span><span class="p">,</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">SIMULATION</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">dataframe_sample</span><span class="p">,</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">README</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                       <span class="n">readme</span><span class="p">,</span>
+                
+                <span class="n">simDict</span><span class="o">.</span><span class="n">CONTACT_EMAIL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">CONTACT_EMAIL</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">AUTHOR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                   <span class="n">planet_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mteSim</span><span class="o">.</span><span class="n">AUTHOR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="kc">None</span><span class="p">),</span>
+                <span class="n">simDict</span><span class="o">.</span><span class="n">PLANETS_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">metadata</span><span class="p">[</span><span class="n">mteAuthors</span><span class="o">.</span><span class="n">PLANETS_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                     <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">STAR_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_ID</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                        <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_ID</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_ID</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_ID</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                      <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">RUN_NAME</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_TYPE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>               <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">SIMULATION_TYPE</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">PHYSICS_IMPLEMENTED</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>           <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">PHYSICS_IMPLEMENTED</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">NB_PLANETS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                    <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">NB_PLANETS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>  
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">CODE_USED</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                     <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">CODE_USED</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">BIBTEX</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                        <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">BIBTEX</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                <span class="n">mteSim</span><span class="o">.</span><span class="n">OTHER_REMARKS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>                 <span class="n">planet_metadata</span><span class="p">[</span><span class="n">mteSim</span><span class="o">.</span><span class="n">OTHER_REMARKS</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                
+                
+            <span class="p">}</span>
+        <span class="n">samples_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>    
+        
+        <span class="n">return_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">samples_dict</span><span class="p">)</span>
+    
+        <span class="k">if</span> <span class="n">download_destination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">simulation_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.parquet&quot;</span>
+            <span class="n">metadata_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_metadata.json&quot;</span>
+            <span class="n">dataframe</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">simulation_file_name</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="n">additional_infos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">additional_infos_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_additional_infos.json&quot;</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">additional_infos_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">additional_infos</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">readme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">readme_file_name</span> <span class="o">=</span> <span class="n">download_destination</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_readme.txt&quot;</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">readme_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">readme</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">return_samples</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="fetch_bibtex">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.fetch_bibtex">[docs]</a>
+<span class="k">def</span> <span class="nf">fetch_bibtex</span><span class="p">(</span><span class="n">bibcode</span><span class="p">,</span><span class="n">api_token</span><span class="p">)</span> <span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;fetch the citation export from ADS for a given bibcode</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bibcode : str</span>
+<span class="sd">        bibcode of the data used</span>
+<span class="sd">    api_token : str</span>
+<span class="sd">        api token, This can be found on your ADS account under : https://ui.adsabs.harvard.edu/user/settings/token</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        ADS citation export</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://api.adsabs.harvard.edu/v1/export/bibtex&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">api_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">json_in</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;bibcode&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">bibcode</span><span class="p">],</span>
+        <span class="s2">&quot;sort&quot;</span><span class="p">:</span> <span class="s2">&quot;date desc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;maxauthor&quot;</span><span class="p">:</span> <span class="mi">1000</span>
+    <span class="p">}</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_in</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;ADS API error </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;export&quot;</span><span class="p">]</span>   <span class="c1"># ADS returns the BibTeX in &quot;export&quot; field</span></div>
+
+
+
+
+<div class="viewcode-block" id="create_bibfile">
+<a class="viewcode-back" href="../../api/resonantstate.data_download.html#resonantstate.data_download.create_bibfile">[docs]</a>
+<span class="k">def</span> <span class="nf">create_bibfile</span><span class="p">(</span><span class="n">Tbibtext</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">api_token</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;create a .bib file to export citations in latex</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Tbibtext : list of str</span>
+<span class="sd">        list or array of Bibcodes or list of dictionaries of loaded analysis</span>
+<span class="sd">    path : str</span>
+<span class="sd">        path where to create the .bib file</span>
+<span class="sd">    api_token : str</span>
+<span class="sd">        api token, This can be found on your ADS account under : https://ui.adsabs.harvard.edu/user/settings/token</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">T_exp</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">tex_string</span><span class="o">=</span><span class="s1">&#39;\citep{&#39;</span>
+    <span class="k">for</span> <span class="n">bib</span> <span class="ow">in</span> <span class="n">Tbibtext</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bib</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">T_exp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fetch_bibtex</span><span class="p">(</span><span class="n">bib</span><span class="p">,</span><span class="n">api_token</span><span class="p">))</span>
+                <span class="n">tex_string</span><span class="o">+=</span><span class="n">bib</span><span class="o">+</span><span class="s1">&#39;,&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;bibtex&#39;</span> <span class="ow">in</span> <span class="n">bib</span><span class="p">:</span>
+                <span class="n">T_exp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fetch_bibtex</span><span class="p">(</span><span class="n">bib</span><span class="p">[</span><span class="s1">&#39;bibtex&#39;</span><span class="p">],</span><span class="n">api_token</span><span class="p">))</span>
+                <span class="n">tex_string</span><span class="o">+=</span><span class="n">bib</span><span class="p">[</span><span class="s1">&#39;bibtex&#39;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;,&#39;</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cant do &#39;</span><span class="o">+</span><span class="n">bib</span><span class="p">)</span>
+
+    <span class="n">tex_string</span><span class="o">+=</span><span class="s1">&#39;}&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">tex_string</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s2">&quot;/biblio.bib&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">T_exp</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

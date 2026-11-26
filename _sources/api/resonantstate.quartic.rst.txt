@@ -1,0 +1,7 @@
+resonantstate.quartic module
+============================
+
+.. automodule:: resonantstate.quartic
+   :members:
+   :show-inheritance:
+   :undoc-members:

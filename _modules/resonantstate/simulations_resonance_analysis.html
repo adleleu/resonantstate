@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.simulations_resonance_analysis &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">resonantstate</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">resonantstate.simulations_resonance_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for resonantstate.simulations_resonance_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<div class="viewcode-block" id="get_periods">
+<a class="viewcode-back" href="../../api/resonantstate.simulations_resonance_analysis.html#resonantstate.simulations_resonance_analysis.get_periods">[docs]</a>
+<span class="k">def</span> <span class="nf">get_periods</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">row_number</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">row_number</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">row_idx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">row_idx</span> <span class="o">=</span> <span class="n">row_number</span>
+
+    <span class="c1"># Get rows</span>
+    <span class="n">row_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;period&#39;</span><span class="p">)]]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">row_idx</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+    <span class="n">row_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row_data</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">row_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row_data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    
+    <span class="c1"># Filter nans</span>
+    <span class="n">nonan_inds</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row_values</span><span class="p">)</span>
+    <span class="n">row_index</span> <span class="o">=</span> <span class="n">row_index</span><span class="p">[</span><span class="n">nonan_inds</span><span class="p">]</span>
+    <span class="n">row_values</span> <span class="o">=</span> <span class="n">row_values</span><span class="p">[</span><span class="n">nonan_inds</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">row_values</span></div>
+
+
+<div class="viewcode-block" id="reorder_data">
+<a class="viewcode-back" href="../../api/resonantstate.simulations_resonance_analysis.html#resonantstate.simulations_resonance_analysis.reorder_data">[docs]</a>
+<span class="k">def</span> <span class="nf">reorder_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">row_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reorders a dataframe of posterior samples to be in increasing order of the periods.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): DataFrame containing posterior samples from one analysis.</span>
+<span class="sd">        row_number (int): Index of the row based on which the columns will be reordered. If -1, the last row is used.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: copy of the dataframe with the planet columns reordered in increasing period.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Identify columns with planet data and their ids</span>
+    <span class="n">planet_cols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">planet_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;mean_longitude_deg_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;period_days_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;k_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;h_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;inclination_deg_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;longitude_of_ascending_node_deg_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mass_planet_star_ratio_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;radius_planet_star_ratio_&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">planet_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="n">planet_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="c1"># Get the periods for each planet at the specified row</span>
+    <span class="n">period_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;period_days_</span><span class="si">{</span><span class="n">p_id</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">p_id</span> <span class="ow">in</span> <span class="n">planet_ids</span> <span class="k">if</span> <span class="sa">f</span><span class="s1">&#39;period_days_</span><span class="si">{</span><span class="n">p_id</span><span class="si">}</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">row_idx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">row_number</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">row_number</span>
+    <span class="n">row_periods</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row_idx</span><span class="p">,</span> <span class="n">period_cols</span><span class="p">]</span>
+    <span class="n">valid_periods</span> <span class="o">=</span> <span class="n">row_periods</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+    <span class="c1"># Sort the planet ids based on their periods at the specified row</span>
+    <span class="n">original_ids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">valid_periods</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">sorted_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">valid_periods</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">original_ids</span><span class="p">))]</span>
+
+    <span class="c1"># Map the old column names to new ones based on sorted ids</span>
+    <span class="n">column_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">new_id</span><span class="p">,</span> <span class="n">old_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_ids</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
+            <span class="n">old_col</span> <span class="o">=</span> <span class="n">param</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_id</span><span class="p">)</span>
+            <span class="n">new_col</span> <span class="o">=</span> <span class="n">param</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">old_col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">column_map</span><span class="p">[</span><span class="n">old_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_col</span>
+
+    <span class="c1"># Separate planet columns and global columns and create new dataframe</span>
+    <span class="n">planet_cols_sorted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">column_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">reordered_df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">planet_cols_sorted</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">column_map</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">global_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">planet_cols_sorted</span><span class="p">]</span>
+    <span class="n">reordered_df</span><span class="p">[</span><span class="n">global_cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">global_cols</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;sample_index&#39;</span> <span class="ow">in</span> <span class="n">reordered_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">reordered_df</span> <span class="o">=</span> <span class="n">reordered_df</span><span class="p">[[</span><span class="s1">&#39;sample_index&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">reordered_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">&#39;sample_index&#39;</span><span class="p">]]</span>
+
+
+    <span class="k">return</span> <span class="n">reordered_df</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="get_nearest_resonance">
+<a class="viewcode-back" href="../../api/resonantstate.simulations_resonance_analysis.html#resonantstate.simulations_resonance_analysis.get_nearest_resonance">[docs]</a>
+<span class="k">def</span> <span class="nf">get_nearest_resonance</span><span class="p">(</span><span class="n">period_ratio</span><span class="p">,</span> <span class="n">second_order</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kmax</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">difference_order</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">zeta</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple function to get the nearest resonance for a pair of planets based on their period ratio.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        period_ratio (float): period ratio between a pair of planets in the system.</span>
+<span class="sd">        second_order (bool, optional): if second order resonances are allowed. Defaults to False.</span>
+<span class="sd">        kmax (int, optional): maximum k value to be checked. Defaults to 12.</span>
+<span class="sd">        difference_order (float, optional): penalty to be applied to width of second-order resonances. Defaults to 0.5.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: resonance k, order and Delta value associated to the closest resonance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">zeta</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># Get closest first order resonance</span>
+        <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">kmax</span><span class="p">)</span>
+        <span class="n">possible_zeta</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">period_ratio</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">period_ratio</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">ks</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">possible_zeta</span><span class="p">))]</span>
+        <span class="n">min_zeta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">possible_zeta</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">min_zeta</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Get closest first order resonance</span>
+        <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">kmax</span><span class="p">)</span>
+        <span class="n">possible_Delta</span> <span class="o">=</span> <span class="n">period_ratio</span> <span class="o">*</span> <span class="n">ks</span> <span class="o">/</span> <span class="p">(</span><span class="n">ks</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">ks</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">possible_Delta</span><span class="p">))]</span>
+        <span class="n">min_Delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">possible_Delta</span><span class="p">))</span>
+        
+        <span class="c1"># Get closest second order resonance</span>
+        <span class="k">if</span> <span class="n">second_order</span><span class="p">:</span>
+            <span class="n">possible_Delta</span> <span class="o">=</span> <span class="n">period_ratio</span> <span class="o">*</span> <span class="n">ks</span> <span class="o">/</span> <span class="p">(</span><span class="n">ks</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">k2</span> <span class="o">=</span> <span class="n">ks</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">possible_Delta</span><span class="p">))]</span>
+            <span class="n">min_Delta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">possible_Delta</span><span class="p">))</span>
+            
+            <span class="c1"># If second order matches better first order, return it</span>
+            <span class="k">if</span> <span class="n">min_Delta2</span> <span class="o">&lt;</span> <span class="n">difference_order</span> <span class="o">*</span> <span class="n">min_Delta</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">k2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">min_Delta2</span>
+        
+        <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">min_Delta</span></div>
+
+
+
+<div class="viewcode-block" id="get_near_resonant_pairs">
+<a class="viewcode-back" href="../../api/resonantstate.simulations_resonance_analysis.html#resonantstate.simulations_resonance_analysis.get_near_resonant_pairs">[docs]</a>
+<span class="k">def</span> <span class="nf">get_near_resonant_pairs</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">row_number</span><span class="p">,</span> <span class="n">max_Delta</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the near-resonant pairs for a given time step of the simulations</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): time evolution of simulation of a planetary system</span>
+<span class="sd">        row_number (int): index of the desired row to analyse</span>
+<span class="sd">        max_Delta (float, optional): maximum value allowed for Delta to consider pair in resonance. Defaults to 1e-2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[tuple]: list of resonance pairs with corresponding k value and order, respectively.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Get rows</span>
+    <span class="n">row_idx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">row_number</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">row_number</span>
+    <span class="n">row_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;period&#39;</span><span class="p">)]]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">row_idx</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+    <span class="n">row_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row_data</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">row_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row_data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    
+    <span class="c1"># Filter nans</span>
+    <span class="n">nonan_inds</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">row_values</span><span class="p">)</span>
+    <span class="n">row_index</span> <span class="o">=</span> <span class="n">row_index</span><span class="p">[</span><span class="n">nonan_inds</span><span class="p">]</span>
+    <span class="n">row_values</span> <span class="o">=</span> <span class="n">row_values</span><span class="p">[</span><span class="n">nonan_inds</span><span class="p">]</span>
+    
+    <span class="c1"># Calculate Period Ratios and planet pairs</span>
+    <span class="n">period_ratios</span> <span class="o">=</span> <span class="n">row_values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">/</span> <span class="n">row_values</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pairs_planets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">row_index</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">row_index</span><span class="p">[</span><span class="mi">1</span><span class="p">:])))</span>
+    
+    <span class="c1"># Compute closest resonances</span>
+    <span class="n">k_resonances</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">Deltas_resonances</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_nearest_resonance</span><span class="p">(</span><span class="n">x</span><span class="p">))(</span><span class="n">period_ratios</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+    <span class="n">k_resonances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">k_resonances</span><span class="p">)</span>
+    
+    <span class="c1"># Filter resonances fulfilling the criterion to be considered in resonance</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Deltas_resonances</span> <span class="o">&lt;</span> <span class="n">max_Delta</span><span class="p">)</span>
+    <span class="n">resonances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">pairs_planets</span><span class="p">[</span><span class="n">inds</span><span class="p">],</span> <span class="n">k_resonances</span><span class="p">[</span><span class="n">inds</span><span class="p">],</span> <span class="n">order</span><span class="p">[</span><span class="n">inds</span><span class="p">]))</span>
+    
+    <span class="k">return</span> <span class="n">resonances</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

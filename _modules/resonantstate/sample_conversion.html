@@ -1,0 +1,1188 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resonantstate.sample_conversion &mdash; resonantstate  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            resonantstate
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">resonantstate</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">resonantstate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">resonantstate.sample_conversion</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for resonantstate.sample_conversion</h1><div class="highlight"><pre>
+<span></span>                                                <span class="c1">###### Conversion of samples ######</span>
+
+<span class="c1"># These functions convert into a system of units where : (see https://iau-a3.gitlab.io/NSFA/IAU2009_consts.html)</span>
+<span class="c1"># - The unit of length is the astronomical unit (1.49597870700e11 m, as recommended by the IAU)</span>
+<span class="c1"># - The unit of mass   is the mass of the Sun (1.98841583e30 kg, taking G and G*Msun as recommended by the IAU)</span>
+<span class="c1"># - The unit of time   is the day (86400 s, as recommended by the IAU)</span>
+
+
+<span class="kn">import</span> <span class="nn">math</span> <span class="k">as</span> <span class="nn">m</span>
+<span class="kn">import</span> <span class="nn">cmath</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">py</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+
+
+<span class="c1">#Defining the gravitational constant</span>
+<span class="n">G</span> <span class="o">=</span> <span class="mf">0.0002959122</span> <span class="c1"># AU^3 Msun^-1 day^-2 (Using the value G=6.67428e-11 m^3 kg^-1 s^-2 recommended by the IAU)</span>
+
+
+<span class="c1">####################################################################################################</span>
+<span class="c1">############################ Start of auxiliary functions. #########################################</span>
+<span class="c1">####################################################################################################</span>
+
+      
+<div class="viewcode-block" id="ell2cart_eccentric">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.ell2cart_eccentric">[docs]</a>
+<span class="k">def</span> <span class="nf">ell2cart_eccentric</span><span class="p">(</span><span class="n">aeiEoO</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+
+      <span class="c1">#Returns the cartesian coordinates. This is an auxiliary function</span>
+
+      <span class="c1">#aeiEoO = [a, e, i, E, omega, Omega] = [semi-major axis, eccentricity, inclination, eccentric anomaly, argument of the periapsis, longitude of the ascending node]</span>
+      <span class="c1">#i, E, omega, Omega are in radians</span>
+      <span class="c1">#mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi</span>
+      
+      <span class="c1">#Extracted from NcorpiON software and translated from C to python</span>
+      
+      <span class="n">a</span>        <span class="o">=</span> <span class="n">aeiEoO</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">e</span>        <span class="o">=</span> <span class="n">aeiEoO</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">i</span>        <span class="o">=</span> <span class="n">aeiEoO</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+      <span class="n">E</span>        <span class="o">=</span> <span class="n">aeiEoO</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+      <span class="n">omega</span>    <span class="o">=</span> <span class="n">aeiEoO</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+      <span class="n">Omega</span>    <span class="o">=</span> <span class="n">aeiEoO</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+      
+      <span class="n">mu</span>       <span class="o">=</span> <span class="n">G</span><span class="o">*</span><span class="n">mass</span>
+      <span class="n">cosE</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+      <span class="n">sinE</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+      <span class="n">cosvarpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega</span> <span class="o">+</span> <span class="n">Omega</span><span class="p">)</span>
+      <span class="n">sinvarpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">+</span> <span class="n">Omega</span><span class="p">)</span>
+      <span class="n">q</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Omega</span><span class="p">)</span>
+      <span class="n">p</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Omega</span><span class="p">)</span>
+      <span class="n">chi</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+      <span class="n">pp</span>       <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">p</span>
+      <span class="n">qq</span>       <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">q</span>
+      <span class="n">dpq</span>      <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">q</span>
+      
+      <span class="c1">## In the orbital plane (see e.g. Laskar &amp; Robutel 1995) ##</span>
+      <span class="n">na</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+      <span class="n">X_buff</span>  <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">cosE</span> <span class="o">-</span> <span class="n">e</span><span class="p">)</span>
+      <span class="n">Y_buff</span>  <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">sinE</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">e</span><span class="o">*</span><span class="n">e</span><span class="p">)</span>
+      <span class="n">vX_buff</span> <span class="o">=</span> <span class="o">-</span><span class="n">na</span><span class="o">*</span><span class="n">sinE</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">e</span><span class="o">*</span><span class="n">cosE</span><span class="p">)</span>
+      <span class="n">vY_buff</span> <span class="o">=</span> <span class="n">na</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">e</span><span class="o">*</span><span class="n">e</span><span class="p">)</span><span class="o">*</span><span class="n">cosE</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">e</span><span class="o">*</span><span class="n">cosE</span><span class="p">)</span>
+
+      <span class="c1">## Rotations to convert to reference plane (see e.g. Laskar &amp; Robutel 1995) ##      </span>
+      <span class="n">X</span>  <span class="o">=</span>  <span class="n">X_buff</span><span class="o">*</span><span class="p">(</span><span class="n">pp</span><span class="o">*</span><span class="n">cosvarpi</span> <span class="o">+</span> <span class="n">dpq</span><span class="o">*</span><span class="n">sinvarpi</span><span class="p">)</span> <span class="o">+</span>  <span class="n">Y_buff</span><span class="o">*</span><span class="p">(</span><span class="n">dpq</span><span class="o">*</span><span class="n">cosvarpi</span> <span class="o">-</span> <span class="n">pp</span><span class="o">*</span><span class="n">sinvarpi</span><span class="p">)</span>
+      <span class="n">vX</span> <span class="o">=</span> <span class="n">vX_buff</span><span class="o">*</span><span class="p">(</span><span class="n">pp</span><span class="o">*</span><span class="n">cosvarpi</span> <span class="o">+</span> <span class="n">dpq</span><span class="o">*</span><span class="n">sinvarpi</span><span class="p">)</span> <span class="o">+</span> <span class="n">vY_buff</span><span class="o">*</span><span class="p">(</span><span class="n">dpq</span><span class="o">*</span><span class="n">cosvarpi</span> <span class="o">-</span> <span class="n">pp</span><span class="o">*</span><span class="n">sinvarpi</span><span class="p">)</span>
+      <span class="n">Y</span>  <span class="o">=</span>  <span class="n">X_buff</span><span class="o">*</span><span class="p">(</span><span class="n">qq</span><span class="o">*</span><span class="n">sinvarpi</span> <span class="o">+</span> <span class="n">dpq</span><span class="o">*</span><span class="n">cosvarpi</span><span class="p">)</span> <span class="o">+</span>  <span class="n">Y_buff</span><span class="o">*</span><span class="p">(</span><span class="n">qq</span><span class="o">*</span><span class="n">cosvarpi</span>  <span class="o">-</span> <span class="n">dpq</span><span class="o">*</span><span class="n">sinvarpi</span><span class="p">)</span>
+      <span class="n">vY</span> <span class="o">=</span> <span class="n">vX_buff</span><span class="o">*</span><span class="p">(</span><span class="n">qq</span><span class="o">*</span><span class="n">sinvarpi</span> <span class="o">+</span> <span class="n">dpq</span><span class="o">*</span><span class="n">cosvarpi</span><span class="p">)</span> <span class="o">+</span> <span class="n">vY_buff</span><span class="o">*</span><span class="p">(</span><span class="n">qq</span><span class="o">*</span><span class="n">cosvarpi</span>  <span class="o">-</span> <span class="n">dpq</span><span class="o">*</span><span class="n">sinvarpi</span><span class="p">)</span>
+      <span class="n">Z</span>  <span class="o">=</span>  <span class="n">X_buff</span><span class="o">*</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">sinvarpi</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">cosvarpi</span><span class="p">)</span> <span class="o">+</span>  <span class="n">Y_buff</span><span class="o">*</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">sinvarpi</span> <span class="o">+</span> <span class="mf">2.</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">cosvarpi</span><span class="p">)</span>
+      <span class="n">vZ</span> <span class="o">=</span> <span class="n">vX_buff</span><span class="o">*</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">sinvarpi</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">cosvarpi</span><span class="p">)</span> <span class="o">+</span> <span class="n">vY_buff</span><span class="o">*</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">sinvarpi</span> <span class="o">+</span> <span class="mf">2.</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">chi</span><span class="o">*</span><span class="n">cosvarpi</span><span class="p">)</span>
+      
+      <span class="k">return</span> <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">vX</span><span class="p">,</span> <span class="n">vY</span><span class="p">,</span> <span class="n">vZ</span><span class="p">]</span></div>
+
+      
+
+<div class="viewcode-block" id="cart2ell">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.cart2ell">[docs]</a>
+<span class="k">def</span> <span class="nf">cart2ell</span><span class="p">(</span><span class="n">XYZvXvYvZ</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+
+      <span class="c1">#Converts the cartesian coordinates into the elliptic elements [a, lambda, k, h, q, p] where k + ih = e*exp(i*varpi) and q + ip = sin(I/2)*exp(i*Omega)</span>
+      <span class="c1">#mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi</span>
+      
+      <span class="c1">#This function was originally provided by Mickaël Gastineau of the IMMCE lab for NcorpiON software and converted from C to python for the workshop</span>
+
+      <span class="n">mu</span> <span class="o">=</span> <span class="n">G</span><span class="o">*</span><span class="n">mass</span>
+
+      <span class="c1">##### Getting the cartesian coordinates #####</span>
+      <span class="n">X</span>   <span class="o">=</span> <span class="n">XYZvXvYvZ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">Y</span>   <span class="o">=</span> <span class="n">XYZvXvYvZ</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">Z</span>   <span class="o">=</span> <span class="n">XYZvXvYvZ</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+      <span class="n">vX</span>  <span class="o">=</span> <span class="n">XYZvXvYvZ</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+      <span class="n">vY</span>  <span class="o">=</span> <span class="n">XYZvXvYvZ</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+      <span class="n">vZ</span>  <span class="o">=</span> <span class="n">XYZvXvYvZ</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+      <span class="c1">##### Computing the semi-major axis #####</span>
+      <span class="n">R</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="n">Y</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">Z</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span>
+      <span class="n">V2</span> <span class="o">=</span> <span class="n">vX</span><span class="o">*</span><span class="n">vX</span> <span class="o">+</span> <span class="n">vY</span><span class="o">*</span><span class="n">vY</span> <span class="o">+</span> <span class="n">vZ</span><span class="o">*</span><span class="n">vZ</span>
+      <span class="n">AA</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">mu</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">mu</span> <span class="o">-</span> <span class="n">R</span><span class="o">*</span><span class="n">V2</span><span class="p">)</span> <span class="c1">#Division by zero if the trajectory is perfectly parabolic.</span>
+
+      <span class="c1">##### Normalizing the velocities (Adopting the convention of J. Laskar&#39;s 2004 lectures notes) #####</span>
+      <span class="n">SMU</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+      <span class="n">vX</span>  <span class="o">=</span> <span class="n">vX</span><span class="o">/</span><span class="n">SMU</span>
+      <span class="n">vY</span>  <span class="o">=</span> <span class="n">vY</span><span class="o">/</span><span class="n">SMU</span>
+      <span class="n">vZ</span>  <span class="o">=</span> <span class="n">vZ</span><span class="o">/</span><span class="n">SMU</span>
+
+      <span class="c1">##### Computing the angular momentum #####</span>
+      <span class="n">V2</span> <span class="o">=</span> <span class="n">vX</span><span class="o">*</span><span class="n">vX</span> <span class="o">+</span> <span class="n">vY</span><span class="o">*</span><span class="n">vY</span> <span class="o">+</span> <span class="n">vZ</span><span class="o">*</span><span class="n">vZ</span>
+      <span class="n">RV</span> <span class="o">=</span> <span class="n">X</span><span class="o">*</span><span class="n">vX</span>  <span class="o">+</span> <span class="n">Y</span><span class="o">*</span><span class="n">vY</span>  <span class="o">+</span> <span class="n">Z</span><span class="o">*</span><span class="n">vZ</span>
+      <span class="n">C1</span> <span class="o">=</span> <span class="n">Y</span><span class="o">*</span><span class="n">vZ</span>  <span class="o">-</span> <span class="n">Z</span><span class="o">*</span><span class="n">vY</span>
+      <span class="n">C2</span> <span class="o">=</span> <span class="n">Z</span><span class="o">*</span><span class="n">vX</span>  <span class="o">-</span> <span class="n">X</span><span class="o">*</span><span class="n">vZ</span>
+      <span class="n">C3</span> <span class="o">=</span> <span class="n">X</span><span class="o">*</span><span class="n">vY</span>  <span class="o">-</span> <span class="n">Y</span><span class="o">*</span><span class="n">vX</span>
+      <span class="n">CC</span> <span class="o">=</span> <span class="n">C1</span><span class="o">*</span><span class="n">C1</span> <span class="o">+</span> <span class="n">C2</span><span class="o">*</span><span class="n">C2</span> <span class="o">+</span> <span class="n">C3</span><span class="o">*</span><span class="n">C3</span>
+      <span class="n">DC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">CC</span><span class="p">)</span>
+
+      <span class="c1">##### Computing (q, p) #####</span>
+      <span class="n">aux0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="p">(</span><span class="n">CC</span> <span class="o">+</span> <span class="n">DC</span><span class="o">*</span><span class="n">C3</span><span class="p">))</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">aux0</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="mf">0.</span>
+      <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="n">C2</span><span class="o">/</span><span class="n">aux0</span>
+            <span class="n">p</span> <span class="o">=</span>  <span class="n">C1</span><span class="o">/</span><span class="n">aux0</span>
+
+      <span class="c1">##### Computing (k, h) #####</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">R</span> <span class="o">==</span> <span class="mf">0.</span> <span class="ow">or</span> <span class="n">V2</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="n">H</span> <span class="o">=</span> <span class="mf">0.</span>
+
+      <span class="k">else</span><span class="p">:</span>
+            <span class="c1">##### Computing the matrix coefficients needed for (k, h) #####</span>
+            <span class="n">a11</span> <span class="o">=</span> <span class="n">V2</span> <span class="o">-</span> <span class="mf">1.</span><span class="o">/</span><span class="n">R</span>
+            <span class="n">a12</span> <span class="o">=</span> <span class="n">RV</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">DC</span><span class="p">)</span>
+            <span class="n">a21</span> <span class="o">=</span> <span class="o">-</span><span class="n">RV</span>
+            <span class="n">a22</span> <span class="o">=</span> <span class="n">DC</span> <span class="o">-</span> <span class="n">R</span><span class="o">/</span><span class="n">DC</span>
+
+            <span class="c1">##### Computing (k, h) #####</span>
+            <span class="n">c11</span>  <span class="o">=</span>  <span class="n">X</span><span class="o">*</span><span class="n">a11</span>  <span class="o">+</span> <span class="n">vX</span><span class="o">*</span><span class="n">a21</span>
+            <span class="n">c12</span>  <span class="o">=</span>  <span class="n">X</span><span class="o">*</span><span class="n">a12</span>  <span class="o">+</span> <span class="n">vX</span><span class="o">*</span><span class="n">a22</span>
+            <span class="n">c21</span>  <span class="o">=</span>  <span class="n">Y</span><span class="o">*</span><span class="n">a11</span>  <span class="o">+</span> <span class="n">vY</span><span class="o">*</span><span class="n">a21</span>
+            <span class="n">c22</span>  <span class="o">=</span>  <span class="n">Y</span><span class="o">*</span><span class="n">a12</span>  <span class="o">+</span> <span class="n">vY</span><span class="o">*</span><span class="n">a22</span>
+            <span class="n">FAC1</span> <span class="o">=</span>  <span class="n">C1</span><span class="o">/</span><span class="p">(</span><span class="n">DC</span> <span class="o">+</span> <span class="n">C3</span><span class="p">)</span>
+            <span class="n">FAC2</span> <span class="o">=</span>  <span class="n">C2</span><span class="o">/</span><span class="p">(</span><span class="n">DC</span> <span class="o">+</span> <span class="n">C3</span><span class="p">)</span>
+            <span class="n">K1</span>   <span class="o">=</span>  <span class="n">c11</span> <span class="o">-</span> <span class="n">FAC1</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">*</span><span class="n">a11</span> <span class="o">+</span> <span class="n">vZ</span><span class="o">*</span><span class="n">a21</span><span class="p">)</span>
+            <span class="n">H1</span>   <span class="o">=</span> <span class="o">-</span><span class="n">c12</span> <span class="o">+</span> <span class="n">FAC1</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">*</span><span class="n">a12</span> <span class="o">+</span> <span class="n">vZ</span><span class="o">*</span><span class="n">a22</span><span class="p">)</span>
+            <span class="n">H2</span>   <span class="o">=</span>  <span class="n">c21</span> <span class="o">-</span> <span class="n">FAC2</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">*</span><span class="n">a11</span> <span class="o">+</span> <span class="n">vZ</span><span class="o">*</span><span class="n">a21</span><span class="p">)</span> <span class="c1">#Should be equal to H1</span>
+            <span class="n">K2</span>   <span class="o">=</span>  <span class="n">c22</span> <span class="o">-</span> <span class="n">FAC2</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">*</span><span class="n">a12</span> <span class="o">+</span> <span class="n">vZ</span><span class="o">*</span><span class="n">a22</span><span class="p">)</span> <span class="c1">#Should be equal to K1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">H1</span> <span class="o">-</span> <span class="n">H2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">K1</span> <span class="o">-</span> <span class="n">K2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.e-6</span><span class="p">):</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning : Bad computation of (k,h) in function cart2ell. (K1 - K2, H1 - H2) = &quot;</span><span class="p">,</span> <span class="n">K1</span> <span class="o">-</span> <span class="n">K2</span><span class="p">,</span> <span class="n">H1</span> <span class="o">-</span> <span class="n">H2</span><span class="p">)</span>
+            <span class="n">K</span>    <span class="o">=</span>  <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">K1</span> <span class="o">+</span> <span class="n">K2</span><span class="p">)</span>
+            <span class="n">H</span>    <span class="o">=</span>  <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">H1</span> <span class="o">+</span> <span class="n">H2</span><span class="p">)</span>
+
+      <span class="c1">##### Computing lambda #####</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">R</span> <span class="o">==</span> <span class="mf">0.</span> <span class="ow">or</span> <span class="n">V2</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="n">lbd</span> <span class="o">=</span> <span class="mf">0.</span>
+
+      <span class="k">else</span><span class="p">:</span>
+            <span class="c1">##### Computing the mean longitude l = M + varpi #####</span>
+            <span class="n">USQA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="o">/</span><span class="n">R</span> <span class="o">-</span> <span class="n">V2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">USQA</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.</span><span class="p">):</span> <span class="c1">#Elliptic case</span>
+                  <span class="n">b12</span>  <span class="o">=</span> <span class="n">vX</span> <span class="o">-</span> <span class="n">FAC1</span><span class="o">*</span><span class="n">vZ</span>
+                  <span class="n">b22</span>  <span class="o">=</span> <span class="n">vY</span> <span class="o">-</span> <span class="n">FAC2</span><span class="o">*</span><span class="n">vZ</span>
+                  <span class="n">aux1</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">V2</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">DC</span><span class="o">*</span><span class="n">USQA</span><span class="p">)</span>
+                  <span class="n">sinF</span> <span class="o">=</span> <span class="o">-</span><span class="n">b12</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="n">USQA</span> <span class="o">+</span> <span class="n">H</span><span class="o">*</span><span class="n">aux1</span>
+                  <span class="n">cosF</span> <span class="o">=</span>  <span class="n">b22</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="n">USQA</span> <span class="o">+</span> <span class="n">K</span><span class="o">*</span><span class="n">aux1</span>
+                  <span class="n">F</span>    <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sinF</span><span class="p">,</span> <span class="n">cosF</span><span class="p">)</span>
+                  <span class="n">lbd</span>  <span class="o">=</span> <span class="n">F</span> <span class="o">-</span> <span class="n">RV</span><span class="o">*</span><span class="n">USQA</span>
+
+            <span class="k">else</span><span class="p">:</span> <span class="c1">#Hyperbolic case</span>
+                  <span class="n">USQA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mf">2.</span><span class="o">/</span><span class="n">R</span> <span class="o">-</span> <span class="n">V2</span><span class="p">))</span>
+                  <span class="n">E</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctanh</span><span class="p">(</span><span class="n">RV</span><span class="o">*</span><span class="n">USQA</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">V2</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">))</span>
+                  <span class="n">M</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">K</span><span class="o">*</span><span class="n">K</span> <span class="o">+</span> <span class="n">H</span><span class="o">*</span><span class="n">H</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">-</span> <span class="n">E</span>
+                  <span class="n">lbd</span>  <span class="o">=</span> <span class="n">M</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">AA</span><span class="p">,</span> <span class="n">lbd</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span></div>
+
+
+
+
+<div class="viewcode-block" id="l2F">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.l2F">[docs]</a>
+<span class="k">def</span> <span class="nf">l2F</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">h</span><span class="p">):</span>
+      <span class="c1">#Solves the Kepler equation without a numerical integration. Much faster than the above function</span>
+      <span class="c1">#Returns F = E + varpi</span>
+      <span class="c1">#(l, k, h) = (Mean longitude, e*cos(varpi), e*sin(varpi))</span>
+      <span class="c1">#Written by ASD Team LTE lab (former IMCCE)</span>
+
+      <span class="n">eps</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="mf">2.26e-16</span>
+      <span class="n">imax</span> <span class="o">=</span> <span class="mi">20</span>
+      <span class="c1"># depart methode d&#39;ordre 3</span>
+      <span class="n">a</span><span class="o">=</span><span class="n">l</span>
+      <span class="n">ca</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+      <span class="n">sa</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+      <span class="n">se</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">sa</span><span class="o">-</span><span class="n">h</span><span class="o">*</span><span class="n">ca</span>
+      <span class="n">ce</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">ca</span><span class="o">+</span><span class="n">h</span><span class="o">*</span><span class="n">sa</span>
+      <span class="n">fa</span><span class="o">=</span><span class="n">a</span><span class="o">-</span><span class="n">se</span><span class="o">-</span><span class="n">l</span>
+      <span class="n">f1a</span><span class="o">=</span><span class="mf">1.0</span><span class="o">-</span><span class="n">ce</span>
+      <span class="n">f2a</span><span class="o">=</span><span class="n">se</span><span class="o">/</span><span class="mf">2.0</span>
+      <span class="n">f3a</span><span class="o">=</span><span class="n">ce</span><span class="o">/</span><span class="mf">6.0</span>
+      <span class="n">d1</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="n">f1a</span>
+      <span class="n">d2</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="p">(</span><span class="n">f1a</span><span class="o">-</span><span class="n">d1</span><span class="o">*</span><span class="n">f2a</span><span class="p">)</span>
+      <span class="n">d3</span> <span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="p">(</span><span class="n">f1a</span><span class="o">+</span><span class="n">d2</span><span class="o">*</span><span class="p">(</span><span class="n">f2a</span><span class="o">+</span><span class="n">d2</span><span class="o">*</span><span class="n">f3a</span><span class="p">))</span>
+      <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">+</span><span class="n">d3</span>
+      <span class="c1"># methode d&#39;ordre 6</span>
+      <span class="n">ca</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+      <span class="n">sa</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+      <span class="n">se</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">sa</span><span class="o">-</span><span class="n">h</span><span class="o">*</span><span class="n">ca</span>
+      <span class="n">ce</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">ca</span><span class="o">+</span><span class="n">h</span><span class="o">*</span><span class="n">sa</span>
+      <span class="n">fa</span><span class="o">=</span><span class="n">a</span><span class="o">-</span><span class="n">se</span><span class="o">-</span><span class="n">l</span>
+      <span class="n">f1a</span><span class="o">=</span><span class="mf">1.0</span><span class="o">-</span><span class="n">ce</span>
+      <span class="n">f2a</span><span class="o">=</span><span class="n">se</span><span class="o">/</span><span class="mf">2.0</span>
+      <span class="n">f3a</span><span class="o">=</span><span class="n">ce</span><span class="o">/</span><span class="mf">6.0</span>
+      <span class="n">f4a</span><span class="o">=-</span><span class="n">se</span><span class="o">/</span><span class="mf">24.0</span>
+      <span class="n">f5a</span><span class="o">=-</span><span class="n">ce</span><span class="o">/</span><span class="mf">120.0</span>
+      <span class="n">d1</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="n">f1a</span>
+      <span class="n">d2</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="p">(</span><span class="n">f1a</span><span class="o">-</span><span class="n">d1</span><span class="o">*</span><span class="n">f2a</span><span class="p">)</span>
+      <span class="n">d3</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="p">(</span><span class="n">f1a</span><span class="o">+</span><span class="n">d2</span><span class="o">*</span><span class="p">(</span><span class="n">f2a</span><span class="o">+</span><span class="n">d2</span><span class="o">*</span><span class="n">f3a</span><span class="p">))</span>
+      <span class="n">d4</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="p">(</span><span class="n">f1a</span><span class="o">+</span><span class="n">d3</span><span class="o">*</span><span class="p">(</span><span class="n">f2a</span><span class="o">+</span><span class="n">d3</span><span class="o">*</span><span class="p">(</span><span class="n">f3a</span><span class="o">+</span><span class="n">d3</span><span class="o">*</span><span class="n">f4a</span><span class="p">)))</span>
+      <span class="n">d5</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="p">(</span> <span class="n">f1a</span><span class="o">+</span><span class="n">d4</span><span class="o">*</span><span class="p">(</span><span class="n">f2a</span><span class="o">+</span><span class="n">d4</span><span class="o">*</span><span class="p">(</span><span class="n">f3a</span><span class="o">+</span><span class="n">d4</span><span class="o">*</span><span class="p">(</span><span class="n">f4a</span><span class="o">+</span><span class="n">d4</span><span class="o">*</span><span class="n">f5a</span><span class="p">))))</span>
+      <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">+</span><span class="n">d5</span>
+      <span class="c1">#     return</span>
+      <span class="c1">#     on teste la precision obtenue</span>
+      <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+      <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">ca</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">sa</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">se</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">sa</span><span class="o">-</span><span class="n">h</span><span class="o">*</span><span class="n">ca</span>
+            <span class="n">fa</span><span class="o">=</span><span class="n">a</span><span class="o">-</span><span class="n">se</span><span class="o">-</span><span class="n">l</span>
+            <span class="n">ce</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">ca</span><span class="o">+</span><span class="n">h</span><span class="o">*</span><span class="n">sa</span>
+            <span class="n">f1a</span><span class="o">=</span><span class="mf">1.0</span><span class="o">-</span><span class="n">ce</span>
+            <span class="n">d1</span><span class="o">=-</span><span class="n">fa</span><span class="o">/</span><span class="n">f1a</span>
+            <span class="c1">#     si la precison n&#39;est pas bonne, on continue les calculs</span>
+            <span class="c1">#     en iterant la methode d&#39;ordre 1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">):</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="n">imax</span><span class="p">):</span>
+                        <span class="c1">#     write(*,*) &#39;erreur fatale dans elliptid:keplkh2&#39;</span>
+                        <span class="c1">#     write(*,*) &#39;erreur :&#39;,abs(d1)/dmax1(1.0,abs(a))</span>
+                        <span class="k">return</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                  <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">+</span><span class="n">d1</span>
+            <span class="k">else</span><span class="p">:</span>
+                  <span class="k">return</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="lPkhiO_to_aeiMoO">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.lPkhiO_to_aeiMoO">[docs]</a>
+<span class="k">def</span> <span class="nf">lPkhiO_to_aeiMoO</span><span class="p">(</span><span class="n">lPkhiO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">):</span>
+
+      <span class="c1">#Converts from the workshop format to elliptic elements [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]</span>
+      <span class="c1">#lPkhiO = [mean longitude (deg), Period (days), k, h, inclination(deg), longitude of the ascending node(deg)]</span>
+      <span class="c1">#mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi</span>
+
+      
+      <span class="n">mu</span>    <span class="o">=</span> <span class="n">G</span><span class="o">*</span><span class="n">mass</span>
+      <span class="n">lbd</span>   <span class="o">=</span> <span class="n">lPkhiO</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">P</span>     <span class="o">=</span> <span class="n">lPkhiO</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">k</span>     <span class="o">=</span> <span class="n">lPkhiO</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+      <span class="n">h</span>     <span class="o">=</span> <span class="n">lPkhiO</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+      <span class="n">i</span>     <span class="o">=</span> <span class="n">lPkhiO</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+      <span class="n">Omega</span> <span class="o">=</span> <span class="n">lPkhiO</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+      
+      <span class="n">lbd</span>   <span class="o">=</span> <span class="n">lbd</span>  <span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+      <span class="n">i</span>     <span class="o">=</span> <span class="n">i</span>    <span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+      <span class="n">Omega</span> <span class="o">=</span> <span class="n">Omega</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+      <span class="n">P</span>     <span class="o">=</span> <span class="n">P</span><span class="o">/</span><span class="n">daysInUOT</span>
+
+      <span class="n">e</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+      <span class="n">varpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+      <span class="n">M</span>     <span class="o">=</span> <span class="n">lbd</span> <span class="o">-</span> <span class="n">varpi</span>
+      <span class="n">omega</span> <span class="o">=</span> <span class="n">varpi</span> <span class="o">-</span> <span class="n">Omega</span>
+      <span class="n">a</span>     <span class="o">=</span> <span class="p">(</span><span class="n">mu</span><span class="o">*</span><span class="n">P</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">Omega</span><span class="p">]</span></div>
+
+      
+      
+<div class="viewcode-block" id="aeiMoO_to_alkhqp">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.aeiMoO_to_alkhqp">[docs]</a>
+<span class="k">def</span> <span class="nf">aeiMoO_to_alkhqp</span><span class="p">(</span><span class="n">aeiMoO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">):</span>
+
+      <span class="c1">#Converts from elliptic elements [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]</span>
+      <span class="c1">#to elliptic elements [semi-major axis, mean longitude (deg), k, h, q, p]</span>
+      <span class="c1">#mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi</span>
+
+      
+      <span class="n">mu</span>    <span class="o">=</span> <span class="n">G</span><span class="o">*</span><span class="n">mass</span>
+      <span class="n">a</span>     <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">e</span>     <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">i</span>     <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+      <span class="n">M</span>     <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+      <span class="n">omega</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+      <span class="n">Omega</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+      
+      <span class="n">varpi</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">+</span> <span class="n">Omega</span>
+      <span class="n">k</span>     <span class="o">=</span> <span class="n">e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">varpi</span><span class="p">)</span>
+      <span class="n">h</span>     <span class="o">=</span> <span class="n">e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">varpi</span><span class="p">)</span>
+      <span class="n">q</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Omega</span><span class="p">)</span>
+      <span class="n">p</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Omega</span><span class="p">)</span>
+      <span class="n">lbd</span>   <span class="o">=</span> <span class="n">M</span> <span class="o">+</span> <span class="n">varpi</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">lbd</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="lPkhiO_to_cart">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.lPkhiO_to_cart">[docs]</a>
+<span class="k">def</span> <span class="nf">lPkhiO_to_cart</span><span class="p">(</span><span class="n">lPkhiO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">):</span>
+
+      <span class="c1">#Converts from the workshop format to cartesian coordinates</span>
+      <span class="c1">#lPkhiO = [mean longitude (deg), Period (days), k, h, inclination(deg), longitude of the ascending node(deg)]</span>
+      <span class="c1">#mass is the central mass. e.g. mass = M* + m_j for heliocentric, M* + m_1 + ... + m_j for regular Jacobi and M*(M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}) for WisdomHolman Jacobi</span>
+
+      <span class="n">aeiMoO</span> <span class="o">=</span> <span class="n">lPkhiO_to_aeiMoO</span><span class="p">(</span><span class="n">lPkhiO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">)</span>
+      <span class="n">a</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">e</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">i</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+      <span class="n">M</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+      <span class="n">o</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+      <span class="n">O</span> <span class="o">=</span> <span class="n">aeiMoO</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+      <span class="n">vrp</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">O</span>
+      <span class="n">l</span>   <span class="o">=</span> <span class="n">M</span> <span class="o">+</span> <span class="n">vrp</span>
+      <span class="n">k</span>   <span class="o">=</span> <span class="n">e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">vrp</span><span class="p">)</span>
+      <span class="n">h</span>   <span class="o">=</span> <span class="n">e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">vrp</span><span class="p">)</span>
+      <span class="n">aeiEoO</span>  <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l2F</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">vrp</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">O</span><span class="p">]</span>
+      <span class="n">cart</span>    <span class="o">=</span> <span class="n">ell2cart_eccentric</span><span class="p">(</span><span class="n">aeiEoO</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">cart</span><span class="p">;</span></div>
+
+
+
+<div class="viewcode-block" id="sample2cart_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.sample2cart_row">[docs]</a>
+<span class="k">def</span> <span class="nf">sample2cart_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of the workshop into the same row in cartesian coordinates</span>
+      <span class="c1">#typeOfCoordinates is either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;</span>
+      <span class="c1">#typeOfCoordinates must be the type of coordinates into which the sample is given !</span>
+      <span class="c1">#This function cannot be used to change the type of coordinates ! Its purpose is only to convert to cartesian</span>
+      <span class="c1">#Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row</span>
+      <span class="c1">#adcol is the number of additional columns in the sample (often 0). (e.g. adcol = 1 for Hadden&#39;s posteriors)</span>
+
+      <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">8</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">adcol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The sample line does not have 8*k + 3 + adcol columns.&quot;</span><span class="p">)</span>
+
+      <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">adcol</span><span class="p">)</span><span class="o">//</span><span class="mi">8</span> <span class="c1">#Number of planets</span>
+      
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+      
+      <span class="n">daysInUOT</span> <span class="o">=</span> <span class="mf">1.</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">lPkhiO</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span> <span class="p">:</span> <span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Jacobi&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;JacobiWisdomHolman&#39;</span><span class="p">):</span>
+                  <span class="n">massum</span> <span class="o">=</span> <span class="mf">1.</span> <span class="c1"># M* + m1 + ... + mi</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">massum</span> <span class="o">=</span> <span class="n">massum</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="n">massum</span><span class="o">/</span><span class="p">(</span><span class="n">massum</span> <span class="o">-</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">])</span> <span class="c1"># M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})</span>
+            <span class="k">else</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;typeOfCoordinates can be either &#39;Jacobi&#39; or &#39;Heliocentric&#39; or &#39;JacobiWisdomHolman&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span><span class="o">*</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">]</span>
+            <span class="n">cart</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lPkhiO_to_cart</span><span class="p">(</span><span class="n">lPkhiO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">))</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">cart</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]])))</span>
+
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">adcol</span><span class="p">]])))</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adcol</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="n">adcol</span><span class="o">+</span><span class="n">i</span><span class="p">]])))</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="sample2aeiMoO_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.sample2aeiMoO_row">[docs]</a>
+<span class="k">def</span> <span class="nf">sample2aeiMoO_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of the workshop into the same row in coordinates a, e, i, M, o, O</span>
+      <span class="c1">#[a, e, i, M, o, O] = [semi-major axis, eccentricity, inclination, mean anomaly, argument of periapsis, longitude of ascending node]</span>
+      <span class="c1">#typeOfCoordinates is either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;</span>
+      <span class="c1">#typeOfCoordinates must be the type of coordinates into which the sample is given !</span>
+      <span class="c1">#This function cannot be used to change the type of coordinates ! Its purpose is only to convert to a, e, i, M, o, O</span>
+      <span class="c1">#Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row</span>
+      <span class="c1">#adcol is the number of additional columns in the sample (often 0). (e.g. adcol = 1 for Hadden&#39;s posteriors)</span>
+
+      <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">8</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">adcol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The sample line does not have 8*k + 3 + adcol columns.&quot;</span><span class="p">)</span>
+
+      <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">adcol</span><span class="p">)</span><span class="o">//</span><span class="mi">8</span> <span class="c1">#Number of planets</span>
+      
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+      
+      <span class="n">daysInUOT</span> <span class="o">=</span> <span class="mf">1.</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">lPkhiO</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span> <span class="p">:</span> <span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Jacobi&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;JacobiWisdomHolman&#39;</span><span class="p">):</span>
+                  <span class="n">massum</span> <span class="o">=</span> <span class="mf">1.</span> <span class="c1"># M* + m1 + ... + mi</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">massum</span> <span class="o">=</span> <span class="n">massum</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="n">massum</span><span class="o">/</span><span class="p">(</span><span class="n">massum</span> <span class="o">-</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">])</span> <span class="c1"># M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})</span>
+            <span class="k">else</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;typeOfCoordinates can be either &#39;Jacobi&#39; or &#39;Heliocentric&#39; or &#39;JacobiWisdomHolman&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span><span class="o">*</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">]</span>
+            <span class="n">aeiMoO</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lPkhiO_to_aeiMoO</span><span class="p">(</span><span class="n">lPkhiO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">))</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">aeiMoO</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]])))</span>
+
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">adcol</span><span class="p">]])))</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adcol</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="n">adcol</span><span class="o">+</span><span class="n">i</span><span class="p">]])))</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+      
+      
+      
+<div class="viewcode-block" id="sample2alkhqp_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.sample2alkhqp_row">[docs]</a>
+<span class="k">def</span> <span class="nf">sample2alkhqp_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of the workshop into the same row in coordinates a, lbd, k, h, q, p</span>
+      <span class="c1">#[a, lbd, k, h, q, p] = [semi-major axis, mean longitude, e*cos(varpi), e*sin(varpi), sin(i/2)*cos(Omega), sin(i/2)*sin(Omega)]</span>
+      <span class="c1">#typeOfCoordinates is either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;</span>
+      <span class="c1">#typeOfCoordinates must be the type of coordinates into which the sample is given !</span>
+      <span class="c1">#This function cannot be used to change the type of coordinates ! Its purpose is only to convert to a, lbd, k, h, q, p</span>
+      <span class="c1">#Use functions Jac2Hel_row or Hel2Jac_row to change the type of coordinates of the sample row</span>
+      <span class="c1">#adcol is the number of additional columns in the sample (often 0). (e.g. adcol = 1 for Hadden&#39;s posteriors)</span>
+
+      <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">8</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">adcol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The sample line does not have 8*k + 3 + adcol columns.&quot;</span><span class="p">)</span>
+
+      <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">adcol</span><span class="p">)</span><span class="o">//</span><span class="mi">8</span> <span class="c1">#Number of planets</span>
+      
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+      
+      <span class="n">daysInUOT</span> <span class="o">=</span> <span class="mf">1.</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">lPkhiO</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span> <span class="p">:</span> <span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Jacobi&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;JacobiWisdomHolman&#39;</span><span class="p">):</span>
+                  <span class="n">massum</span> <span class="o">=</span> <span class="mf">1.</span> <span class="c1"># M* + m1 + ... + mi</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">massum</span> <span class="o">=</span> <span class="n">massum</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="n">massum</span><span class="o">/</span><span class="p">(</span><span class="n">massum</span> <span class="o">-</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">])</span> <span class="c1"># M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})</span>
+            <span class="k">else</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;typeOfCoordinates can be either &#39;Jacobi&#39; or &#39;Heliocentric&#39; or &#39;JacobiWisdomHolman&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span><span class="o">*</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">]</span>
+            <span class="n">aeiMoO</span> <span class="o">=</span> <span class="n">lPkhiO_to_aeiMoO</span><span class="p">(</span><span class="n">lPkhiO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">)</span>
+            <span class="n">alkhqp</span> <span class="o">=</span> <span class="n">aeiMoO_to_alkhqp</span><span class="p">(</span><span class="n">aeiMoO</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">daysInUOT</span><span class="p">)</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">alkhqp</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]])))</span>
+
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">adcol</span><span class="p">]])))</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adcol</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="n">adcol</span><span class="o">+</span><span class="n">i</span><span class="p">]])))</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+      
+
+<div class="viewcode-block" id="cart2sample_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.cart2sample_row">[docs]</a>
+<span class="k">def</span> <span class="nf">cart2sample_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Inverse of function sample2cart_row</span>
+
+      <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">8</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">adcol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The sample line does not have 8*k + 3 + adcol columns.&quot;</span><span class="p">)</span>
+
+      <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">adcol</span><span class="p">)</span><span class="o">//</span><span class="mi">8</span> <span class="c1">#Number of planets</span>
+      
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+      
+      <span class="n">daysInUOT</span> <span class="o">=</span> <span class="mf">1.</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">XYZvXvYvZ</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span> <span class="p">:</span> <span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Jacobi&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">):</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">typeOfCoordinates</span> <span class="o">==</span> <span class="s1">&#39;JacobiWisdomHolman&#39;</span><span class="p">):</span>
+                  <span class="n">massum</span> <span class="o">=</span> <span class="mf">1.</span> <span class="c1"># M* + m1 + ... + mi</span>
+                  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">massum</span> <span class="o">=</span> <span class="n">massum</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+                  <span class="n">mass</span> <span class="o">=</span> <span class="n">massum</span><span class="o">/</span><span class="p">(</span><span class="n">massum</span> <span class="o">-</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">])</span> <span class="c1"># M*(M* + m1 + ... + mi)/(M* + m1 + ... + m_{i-1})</span>
+            <span class="k">else</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;typeOfCoordinates can be either &#39;Jacobi&#39; or &#39;Heliocentric&#39; or &#39;JacobiWisdomHolman&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span><span class="o">*</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">]</span>
+            <span class="n">alkhqp</span> <span class="o">=</span> <span class="n">cart2ell</span><span class="p">(</span><span class="n">XYZvXvYvZ</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span>
+            <span class="n">a</span>      <span class="o">=</span> <span class="n">alkhqp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">lbd</span>    <span class="o">=</span> <span class="n">alkhqp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">k</span>      <span class="o">=</span> <span class="n">alkhqp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">h</span>      <span class="o">=</span> <span class="n">alkhqp</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">q</span>      <span class="o">=</span> <span class="n">alkhqp</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">p</span>      <span class="o">=</span> <span class="n">alkhqp</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">n</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">G</span><span class="o">*</span><span class="n">mass</span><span class="o">/</span><span class="n">a</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">P</span>      <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">n</span>
+            <span class="n">P</span>      <span class="o">=</span> <span class="n">P</span><span class="o">*</span><span class="n">daysInUOT</span>
+            <span class="n">lbd</span>    <span class="o">=</span> <span class="mf">180.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">lbd</span>
+            <span class="n">Omega</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+            <span class="n">sini2</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">I</span>      <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">sini2</span><span class="p">)</span>
+            <span class="n">I</span>      <span class="o">=</span> <span class="mf">180.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">I</span>
+            <span class="n">Omega</span>  <span class="o">=</span> <span class="mf">180.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">Omega</span>
+            <span class="n">lPkhiO</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lbd</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">Omega</span><span class="p">])</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">lPkhiO</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]])))</span>
+
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">adcol</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">adcol</span><span class="p">]])))</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">adcol</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">output</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="o">-</span><span class="n">adcol</span><span class="o">+</span><span class="n">i</span><span class="p">]])))</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="Jac2Hel_rowCart">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Jac2Hel_rowCart">[docs]</a>
+<span class="k">def</span> <span class="nf">Jac2Hel_rowCart</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#To be called on the return value of sample2cart_row</span>
+      <span class="c1">#Converts from Jacobi to Heliocentric</span>
+      
+      <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">8</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">adcol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The sample line does not have 8*k + 3 + adcol columns.&quot;</span><span class="p">)</span>
+
+      <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">adcol</span><span class="p">)</span><span class="o">//</span><span class="mi">8</span> <span class="c1">#Number of planets</span>
+      
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)))</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)):</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      
+      <span class="n">masses</span>     <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]</span>
+      <span class="n">total_mass</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]</span>
+      
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">masses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">])</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                  <span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">total_mass</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+      <span class="n">masses</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masses</span><span class="p">)</span>
+      <span class="n">total_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_mass</span><span class="p">)</span>
+      
+      <span class="n">M_J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="c1">#Conversion matrix from Barycentric to Jacobi</span>
+      <span class="n">M_H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="c1">#Conversion matrix from Barycentric to Heliocentric</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">M_H</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="n">M_J</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">M_H</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+
+      <span class="n">M_J</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">denom</span> <span class="o">=</span> <span class="n">total_mass</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                  <span class="n">num</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                  <span class="n">M_J</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">num</span><span class="o">/</span><span class="n">denom</span>
+      
+      <span class="n">M</span> <span class="o">=</span> <span class="n">M_H</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">M_J</span><span class="p">)</span> <span class="c1">#Conversion matrix from Jacobi to Heliocentric</span>
+      
+      <span class="n">Xs</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">Ys</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">Zs</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">vXs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">vYs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">vZs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">Xs</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">Ys</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">Zs</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vXs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vYs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vZs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+      
+      <span class="n">newX</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">Xs</span><span class="p">))</span>
+      <span class="n">newY</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">Ys</span><span class="p">))</span>
+      <span class="n">newZ</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">Zs</span><span class="p">))</span>
+      <span class="n">newvX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vXs</span><span class="p">))</span>
+      <span class="n">newvY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vYs</span><span class="p">))</span>
+      <span class="n">newvZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vZs</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newX</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newY</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newZ</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvX</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvY</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvZ</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            
+      <span class="k">return</span> <span class="n">output</span></div>
+
+            
+
+<div class="viewcode-block" id="Hel2Jac_rowCart">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Hel2Jac_rowCart">[docs]</a>
+<span class="k">def</span> <span class="nf">Hel2Jac_rowCart</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#To be called on the return value of sample2cart_row</span>
+      <span class="c1">#Converts from Heliocentric to Jacobi</span>
+      
+      <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">8</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">adcol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The sample line does not have 8*k + 3 + adcol columns.&quot;</span><span class="p">)</span>
+
+      <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">adcol</span><span class="p">)</span><span class="o">//</span><span class="mi">8</span> <span class="c1">#Number of planets</span>
+      
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)))</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)):</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      
+      <span class="n">masses</span>     <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]</span>
+      <span class="n">total_mass</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]</span>
+      
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">masses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">])</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                  <span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">total_mass</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+      <span class="n">masses</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masses</span><span class="p">)</span>
+      <span class="n">total_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_mass</span><span class="p">)</span>
+      
+      <span class="n">M_J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="c1">#Conversion matrix from Barycentric to Jacobi</span>
+      <span class="n">M_H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="c1">#Conversion matrix from Barycentric to Heliocentric</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">M_H</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="n">M_J</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">M_H</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+
+      <span class="n">M_J</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">denom</span> <span class="o">=</span> <span class="n">total_mass</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                  <span class="n">num</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                  <span class="n">M_J</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">num</span><span class="o">/</span><span class="n">denom</span>
+      
+      <span class="n">M</span> <span class="o">=</span> <span class="n">M_J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">M_H</span><span class="p">)</span> <span class="c1">#Conversion matrix from Heliocentric to Jacobi</span>
+      
+      <span class="n">Xs</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">Ys</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">Zs</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">vXs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">vYs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">vZs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">Xs</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">Ys</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">Zs</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vXs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vYs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vZs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+      
+      <span class="n">newX</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">Xs</span><span class="p">))</span>
+      <span class="n">newY</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">Ys</span><span class="p">))</span>
+      <span class="n">newZ</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">Zs</span><span class="p">))</span>
+      <span class="n">newvX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vXs</span><span class="p">))</span>
+      <span class="n">newvY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vYs</span><span class="p">))</span>
+      <span class="n">newvZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vZs</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newX</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newY</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newZ</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvX</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvY</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvZ</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            
+      <span class="k">return</span> <span class="n">output</span></div>
+
+            
+
+<div class="viewcode-block" id="Jac2Hel_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Jac2Hel_row">[docs]</a>
+<span class="k">def</span> <span class="nf">Jac2Hel_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of sample from Jacobi to Heliocentric</span>
+      
+      <span class="n">rowCartJac</span>       <span class="o">=</span> <span class="n">sample2cart_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;Jacobi&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowCartHel</span>       <span class="o">=</span> <span class="n">Jac2Hel_rowCart</span><span class="p">(</span><span class="n">rowCartJac</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowlPkhiO</span>        <span class="o">=</span> <span class="n">cart2sample_row</span><span class="p">(</span><span class="n">rowCartHel</span><span class="p">,</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">rowlPkhiO</span></div>
+
+      
+
+<div class="viewcode-block" id="Hel2Jac_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Hel2Jac_row">[docs]</a>
+<span class="k">def</span> <span class="nf">Hel2Jac_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of sample from Heliocentric to Jacobi</span>
+      
+      <span class="n">rowCartHel</span>       <span class="o">=</span> <span class="n">sample2cart_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowCartJac</span>       <span class="o">=</span> <span class="n">Hel2Jac_rowCart</span><span class="p">(</span><span class="n">rowCartHel</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowlPkhiO</span>        <span class="o">=</span> <span class="n">cart2sample_row</span><span class="p">(</span><span class="n">rowCartJac</span><span class="p">,</span> <span class="s1">&#39;Jacobi&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">rowlPkhiO</span></div>
+
+      
+      
+<div class="viewcode-block" id="JacWH2Hel_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.JacWH2Hel_row">[docs]</a>
+<span class="k">def</span> <span class="nf">JacWH2Hel_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of sample from JacobiWisdomHolman to Heliocentric</span>
+      
+      <span class="n">rowCartJac</span>       <span class="o">=</span> <span class="n">sample2cart_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;JacobiWisdomHolman&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowCartHel</span>       <span class="o">=</span> <span class="n">Jac2Hel_rowCart</span><span class="p">(</span><span class="n">rowCartJac</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowlPkhiO</span>        <span class="o">=</span> <span class="n">cart2sample_row</span><span class="p">(</span><span class="n">rowCartHel</span><span class="p">,</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">rowlPkhiO</span></div>
+
+      
+
+<div class="viewcode-block" id="Hel2JacWH_row">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Hel2JacWH_row">[docs]</a>
+<span class="k">def</span> <span class="nf">Hel2JacWH_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+
+      <span class="c1">#Converts one row of sample from Heliocentric to JacobiWisdomHolman</span>
+      
+      <span class="n">rowCartHel</span>       <span class="o">=</span> <span class="n">sample2cart_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;Heliocentric&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowCartJac</span>       <span class="o">=</span> <span class="n">Hel2Jac_rowCart</span><span class="p">(</span><span class="n">rowCartHel</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="n">rowlPkhiO</span>        <span class="o">=</span> <span class="n">cart2sample_row</span><span class="p">(</span><span class="n">rowCartJac</span><span class="p">,</span> <span class="s1">&#39;JacobiWisdomHolman&#39;</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">rowlPkhiO</span></div>
+
+
+
+<span class="c1">##########################################################################################################################</span>
+<span class="c1">############################ End of auxiliary functions. Defining main functions #########################################</span>
+<span class="c1">##########################################################################################################################</span>
+
+
+<div class="viewcode-block" id="Sample2cart">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Sample2cart">[docs]</a>
+<span class="k">def</span> <span class="nf">Sample2cart</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts to cartesian coordinates a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in the format of the Geneva Resonant State Workshop (GRSW). Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      typeOfCoordinates: String</span>
+<span class="sd">            Either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.</span>
+<span class="sd">            &#39;Jacobi&#39; differs from &#39;JacobiWisdomHolman&#39; in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991. </span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in cartesian coordinates. The columns are now Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample into Cartesian coordinates&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">sample2cart_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="Cart2sample">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Cart2sample">[docs]</a>
+<span class="k">def</span> <span class="nf">Cart2sample</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts to GRSW format a sample in cartesian coordinates.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in the format Id or timestamp, X, Y, Z, vX, vY, vZ, m/M*, R/R*, ... , M* (Msun), R* (Rsun).</span>
+<span class="sd">      typeOfCoordinates: String</span>
+<span class="sd">            Either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.</span>
+<span class="sd">            &#39;Jacobi&#39; differs from &#39;JacobiWisdomHolman&#39; in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991. </span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in GRSW format. The columns are now Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample from Cartesian to workshop format&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">cart2sample_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="Sample2aeiMoO">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Sample2aeiMoO">[docs]</a>
+<span class="k">def</span> <span class="nf">Sample2aeiMoO</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts to elliptic elements a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in the format of the Geneva Resonant State Workshop (GRSW). Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      typeOfCoordinates: String</span>
+<span class="sd">            Either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.</span>
+<span class="sd">            &#39;Jacobi&#39; differs from &#39;JacobiWisdomHolman&#39; in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991. </span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in elliptic elements. The columns are now Id or timestamp, a (au), e, I (rad), M (rad), omega (rad), Omega(rad), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample into (a, e, i, M, o, O) elliptic elements&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">sample2aeiMoO_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="Sample2alkhqp">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Sample2alkhqp">[docs]</a>
+<span class="k">def</span> <span class="nf">Sample2alkhqp</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts to rectangular elliptic elements a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in the format of the Geneva Resonant State Workshop (GRSW). Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      typeOfCoordinates: String</span>
+<span class="sd">            Either &#39;Jacobi&#39;, &#39;JacobiWisdomHolman&#39; or &#39;Heliocentric&#39;. This argument indicates the type of coordinates of the sample. It cannot be used for conversion between these types.</span>
+<span class="sd">            &#39;Jacobi&#39; differs from &#39;JacobiWisdomHolman&#39; in the sense that the mu is defined differently. See Wisdom &amp; Holman 1991. </span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in elliptic elements. The columns are now Id or timestamp, a (au), lbd (rad), k, h, q, p, m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample into (a, lbd, k, h, q, p) elliptic elements&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">sample2alkhqp_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">typeOfCoordinates</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+      
+      
+<div class="viewcode-block" id="Jac2Hel">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Jac2Hel">[docs]</a>
+<span class="k">def</span> <span class="nf">Jac2Hel</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts from Jacobi to Heliocentric a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in Jacobi (mu = G*(M* + m1 + m2 + ... + mj)) in the format of the Geneva Resonant State Workshop (GRSW).</span>
+<span class="sd">            Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in Heliocentric coordinates (mu = G*(M* + mj))</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample from Jacobi to Heliocentric coordinates&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">Jac2Hel_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+      
+      
+<div class="viewcode-block" id="Hel2Jac">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Hel2Jac">[docs]</a>
+<span class="k">def</span> <span class="nf">Hel2Jac</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts from Heliocentric to Jacobi a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in Heliocentric (mu = G*(M* + mj)) in the format of the Geneva Resonant State Workshop (GRSW).</span>
+<span class="sd">            Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in Jacobi coordinates (mu = G*(M* + m1 + m2 + ... + mj))</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample from Heliocentric to Jacobi coordinates&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">Hel2Jac_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+      
+<div class="viewcode-block" id="JacWH2Hel">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.JacWH2Hel">[docs]</a>
+<span class="k">def</span> <span class="nf">JacWH2Hel</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts from Jacobi (Wisdom Holman convention) to Heliocentric a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in JacobiWisdomHolman (mu = G* M* * (M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1})) in the format of the Geneva Resonant State Workshop (GRSW).</span>
+<span class="sd">            Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in Heliocentric coordinates (mu = G*(M* + mj))</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample from JacobiWisdomHolman to Heliocentric coordinates&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">JacWH2Hel_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+
+      
+<div class="viewcode-block" id="Hel2JacWH">
+<a class="viewcode-back" href="../../api/resonantstate.sample_conversion.html#resonantstate.sample_conversion.Hel2JacWH">[docs]</a>
+<span class="k">def</span> <span class="nf">Hel2JacWH</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">adcol</span><span class="p">):</span>
+<span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Converts from Heliocentric to Jacobi (Wisdom Holman convention) a sample in GRSW format.</span>
+<span class="sd">      </span>
+<span class="sd">      Author : Jérémy COUTURIER. https://jeremycouturier.com</span>
+<span class="sd">      </span>
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      sample: Numpy array of floats.</span>
+<span class="sd">            A sample in Heliocentric (mu = G*(M* + mj)) in the format of the Geneva Resonant State Workshop (GRSW).</span>
+<span class="sd">            Columns are Id or timestamp, lbd (°), Period (days), k, h, I (°), Omega (°), m/M*, R/R*, ... , M* (Msun), R* (Rsun)</span>
+<span class="sd">      adcol: Integer</span>
+<span class="sd">            Number of additional columns in the sample. When adcol = 0, the number of columns is 3 mod (number of planets). Additional columns are untouched by this function.</span>
+
+<span class="sd">      Returns</span>
+<span class="sd">      -------</span>
+<span class="sd">      S : Numpy array of floats.</span>
+<span class="sd">            The same sample in JacobiWisdomHolman coordinates (mu = G* M* * (M* + m1 + ... + mj)/(M* + m1 + ... + m_{j-1}))</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">n</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting sample from Heliocentric to JacobiWisdomHolman coordinates&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="n">K</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">row</span>    <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+            <span class="n">Newrow</span> <span class="o">=</span> <span class="n">Hel2JacWH_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">adcol</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Newrow</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">K</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                  <span class="n">progress</span> <span class="o">=</span> <span class="mf">100.</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+                  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Progress = &quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">output</span></div>
+
+      
+      
+<span class="c1">##########################################################################################################################</span>
+<span class="c1">############################################# Examples of use ############################################################</span>
+<span class="c1">##########################################################################################################################</span>
+
+
+<span class="c1">#S1 = Sample2cart(sample, &#39;Heliocentric&#39;, 0)         # Converts the sample into Heliocentric cartesian coordinates</span>
+
+<span class="c1">#S2 = Sample2cart(Hel2Jac(sample, 0), &#39;Jacobi&#39;, 0)   # Converts the sample into Jacobi cartesian coordinates</span>
+
+<span class="c1">#S3 = Sample2aeiMoO(sample, &#39;Heliocentric&#39;, 0)       # Converts the sample into Heliocentric elliptic elements (a, e, i, M, omega, Omega)</span>
+
+<span class="c1">#S4 = Sample2alkhqp(sample, &#39;Heliocentric&#39;, 0)       # Converts the sample into Heliocentric elliptic elements (a, l, k, h, q, p)</span>
+
+<span class="c1">#S5 = Sample2aeiMoO(Hel2Jac(sample, 0), &#39;Jacobi&#39;, 0) # Converts the sample into Jacobi elliptic elements (a, e, i, M, omega, Omega)</span>
+
+<span class="c1">#S6 = Sample2alkhqp(Hel2Jac(sample, 0), &#39;Jacobi&#39;, 0) # Converts the sample into Jacobi elliptic elements (a, l, k, h, q, p)</span>
+
+<span class="c1">#S7 = Sample2cart(Hel2JacWH(sample, 0), &#39;Jacobi&#39;, 0) # Converts the sample into Jacobi cartesian coordinates with the Wisdom-Holman convention for mu</span>
+
+
+<span class="c1">## Sanity checks :</span>
+
+<span class="c1"># - Jac2Hel(Hel2Jac(sample, adcol), adcol) or Hel2Jac(Jac2Hel(sample, adcol), adcol) should leave the sample mostly untouched (within errors due to Kepler equation solving)</span>
+<span class="c1"># - Sample2cart(Cart2sample(sample, &#39;Heliocentric&#39;, adcol), &#39;Heliocentric&#39;, adcol) and variations should leave the sample mostly untouched as well.</span>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Adrien Leleu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

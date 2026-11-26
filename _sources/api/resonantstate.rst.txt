@@ -1,101 +1,23 @@
 resonantstate package
 =====================
 
-Submodules
-----------
-
-resonantstate.constants module
-------------------------------
-
-.. automodule:: resonantstate.constants
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.data\_download module
------------------------------------
-
-.. automodule:: resonantstate.data_download
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.ell2SFM module
-----------------------------
-
-.. automodule:: resonantstate.ell2SFM
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.ell2SFM\_local module
------------------------------------
-
-.. automodule:: resonantstate.ell2SFM_local
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.ell2SFM\_tokeep module
-------------------------------------
-
-.. automodule:: resonantstate.ell2SFM_tokeep
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.ell\_to\_3P0R module
-----------------------------------
-
-.. automodule:: resonantstate.ell_to_3P0R
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.quartic module
-----------------------------
-
-.. automodule:: resonantstate.quartic
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.sample\_conversion module
----------------------------------------
-
-.. automodule:: resonantstate.sample_conversion
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.simulations\_resonance\_analysis module
------------------------------------------------------
-
-.. automodule:: resonantstate.simulations_resonance_analysis
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.table\_entries\_catalogs module
----------------------------------------------
-
-.. automodule:: resonantstate.table_entries_catalogs
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-resonantstate.ttv module
-------------------------
-
-.. automodule:: resonantstate.ttv
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
 .. automodule:: resonantstate
    :members:
    :show-inheritance:
    :undoc-members:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   resonantstate.SFMR
+   resonantstate.constants
+   resonantstate.data_download
+   resonantstate.ell_to_3P0R
+   resonantstate.quartic
+   resonantstate.sample_conversion
+   resonantstate.simulations_resonance_analysis
+   resonantstate.table_entries_catalogs
+   resonantstate.ttv
