@@ -13,6 +13,7 @@ from resonantstate.quartic import quartic
 Tp=np.arange(1,20)
 
 
+
 def _dist_Dpp1p(Pr):
     r"""
       Compute the distance to the closest first-order resonance, and verify if it lands in the symetrical domain around that resonance
@@ -90,7 +91,7 @@ def dist_Dpp1p(Pr):
         return  _dist_Dpp1p(Pr)
 
     
-def samples2ell_twoplanets(sample, pair):
+def _samples2ell_twoplanets(sample, pair):
       r"""convert the sample into numpy array of orbital elements and masses
 
       Parameters
@@ -149,7 +150,7 @@ def samples2ell_twoplanets(sample, pair):
 
       return [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2]
 
-def ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):    
+def ell2SFMR(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2, return_all=False):    
       r"""
       Converts from elliptic elements to the coordinates :math:`\left(X, Y, X_2, Y_2, \delta\right)` of the Second Fondamental Model of resonance (SFM).
       :math:`\left(X, Y\right)` corresponds to the unique degree of freedom of the SFM and :math:`\left(X_2, Y_2\right)` to the first integral. :math:`\delta` is the unique parameter of the SFM
@@ -313,7 +314,7 @@ def samples2erjesj(samples, pair, p):
     """
       
     
-    dic=samples2SFM(samples, pair, p,return_all=True)
+    dic=samples2SFMR(samples, pair, p,return_all=True)
 
 
     phi2=-p*samples[:,1+8*pair[0]]*pi/180+(p+1)*samples[:,1+8*pair[1]]*pi/180
@@ -374,7 +375,7 @@ def X1X2(X, Y, delta):
       else:
             return [Sol[1], Sol[2]]
 
-def SFM2useful(X, Y, X2, Y2, delta):
+def SFMR2useful(X, Y, X2, Y2, delta):
       r""" Returns [r, R, s, S, x1, x2] where :math:`X+iY = \sqrt{2R}e^{ir}` and :math:`X_2+iY_2 = \sqrt{2S}e^{is}`
       :math:`x_1` and :math:`x_2` are such that :math:`(x1, 0)` and :math:`(x2, 0)` are on the same level line as :math:`(X, Y)`
 
@@ -394,7 +395,9 @@ def SFM2useful(X, Y, X2, Y2, delta):
       Returns
       -------
       list of np.arrays
-          [r, R, s, S, x1, x2]
+          [r, R, s, S, x1, x2, RS, RT]
+          RS = 1 if formally resonant, 2 for upper circulation, 0 for upper libration, -1 for lower circulation and -2 for lower libration
+          RT = True if the pair is in the resonance-trapped domain, False otherwise 
       """
 
       
@@ -402,42 +405,45 @@ def SFM2useful(X, Y, X2, Y2, delta):
       S = (X2**2 + Y2**2)/2.
       r  = np.arctan2(Y,  X)
       s = np.arctan2(Y2, X2)
-      
-      x1 = []
-      x2 = []
-      IR = []
-      
+
       n = len(delta)
+      x1 = np.zeros(n)
+      x2 = np.zeros(n)
+      RS = np.zeros(n)
+      RT = np.zeros(n)
+      
+      
       for i in range(n):
             [xx1, xx2] = X1X2(X[i], Y[i], delta[i])
-            x1.append(xx1)
-            x2.append(xx2)
+            x1[i]=xx1
+            x2[i]=xx2
             [xmin, xmax, xres, xint, xhyp] = topology(delta[i])
             [lib1,lib2]= X1X2(0, 0, delta[i])
             if (delta[i] < 0.):
                   
                   if  max(xx1,xx2)<max(lib1,lib2):    
-                        IR.append(2) #external libration
+                        RS[i]=2 #upper libration
                   else:
-                        IR.append(0) #external circulation
+                        RS[i]=0 #upper circulation
             else:
                   Hseparatrix = 1.5*(delta[i] + 1.)*xhyp**2 - 0.25*xhyp**4 + 2.*xhyp
                   H           = 1.5*(delta[i] + 1.)*(X[i]**2 + Y[i]**2) - 0.25*(X[i]**2 + Y[i]**2)**2 + 2.*X[i]
                   if (H > Hseparatrix):
-                        IR.append(1) #formally resonant
+                        RS[i]=1 #formally resonant
                   else:
                         if max(xx1,xx2)<xres:
                               if min(xx1,xx2)>min(lib1,lib2):
-                                    IR.append(-2) #internal libration
+                                    RS[i]=-2 #lower libration
                               else:
-                                    IR.append(-1) #internal circulation
+                                    RS[i]=-1 #lower circulation
                         else:
-                              IR.append(0) #external circulation
+                              RS[i]=0 #upper circulation
 
-      x1 = np.array(x1)
-      x2 = np.array(x2)
-      IR = np.array(IR)
-      return [r, R, s, S, x1, x2, IR]
+            if (RS[i]==1) or ((delta[i]<0) and (delta[i]>-2) and ((max(xx1,xx2)-xres)<1)):
+                  RT[i]=True 
+            else:
+                  RT[i]=False 
+      return [r, R, s, S, x1, x2, RS, RT]
 
 def topology(delta):
       r"""Returns :math:`[Xmin, Xmax, Xres, Xint, Xhyp]` where :math:`Xmin, Xmax` are the position of the separatrix, the :math:`Xres` the position of the primary fixed point, 
@@ -470,7 +476,7 @@ def topology(delta):
             xmin = - xhyp - 2./np.sqrt(-xhyp)
             return [xmin, xmax, xres, xint, xhyp]
 
-def samples2SFM(sample, pair, p,return_all=False):
+def samples2SFMR(sample, pair, p,return_all=False):
       """_summary_
 
       Parameters
@@ -489,8 +495,8 @@ def samples2SFM(sample, pair, p,return_all=False):
       l : List
             The list :math:`\left[X, Y, X_2, Y_2, \delta\right]` of elements of the Second Fondamental Model of Resonance.
       """
-      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = samples2ell_twoplanets(sample, pair)
-      return ell2SFM(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2,return_all=return_all)
+      [e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2] = _samples2ell_twoplanets(sample, pair)
+      return ell2SFMR(p, e1, e2, vp1, vp2, m1, m2, P1, P2, lbd1, lbd2,return_all=return_all)
 
 def samples2usefull(sample, pair, p):
       r""" Returns [r, R, s, S, x1, x2] where :math:`X+iY = \sqrt{2R}e^{ir}` and :math:`X_2+iY_2 = \sqrt{2S}e^{is}`
@@ -508,14 +514,20 @@ def samples2usefull(sample, pair, p):
       Returns
       -------
       list of np.arrays
-            [r, R, s, S, x1, x2]
+            [r, R, s, S, x1, x2, RS, RT]
+            RS = 1 if formally resonant, 2 for upper circulation, 0 for upper libration, -1 for lower circulation and -2 for lower libration
+            RT = True if the pair is in the resonance-trapped domain, False otherwise 
       """
-      [X, Y, X2, Y2, delta] = samples2SFM(sample, pair, p)
-      [sig, Sig, sig2, Sig2, x1, x2, IR] = SFM2useful(X, Y, X2, Y2, delta)
-      return [sig, Sig, sig2, Sig2, x1, x2, IR]
+      [X, Y, X2, Y2, delta] = samples2SFMR(sample, pair, p)
+      [sig, Sig, sig2, Sig2, x1, x2, RS, RT] = SFMR2useful(X, Y, X2, Y2, delta)
+      return [sig, Sig, sig2, Sig2, x1, x2, RS, RT]
 
-def get_SFM_quantities(samples,pair,p=None,sampling=1):
-    r"""call functions of the package to extract the quantities used in the first paper : delta, DMMR, er, Der, es, IR, p
+class _AttrDict(dict):
+      __getattr__ = dict.__getitem__
+      __setattr__ = dict.__setitem__
+
+def get_SFMR_quantities(samples,pair,p=None,sampling=1):
+    r"""call functions of the package to extract the quantities used in the first paper : delta, DMMR, er, Der, es, RS, RT, p
 
     Parameters
     ----------
@@ -530,17 +542,19 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
 
     Returns
     -------
+    Dictionary with the following keys:
+
     delta : np.array of floats of the lengh of the thinned samples
-        delta parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)
+        :math:`\delta` parameter of the second fundamental model for resonance (Henrard and Lemaitre 1983)
     DMMR : np.array of floats of the lengh of the thinned samples
-        $\\xi_r^2-3(\delta+1)$
+        :math:`\\xi_r^2-3(\delta+1)`
     er : np.array of floats of the lengh of the thinned samples
-        $\\xi_r$ parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities
+        :math:`\\xi_r` parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) also called resonant eccentricities
     Der : np.array of floats of the lengh of the thinned samples
-        $\Delta \\xi_r$ parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) 
+        :math:`\Delta \\xi_r` parameter of the second fundamental model for resonance (see GRSW paper 1 - Leleu et al 2026) 
     es : np.array of floats of the lengh of the thinned samples
-        $\\xi_s$ secular eccentricities (see GRSW paper 1 - Leleu et al 2026) 
-    IR : np.array of floats of the lengh of the thinned samples
+        :math:`\\xi_s` secular eccentricities (see GRSW paper 1 - Leleu et al 2026) 
+    RS : np.array of floats of the lengh of the thinned samples
         position of the sample in the second fundamental model:
             2 : upper libration
             1 : formally resonant
@@ -565,8 +579,8 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
     if p==None:
         dist,p,sym=dist_Dpp1p(P2/P1)
     
-    [X, Y, X2, Y2, delta]=samples2SFM( samples[::sampling,:], pair, p)
-    [sig, Sig, sig2, Sig2, x1, x2, IR] = samples2usefull( samples[::sampling,:], pair,p)
+    [X, Y, X2, Y2, delta]=samples2SFMR( samples[::sampling,:], pair, p)
+    [sig, Sig, sig2, Sig2, x1, x2, RS, RT] = samples2usefull( samples[::sampling,:], pair,p)
     
     es=np.sqrt(2*Sig2)
 
@@ -586,8 +600,20 @@ def get_SFM_quantities(samples,pair,p=None,sampling=1):
 
     DMMR=er**2-3*(delta+1)
 
+    dic={
+          'delta':delta,
+          'DMMR':DMMR,
+          'er':er,
+          'es':es,
+          'Der':Der,
+          'RS':RS,
+          'RT':RT,
+          'p':p
+    }
+    
 
-    return delta, DMMR, er, Der, es, IR, p
+    return _AttrDict(dic)
+
 
 
 
@@ -601,9 +627,9 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
       ax1 : ax
           ax of the figure
       delta_lim : tuple of floats, optional
-          ($\delta_{min},\delta_{max}$) boundaries of the figure $\delta$, by default None
+          (:math: `\delta_{min},\delta_{max}`) boundaries of the figure :math: `\delta`, by default None
       X_lim :  tuple of floats, optional
-          ($\\xi_r_{min},\xi_r_{max}$) boundaries of the figure $\\xi_r$, by default None
+          (:math: `\\xi_r_{min},\xi_r_{max}`) boundaries of the figure :math: `\\xi_r`, by default None
       linewidth : int, optional
           _description_, by default 4
       alpha : int, optional
@@ -641,7 +667,7 @@ def plot_topology(ax1, delta_lim=None, X_lim=None, linewidth=4, alpha=1, grid=Fa
 
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\delta$", labelpad = 3)
-      ax1.set_ylabel(ylabel=r"$\\xi_r$",    labelpad = 4, rotation = 0)
+      ax1.set_ylabel(ylabel=r"$\xi_r$",    labelpad = 4, rotation = 0)
       delt = np.linspace(delta_lim[0], delta_lim[1], 1024)
       Xmin = np.zeros(1024)
       Xmax = np.zeros(1024)
@@ -694,9 +720,9 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
       ax1 : ax
           ax of the figure
       DMMR_lim : tuple of floats, optional
-          ($\Delta_{MMR,min},\Delta_{MMR,max}$) boundaries of the figure for the x axis $\Delta_{MMR}$, by default None
+          (:math:`\Delta_{MMR,min},\Delta_{MMR,max}`) boundaries of the figure for the x axis :math:`\Delta_{MMR}`, by default None
       X_lim :  tuple of floats, optional
-          ($\\xi_r_{min},\xi_r_{max}$) boundaries of the figure for the y axis $\\xi_r$, by default None
+          (:math:`\xi_{r,min},\xi_{r,max}`) boundaries of the figure for the y axis :math:`\xi_r`, by default None
       linewidth : int, optional
           _description_, by default 4
       alpha : int, optional
@@ -736,7 +762,7 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
 
       ax1.tick_params(axis='both', which='major')
       ax1.set_xlabel(xlabel=r"$\Delta_{MMR}$", labelpad = 3)
-      ax1.set_ylabel(ylabel=r"$\\xi_r$",          labelpad = 4, rotation = 0)
+      ax1.set_ylabel(ylabel=r"$\xi_r$",          labelpad = 4, rotation = 0)
       #delt = np.linspace(delta_lim[0]-X2max, delta_lim[1]+X2max, 512)
       delt = np.arange(-bound, bound, .01)
       Xmin = np.zeros(delt.size)
@@ -808,8 +834,8 @@ def plot_topology_DMMR(ax1, DMMR_lim=None, X_lim=None, linewidth=4, alpha=1, gri
             ax1.grid(linewidth=0.3, alpha = 0.5)
 
 
-def plot_samples_SFM_pair( ax1, sample, pair, p, color, color_lim=None, label='',alpha = 1,markersize=20,marker='o',flag_DMMR=True):
-      delta, DMMR, er, Der, es, IR, p= get_SFM_quantities(sample,pair,p=p)
+def plot_samples_SFMR_pair( ax1, sample, pair, p, color, color_lim=None, label='',alpha = 1,markersize=20,marker='o',flag_DMMR=True):
+      delta, DMMR, er, Der, es, RS, RT, p= get_SFMR_quantities(sample,pair,p=p)
       I    = pair[0]
       J    = pair[1]
 
@@ -826,7 +852,7 @@ def plot_samples_SFM_pair( ax1, sample, pair, p, color, color_lim=None, label=''
             ax1.scatter(px, er, color = color, marker = marker,  s = markersize, alpha = alpha, label = label + f' pair {I} {J}')
 
 
-def plot_samples_SFM( ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o',flag_DMMR=True):
+def plot_samples_SFMR( ax1, sample, pairs, p_indexes, colors, color_lim=None, label='',alpha = 1,markersize=20,marker='o',flag_DMMR=True):
       ### Plots the sample in the phase space of the Second Fundamental Model ###
 
       if isinstance(p_indexes, (list, np.ndarray)):
@@ -834,9 +860,9 @@ def plot_samples_SFM( ax1, sample, pairs, p_indexes, colors, color_lim=None, lab
                   colors = cycle(colors)
             for pair, p, color in zip(pairs, p_indexes, colors):
 
-                  plot_samples_SFM_pair( ax1, sample, pair, p, color, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
+                  plot_samples_SFMR_pair( ax1, sample, pair, p, color, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
                            
       else:
-                  plot_samples_SFM_pair( ax1, sample, pairs, p_indexes, colors, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
+                  plot_samples_SFMR_pair( ax1, sample, pairs, p_indexes, colors, color_lim=color_lim, label=label,alpha =alpha,markersize=markersize,marker=marker,flag_DMMR=flag_DMMR)
                   
 
