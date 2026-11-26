@@ -1,9 +1,10 @@
 import numpy as np
 from resonantstate.data_download  import get_metadata_observations, download_observations_samples
 from resonantstate.analyse_samples import *
-from resonantstate.ell2SFM import *
+from resonantstate.SFMR import *
 from resonantstate.simulations_resonance_analysis import *
 from tqdm import tqdm
+from pathlib import Path
 
 def get_PRM(samples,df_ana):
     nb_planets=len(df_ana['planets_list'])
@@ -42,12 +43,12 @@ def choose_obs(case,
     dataframe_observations=dataframe_observations[dataframe_observations["star_name"]!='SOL'] 
 
     #issue with these
-    dataframe_observations=dataframe_observations[dataframe_observations["author_name"]!='Ragozzine'] 
-    dataframe_observations=dataframe_observations[dataframe_observations["author_name"]!='MacDonald'] 
+    #dataframe_observations=dataframe_observations[dataframe_observations["author_name"]!='Ragozzine'] 
+    #dataframe_observations=dataframe_observations[dataframe_observations["author_name"]!='MacDonald'] 
 
     #The author didn't attribute default solution to any analysis
-    dataframe_observations.loc[(dataframe_observations['author_name']=='Almenara') , 'default'] = 1  
-    dataframe_observations.loc[(dataframe_observations['author_name']=='Almenara')&(dataframe_observations['star_name']=='Kepler-138')&(dataframe_observations['analysis_id']==0), 'default']=0
+    #dataframe_observations.loc[(dataframe_observations['author_name']=='Almenara') , 'default'] = 1  
+    #dataframe_observations.loc[(dataframe_observations['author_name']=='Almenara')&(dataframe_observations['star_name']=='Kepler-138')&(dataframe_observations['analysis_id']==0), 'default']=0
 
     #get the list of unique stars to compare the solution.
     dataframe_observations.append(dataframe_observations)
@@ -87,10 +88,10 @@ def choose_obs(case,
             #favor photodynamical analysis
                 dataframe_system_dl=dataframe_system[(dataframe_system['methods'].str.contains('photo-dynamics')|dataframe_system['methods'].str.contains('photodynamics'))&(dataframe_system['default']==1)]
             else:
-                dataframe_system_dl=dataframe_system[((dataframe_system['methods'].str.contains('extracted times'))|(dataframe_system['methods'].str.contains('TTV')))&(dataframe_system['default']==1)]
+                dataframe_system_dl=dataframe_system[(dataframe_system['default']==1)]
 
         if dataframe_system_dl['author_name'].values.size==0:
-            input('no'+star_name+' nb favored='+str(sum(favored)) )
+            input('no solution kept '+star_name+' nb favored = '+str(sum(favored))+'. press any key to continue' )
         
    
         df_list = download_observations_samples(dataframe_system_dl, local_path=local_path,download_destination=download_destination_path)
@@ -115,18 +116,18 @@ def choose_obs(case,
 
                 if TP[Id2]<Pmax and TP[Id1]<Pmax  :
 
-                    samples_array=np.vstack([samples[col] for col in samples.columns])
+                    samples_array=samples.to_numpy()
                     near_res=get_nearest_resonance(TP[Id2]/TP[Id1], second_order = False, kmax=12, difference_order = 0.2)
 
                     dist,p,selection_criterion=dist_Dpp1p(TP[Id2]/TP[Id1])
                     
                     if selection_criterion:
 
-                        [X, Y, X2, Y2, delta]=samples2SFM( samples_array[:,::sampling], pair, near_res[0])
-                        [sig, Sig, sig2, Sig2, x1, x2, IR] = samples2usefull( samples_array[:,::sampling], pair,near_res[0])
+                        [X, Y, X2, Y2, delta]=samples2SFMR( samples_array[::sampling,:], pair, near_res[0])
+
 
                         #find the max value of the intersection with the delta,x_res plane of the SFM
-                        xintersect=np.maximum(x1,x2)
+                        
                         
                         #find the period of the innermost planet of the 'resonant' group of planets.
                         Idk=np.where(TP[Idsort]==TP[Id1])[0][0]
@@ -167,8 +168,6 @@ def choose_obs(case,
                                     dic_sol['reason']=1
                                 elif mtotmstar.std()/mtotmstar.mean() < prec_max_rob: 
                                     dic_sol['reason']=.5
-                                elif xintersect.std()<xintersect_spread_max:
-                                    dic_sol['reason']=0
                                 elif df_ana['eccentricity_prior']=='log-uniform': #favor low eccentricity solution
                                     dic_sol['reason']=-1
                                 else :
@@ -182,7 +181,7 @@ def choose_obs(case,
 
                             else:
                                 #if the pair is not new
-                                print('already have '+df_ana['star_name']+' '+str(TP[Id1])+' '+str(TP[Id2])+' '+str(Id_already.size))
+                                print('already have '+df_ana['star_name']+' with P1='+str(TP[Id1])+'d and P2='+str(TP[Id2])+'d, for the reason ID:'+str(Id_already.size))
 
                                 new_reason=-2
                                 if robustness[Id1]==1 and robustness[Id2]==1 and T_keep[Id_already[0]]['reason']<1:
@@ -201,4 +200,4 @@ def choose_obs(case,
                     
 
     df_keep = pd.DataFrame(T_keep)                            
-    df_keep.to_parquet('data/keep_'+case)
+    df_keep.to_parquet(Path(__file__).resolve().parent / 'data'/ ('keep_'+case))

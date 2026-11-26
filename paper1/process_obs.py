@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
 from resonantstate.data_download  import get_metadata_observations, download_observations_samples
-from resonantstate.analyse_samples import *
+#from resonantstate.analyse_samples import *
 from resonantstate.ell2SFM import *
-from resonantstate.simulations_resonance_analysis import *
-from resonantstate.utils import *
 from tqdm import tqdm
 
 
@@ -42,7 +40,7 @@ def process_obs(case,
         pair=(Id1,Id2)
 
 
-        delta, DMMR, xres, xlib, Sig2, IR , p = get_SFM_quantities(samples,pair)
+        SFMR = get_SFMR_quantities(samples,pair)
         
         TP=np.zeros(nb_planets)
         TR=np.zeros(nb_planets)
@@ -55,17 +53,19 @@ def process_obs(case,
         Prdist,p,sym=dist_Dpp1p(samples['period_days_'+str(Id2)].values/samples['period_days_'+str(Id1)].values)
 
         
-        IRv, IRc = np.unique(IR, return_counts=True)
+        RSv, RSc = np.unique(SFMR.RS, return_counts=True)
+        RTv, RTc = np.unique(SFMR.RT, return_counts=True)
 
         df_keep.loc[index,'nb_planets']=nb_planets
         df_keep.loc[index,'nb_nearby_planets']=sum(cond_group)
 
-        df_keep.loc[index,['resonantstate']]=IRv[np.argmax(IRc)]
-        df_keep.loc[index,['er','er_e1','er_e2']]=np.quantile(xres,(0.5,.16,.84))
-        df_keep.loc[index,['delta','delta_e1','delta_e2']]=np.quantile(delta,(0.5,.16,.84))
-        df_keep.loc[index,['DMMR','DMMR_e1','DMMR_e2']]=np.quantile(xres**2-3*(delta+1),(0.5,.16,.84))
-        df_keep.loc[index,['es','es_e1','es_e2']]=np.quantile(np.sqrt(2*Sig2),(0.5,.16,.84))
-        df_keep.loc[index,['Der','Der_e1','Der_e2']]=np.quantile(xlib,(0.5,.16,.84))
+        df_keep.loc[index,['resonantstate']]=RSv[np.argmax(RSc)]
+        df_keep.loc[index,['resonancetrapped']]=RTv[np.argmax(RTc)]
+        df_keep.loc[index,['er','er_e1','er_e2']]=np.quantile(SFMR.er,(0.5,.16,.84))
+        df_keep.loc[index,['delta','delta_e1','delta_e2']]=np.quantile(SFMR.delta,(0.5,.16,.84))
+        df_keep.loc[index,['DMMR','DMMR_e1','DMMR_e2']]=np.quantile(SFMR.er**2-3*(SFMR.delta+1),(0.5,.16,.84))
+        df_keep.loc[index,['es','es_e1','es_e2']]=np.quantile(SFMR.es,(0.5,.16,.84))
+        df_keep.loc[index,['Der','Der_e1','Der_e2']]=np.quantile(SFMR.Der,(0.5,.16,.84))
         df_keep.loc[index,['ein','ein_e1','ein_e2']]=np.quantile(np.sqrt(samples['h_'+str(Id1)]**2+samples['k_'+str(Id1)]**2),(0.5,.16,.84))
         df_keep.loc[index,['eout','eout_e1','eout_e2']]=np.quantile(np.sqrt(samples['h_'+str(Id2)]**2+samples['k_'+str(Id2)]**2),(0.5,.16,.84))
         df_keep.loc[index,['Prdist','Prdist_e1','Prdist_e2']]= np.quantile(Prdist,(0.5,.16,.84))
